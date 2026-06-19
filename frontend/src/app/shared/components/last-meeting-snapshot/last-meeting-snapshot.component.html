@@ -1,0 +1,36 @@
+@if (session) {
+  <article class="snapshot-card" [class.compact]="compact">
+    <header class="snapshot-header">
+      <div>
+        <span class="snapshot-label">Last client discussion</span>
+        <h4>{{ session.title }}</h4>
+        <time>{{ formatSessionDate(session.createdAt) }}</time>
+      </div>
+      @if (showActions && dealId) {
+        <div class="snapshot-actions">
+          <a [routerLink]="['/deals', dealId, 'meeting-notes']" class="btn btn-outline btn-sm">Full notes</a>
+        </div>
+      }
+    </header>
+
+    @if (highlights.length) {
+      <div class="highlight-row">
+        @for (h of highlights; track h.label) {
+          <div class="highlight-chip">
+            <span class="chip-label">{{ h.label }}</span>
+            <strong>{{ h.value }}</strong>
+          </div>
+        }
+      </div>
+    }
+
+    <p class="snapshot-excerpt">{{ excerpt }}</p>
+  </article>
+} @else {
+  <article class="snapshot-card empty" [class.compact]="compact">
+    <p>No meeting notes saved yet.</p>
+    @if (showActions && dealId) {
+      <a [routerLink]="['/deals', dealId, 'meeting-notes']" class="btn btn-outline btn-sm">Add meeting notes</a>
+    }
+  </article>
+}

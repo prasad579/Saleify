@@ -1,0 +1,52 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="logo">🤖</span>
+      <div>
+        <strong>Marketplace Copilot</strong>
+        <small>AI-Powered Deal Desk</small>
+      </div>
+    </div>
+
+    <nav>
+      @for (item of navItems; track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+          <span>{{ item.icon }}</span>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="copilot-card">
+      <div class="robot">🤖</div>
+      <strong>Need help?</strong>
+      <p>Ask Copilot about deals, pricing, or approvals.</p>
+      <button class="btn btn-primary" routerLink="/home">Chat with Copilot →</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <input class="search" placeholder="Search deals, customers, products..." />
+      <div class="user">
+        <span>🔔</span>
+        <span>❓</span>
+        <div class="avatar">{{ auth.user()?.name?.slice(0, 2) || 'SK' }}</div>
+        <div>
+          <div class="name">{{ auth.user()?.name || 'Srinivas K' }}</div>
+          <div class="role">{{ auth.user()?.role || 'Sales Representative' }}</div>
+        </div>
+        <button type="button" class="btn btn-outline" (click)="signOut()">Logout</button>
+      </div>
+    </header>
+
+    <main class="content">
+      @if (health.checked() && !health.online()) {
+        <div class="api-offline-banner">
+          API offline — deal create/pricing need the backend. Run <code>cd backend && dotnet run</code> or <code>start-demo.ps1</code>.
+        </div>
+      }
+      <router-outlet />
+    </main>
+  </div>
+</div>

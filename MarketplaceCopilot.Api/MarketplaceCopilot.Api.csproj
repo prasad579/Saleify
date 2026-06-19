@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MarketplaceCopilot.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarketplaceCopilot.Entities\MarketplaceCopilot.Entities.csproj" />
+    <ProjectReference Include="..\MarketplaceCopilot.Data\MarketplaceCopilot.Data.csproj" />
+    <ProjectReference Include="..\MarketplaceCopilot.Services\MarketplaceCopilot.Services.csproj" />
+    <ProjectReference Include="..\MarketplaceCopilot.Services.Contracts\MarketplaceCopilot.Services.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Seed / runtime demo data resolved from the host content root by DataStore. -->
+    <Content Update="data\deals.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

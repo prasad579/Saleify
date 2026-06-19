@@ -1,0 +1,31 @@
+# ---- .NET ----
+bin/
+obj/
+*.user
+*.suo
+.vs/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+*.dll
+*.pdb
+
+# ---- Node / Angular ----
+node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/tmp/
+npm-debug.log*
+yarn-error.log*
+
+# ---- Build / logs ----
+*.log
+.build.log
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+*.swp
+
+# ---- Secrets (do not commit real OAuth credentials) ----
+appsettings.*.local.json

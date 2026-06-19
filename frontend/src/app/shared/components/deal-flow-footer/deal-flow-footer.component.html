@@ -1,0 +1,23 @@
+<footer class="deal-flow-footer">
+  @if (hint) {
+    <p class="footer-hint">{{ hint }}</p>
+  }
+  <div class="footer-actions-row">
+    @if (backLink) {
+      <a [routerLink]="backLink" class="btn btn-outline">{{ backLabel }}</a>
+    }
+    @if (showSave) {
+      <button type="button" class="btn btn-outline" [disabled]="saving" (click)="save.emit()">
+        {{ saving ? 'Saving…' : saveLabel }}
+      </button>
+    }
+    @if (exitLink) {
+      <a [routerLink]="exitLink" class="btn btn-outline">{{ exitLabel }}</a>
+    }
+    @if (continueLabel) {
+      <button type="button" class="btn btn-primary" [disabled]="saving || continueDisabled" (click)="proceed.emit()">
+        {{ saving ? 'Saving…' : continueLabel }}
+      </button>
+    }
+  </div>
+</footer>

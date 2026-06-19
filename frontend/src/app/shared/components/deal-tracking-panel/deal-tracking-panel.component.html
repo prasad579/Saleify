@@ -1,0 +1,316 @@
+<section id="deal-tracking-panel" class="tracking-panel card">
+  <nav class="tracking-tabs" role="tablist">
+    <button type="button" class="tracking-tab" [class.active]="activeTab === 'meetings'" (click)="setTab('meetings')">
+      <span class="tab-icon">📋</span> Meeting notes
+      @if (sessions.length) { <span class="tab-badge">{{ sessions.length }}</span> }
+    </button>
+    <button type="button" class="tracking-tab" [class.active]="activeTab === 'actions'" (click)="setTab('actions')">
+      <span class="tab-icon">✓</span> Action items
+      @if (actionItems.length) { <span class="tab-badge orange">{{ actionItems.length }}</span> }
+    </button>
+    <button type="button" class="tracking-tab" [class.active]="activeTab === 'reminders'" (click)="setTab('reminders')">
+      <span class="tab-icon">🕐</span> Reminders
+      @if (reminders.length) { <span class="tab-badge orange">{{ reminders.length }}</span> }
+    </button>
+    <button type="button" class="tracking-tab" [class.active]="activeTab === 'history'" (click)="setTab('history')">
+      <span class="tab-icon">📜</span> Change history
+      @if (changeHistory.length) { <span class="tab-badge">{{ changeHistory.length }}</span> }
+    </button>
+  </nav>
+
+  <div class="tab-body">
+    @if (activeTab === 'meetings') {
+      <div class="tab-toolbar">
+        <p class="hint">{{ sessions.length }} saved meeting session(s)</p>
+      </div>
+      @if (sessions.length) {
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th><th>Title</th><th>Summary</th><th>Fields</th><th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (s of pagedSessions; track s.id) {
+                <tr [class.row-latest]="s.id === lastSession?.id">
+                  <td class="nowrap">{{ formatSessionDate(s.createdAt) }}</td>
+                  <td>
+                    <strong>{{ s.title }}</strong>
+                    @if (s.id === lastSession?.id) { <span class="badge badge-purple">Latest</span> }
+                  </td>
+                  <td class="excerpt-col">{{ truncateNotes(s.rawNotes, 100) }}</td>
+                  <td>{{ meaningfulFields(getAllSummaryFields(s.extracted)).length }} fields</td>
+                  <td>
+                    <button type="button" class="btn btn-outline btn-sm" (click)="toggleSession(s.id)">
+                      {{ expandedSessionId === s.id ? 'Hide' : 'View' }}
+                    </button>
+                  </td>
+                </tr>
+                @if (expandedSessionId === s.id) {
+                  <tr class="expand-row">
+                    <td colspan="5">
+                      <pre class="notes-block">{{ s.rawNotes }}</pre>
+                      @if (getAllSummaryFields(s.extracted).length) {
+                        <table class="data-table summary-table compact">
+                          <thead><tr><th>Field</th><th>Value</th><th>Type</th></tr></thead>
+                          <tbody>
+                            @for (row of getAllSummaryFields(s.extracted); track row.key + row.label) {
+                              <tr>
+                                <td class="label-col">{{ row.label }}</td>
+                                <td>{{ row.value }}</td>
+                                <td>@if (row.dynamic) { <span class="tag-dynamic">Dynamic</span> } @else { Template }</td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      }
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (sessions.length > tablePageSize) {
+          <div class="pagination">
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="sessionsPage <= 1" (click)="prevPage('sessions')">← Prev</button>
+            <span>Page {{ sessionsPage }} of {{ sessionsTotalPages }}</span>
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="sessionsPage >= sessionsTotalPages" (click)="nextPage('sessions')">Next →</button>
+          </div>
+        }
+      } @else {
+        <p class="hint empty-tab">No meeting sessions saved yet.</p>
+      }
+    }
+
+    @if (activeTab === 'actions') {
+      <div class="tab-toolbar">
+        <label class="filter-control">
+          Discussion
+          <select [(ngModel)]="sessionFilter" (ngModelChange)="onSessionFilterChange()">
+            <option value="all">All discussions</option>
+            <option value="none">Not linked</option>
+            @for (s of sessions; track s.id) {
+              <option [value]="s.id">{{ s.title }}</option>
+            }
+          </select>
+        </label>
+        @if (editable) {
+          <label class="filter-control">
+            Link new items to
+            <select [ngModel]="linkNewItemsToSession" (ngModelChange)="onLinkChange($event)">
+              <option value="">None (optional)</option>
+              @for (s of sessions; track s.id) {
+                <option [value]="s.id">{{ s.title }}</option>
+              }
+              @if (pendingSessionId) {
+                <option [value]="pendingSessionId">Current draft</option>
+              }
+            </select>
+          </label>
+          <button type="button" class="btn btn-outline btn-sm" (click)="addActionItem()">+ Add action</button>
+        }
+      </div>
+      @if (filteredActions.length) {
+        <div class="table-wrap">
+          <table class="data-table action-table">
+            <thead><tr><th>Task</th><th>Discussion</th><th>Owner</th><th>Due</th><th>Status</th>@if (editable) { <th></th> }</tr></thead>
+            <tbody>
+              @for (a of pagedActions; track a.id) {
+                <tr [class.missing-date]="editable && needsDate(a)">
+                  <td>
+                    @if (editable) {
+                      <input class="cell-text" [(ngModel)]="a.task" />
+                    } @else {
+                      {{ a.task }}
+                    }
+                  </td>
+                  <td>
+                    @if (editable) {
+                      <select [(ngModel)]="a.sessionId">
+                        <option value="">— Optional —</option>
+                        @for (s of sessions; track s.id) {
+                          <option [value]="s.id">{{ s.title }}</option>
+                        }
+                      </select>
+                    } @else {
+                      {{ discussionLabel(a.sessionId) }}
+                    }
+                  </td>
+                  <td>
+                    @if (editable) {
+                      <input class="cell-text narrow" [(ngModel)]="a.owner" />
+                    } @else {
+                      {{ a.owner || '—' }}
+                    }
+                  </td>
+                  <td>
+                    @if (editable) {
+                      <input type="date" class="date-input" [(ngModel)]="a.dueDate" />
+                    } @else {
+                      {{ a.dueDate || '—' }}
+                    }
+                  </td>
+                  <td>
+                    @if (editable) {
+                      <select [(ngModel)]="a.status">
+                        @for (st of actionStatuses; track st) { <option [value]="st">{{ st }}</option> }
+                      </select>
+                    } @else {
+                      {{ a.status }}
+                    }
+                  </td>
+                  @if (editable) {
+                    <td><button type="button" class="btn-icon danger" (click)="removeActionItem(a.id)">✕</button></td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (filteredActions.length > tablePageSize) {
+          <div class="pagination">
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="actionsPage <= 1" (click)="prevPage('actions')">← Prev</button>
+            <span>Page {{ actionsPage }} of {{ actionsTotalPages }}</span>
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="actionsPage >= actionsTotalPages" (click)="nextPage('actions')">Next →</button>
+          </div>
+        }
+      } @else {
+        <p class="hint empty-tab">No action items yet.</p>
+      }
+    }
+
+    @if (activeTab === 'reminders') {
+      <div class="tab-toolbar">
+        <label class="filter-control">
+          Discussion
+          <select [(ngModel)]="sessionFilter" (ngModelChange)="onSessionFilterChange()">
+            <option value="all">All discussions</option>
+            <option value="none">Not linked</option>
+            @for (s of sessions; track s.id) {
+              <option [value]="s.id">{{ s.title }}</option>
+            }
+          </select>
+        </label>
+        @if (editable) {
+          <button type="button" class="btn btn-outline btn-sm" (click)="addReminder()">+ Add reminder</button>
+        }
+      </div>
+      @if (filteredReminders.length) {
+        <div class="table-wrap">
+          <table class="data-table action-table">
+            <thead><tr><th>Reminder</th><th>Discussion</th><th>Date</th><th>Type</th>@if (editable) { <th></th> }</tr></thead>
+            <tbody>
+              @for (r of pagedReminders; track r.id) {
+                <tr>
+                  <td>
+                    @if (editable) {
+                      <input class="cell-text wide" [(ngModel)]="r.reminder" />
+                    } @else {
+                      {{ r.reminder }}
+                    }
+                  </td>
+                  <td>
+                    @if (editable) {
+                      <select [(ngModel)]="r.sessionId">
+                        <option value="">— Optional —</option>
+                        @for (s of sessions; track s.id) {
+                          <option [value]="s.id">{{ s.title }}</option>
+                        }
+                      </select>
+                    } @else {
+                      {{ discussionLabel(r.sessionId) }}
+                    }
+                  </td>
+                  <td>
+                    @if (editable) {
+                      <input type="date" class="date-input" [(ngModel)]="r.dateTime" />
+                    } @else {
+                      {{ r.dateTime || '—' }}
+                    }
+                  </td>
+                  <td>
+                    @if (editable) {
+                      <select [(ngModel)]="r.type">
+                        @for (t of reminderTypes; track t) { <option [value]="t">{{ t }}</option> }
+                      </select>
+                    } @else {
+                      {{ r.type }}
+                    }
+                  </td>
+                  @if (editable) {
+                    <td><button type="button" class="btn-icon danger" (click)="removeReminder(r.id)">✕</button></td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (filteredReminders.length > tablePageSize) {
+          <div class="pagination">
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="remindersPage <= 1" (click)="prevPage('reminders')">← Prev</button>
+            <span>Page {{ remindersPage }} of {{ remindersTotalPages }}</span>
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="remindersPage >= remindersTotalPages" (click)="nextPage('reminders')">Next →</button>
+          </div>
+        }
+      } @else {
+        <p class="hint empty-tab">No reminders yet.</p>
+      }
+    }
+
+    @if (activeTab === 'history') {
+      <div class="tab-toolbar history-filters">
+        <label>
+          Category
+          <select [(ngModel)]="historyCategory" (ngModelChange)="onHistoryFilterChange()">
+            @for (c of historyCategories; track c) { <option [value]="c">{{ c }}</option> }
+          </select>
+        </label>
+        <label>
+          Search
+          <input type="search" [(ngModel)]="historySearch" (ngModelChange)="onHistoryFilterChange()" placeholder="Summary, details…" />
+        </label>
+      </div>
+      @if (filteredHistory.length) {
+        <div class="table-wrap">
+          <table class="data-table history-table">
+            <thead>
+              <tr><th>When</th><th>Category</th><th>Change</th><th>Details</th><th>By</th></tr>
+            </thead>
+            <tbody>
+              @for (h of pagedHistory; track h.id) {
+                <tr>
+                  <td class="nowrap">{{ h.timestamp }}</td>
+                  <td><span class="badge badge-purple">{{ h.category }}</span></td>
+                  <td><strong>{{ h.summary }}</strong></td>
+                  <td class="details-col">{{ h.details || '—' }}</td>
+                  <td>{{ h.changedBy }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        @if (filteredHistory.length > tablePageSize) {
+          <div class="pagination">
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="historyPage <= 1" (click)="prevPage('history')">← Prev</button>
+            <span>Page {{ historyPage }} of {{ historyTotalPages }} ({{ filteredHistory.length }})</span>
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="historyPage >= historyTotalPages" (click)="nextPage('history')">Next →</button>
+          </div>
+        }
+      } @else {
+        <p class="hint empty-tab">No history entries match your filters.</p>
+      }
+    }
+  </div>
+
+  <div class="tab-footer">
+    @if (editable) {
+      <button class="btn btn-primary" type="button" [disabled]="saving" (click)="save.emit()">
+        {{ saving ? 'Saving…' : 'Save all changes' }}
+      </button>
+    } @else if (dealId) {
+      <a class="btn btn-primary" [routerLink]="['/deals', dealId, 'meeting-notes']">Edit meeting notes & tracking →</a>
+    }
+  </div>
+</section>

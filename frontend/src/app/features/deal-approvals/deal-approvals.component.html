@@ -1,0 +1,337 @@
+<h1 class="page-title">Approvals</h1>
+<p class="page-subtitle">Deal {{ dealId }} @if (deal) { — {{ deal.customer }} }</p>
+
+<div class="page-nav">
+  <a [routerLink]="['/deals', dealId, 'meeting-notes']" class="back-link">← Meeting Notes</a>
+  <span class="nav-sep">·</span>
+  <a [routerLink]="['/deals', dealId]" class="back-link">Deal overview</a>
+</div>
+
+@if (loading) {
+  <p>Loading approvals…</p>
+} @else if (error && !approvals) {
+  <div class="card empty-state">
+    <p class="error">{{ error }}</p>
+    <div class="empty-actions">
+      <button type="button" class="btn btn-primary" (click)="load()">Retry</button>
+      <a [routerLink]="['/deals', dealId, 'meeting-notes']" class="btn btn-outline">← Back to Meeting Notes</a>
+    </div>
+  </div>
+} @else if (approvals) {
+  <app-deal-stepper [activeStep]="5" />
+
+  @if (error) { <div class="alert error">{{ error }}</div> }
+  @if (success) { <div class="alert success">{{ success }}</div> }
+
+  @if (approvals.documentsLocked) {
+    <div class="alert locked-banner">
+      🔒 Documents are <strong>locked</strong> — all approvals complete.
+      @if (approvals.allowPostApprovalEdits) {
+        <button type="button" class="btn btn-outline btn-sm" [disabled]="saving" (click)="unlockForEdits()">Allow changes after approval</button>
+      }
+    </div>
+  }
+
+  <div class="summary-grid">
+    <div class="card summary-card">
+      <span class="label">Deal version</span>
+      <strong>{{ approvals.version }}</strong>
+      @if (approvals.documentsLocked) {
+        <span class="badge badge-green">Locked</span>
+      } @else {
+        <span class="badge badge-purple">Current</span>
+      }
+    </div>
+    <div class="card summary-card">
+      <span class="label">Last updated</span>
+      <strong>{{ approvals.lastUpdatedAt || '—' }}</strong>
+      <small>by {{ approvals.lastUpdatedBy || deal?.owner }}</small>
+    </div>
+    <div class="card summary-card" [class.warn]="approvals.changesPendingReapproval">
+      <span class="label">Changes detected</span>
+      @if (approvals.changesPendingReapproval) {
+        <strong class="warn-text">Re-approval required</strong>
+        <small>{{ approvals.changeSummary }}</small>
+      } @else {
+        <strong>No pending changes</strong>
+      }
+    </div>
+    <div class="card summary-card">
+      <span class="label">EULA status</span>
+      <strong>{{ approvals.eulaStatus || 'Draft' }}</strong>
+      @if (approvals.eulaDocument) {
+        <small>{{ approvals.eulaDocument.fillPercent }}% filled</small>
+      }
+    </div>
+  </div>
+
+  <section class="card section-card">
+    <div class="section-head">
+      <h3>Approval decision matrix</h3>
+      <span class="hint">Rules that determine required reviews</span>
+    </div>
+    <div class="matrix-grid">
+      @for (rule of approvals.ruleMatches; track rule.id) {
+        <div class="matrix-card" [class.matched]="rule.matched">
+          <div class="matrix-title">{{ rule.title }}</div>
+          <p>{{ rule.reason }}</p>
+          @if (rule.matched) {
+            <span class="badge badge-green">Rule matched</span>
+          } @else {
+            <span class="badge badge-gray">Not required</span>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <div class="main-layout">
+    <section class="workflow-col">
+      <section class="card section-card">
+        <h3>Approval workflow</h3>
+        <p class="hint">Each reviewer can approve, request changes, or reject. Comments are required for changes and rejection.</p>
+        <div class="workflow-list">
+          @for (step of approvals.steps; track step.id) {
+            @if (step.id !== 'eula') {
+              <article class="workflow-step" [class.active]="activeStepId === step.id">
+                <div class="step-header" (click)="selectStep(step.id)">
+                  <span class="step-num">{{ step.order }}</span>
+                  <div class="step-meta">
+                    <strong>{{ step.title }}</strong>
+                    <span class="badge" [class]="'badge ' + statusClass(step.status)">{{ step.status }}</span>
+                  </div>
+                  <span class="assignee">{{ step.assignee }}</span>
+                </div>
+                <p class="rule-reason">{{ step.ruleReason }}</p>
+
+                @if (step.comments?.length) {
+                  <div class="comments">
+                    @for (c of step.comments; track c.id) {
+                      <div class="comment" [class.comment-changes]="c.type === 'changes'">
+                        <strong>{{ c.author }}</strong>
+                        <span class="comment-type">{{ c.type }}</span>
+                        <span class="comment-time">{{ c.timestamp }}</span>
+                        <p>{{ c.text }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (canActOnStep(step)) {
+                  <div class="step-actions" (click)="$event.stopPropagation()">
+                    <textarea rows="2" [(ngModel)]="stepComments[step.id]" placeholder="Comment (required for request changes / reject)…"></textarea>
+                    <div class="action-buttons">
+                      <button type="button" class="btn btn-primary btn-sm" [disabled]="saving" (click)="applyActionForStep(step.id, 'approve')">Approve</button>
+                      <button type="button" class="btn btn-outline btn-sm" [disabled]="saving" (click)="applyActionForStep(step.id, 'request-changes')">Request changes</button>
+                      <button type="button" class="btn btn-outline btn-sm danger" [disabled]="saving" (click)="applyActionForStep(step.id, 'reject')">Reject</button>
+                      @if (step.status === 'Changes Requested') {
+                        <button type="button" class="btn btn-outline btn-sm" [disabled]="saving" (click)="applyActionForStep(step.id, 'mark-ready')">Mark ready for re-review</button>
+                      }
+                    </div>
+                  </div>
+                }
+              </article>
+            } @else {
+              <article class="workflow-step eula-step">
+                <div class="step-header">
+                  <span class="step-num">{{ step.order }}</span>
+                  <div class="step-meta">
+                    <strong>{{ step.title }}</strong>
+                    <span class="badge" [class]="'badge ' + statusClass(step.status)">{{ step.status }}</span>
+                  </div>
+                  <span class="assignee">{{ step.assignee }}</span>
+                </div>
+                <p class="rule-reason">{{ step.ruleReason }}</p>
+                @if (approvals.eulaDocument) {
+                  <div class="eula-inline">
+                    <span class="badge badge-purple">{{ approvals.eulaStatus }} · {{ approvals.eulaDocument.fillPercent }}%</span>
+                    <button type="button" class="btn btn-outline btn-sm" (click)="viewDocument(approvals.eulaDocument)">Preview EULA</button>
+                    @if (approvals.documentsLocked) {
+                      <button type="button" class="btn btn-outline btn-sm" (click)="downloadDocument(approvals.eulaDocument)">Download</button>
+                    }
+                  </div>
+                }
+              </article>
+            }
+          }
+        </div>
+      </section>
+
+      <section class="card section-card">
+        <div class="section-head">
+          <h3>Approval audit log</h3>
+          <label class="filter-control">
+            Category
+            <select [(ngModel)]="auditCategory" (ngModelChange)="onAuditFilterChange()">
+              @for (c of auditCategories; track c) { <option [value]="c">{{ c }}</option> }
+            </select>
+          </label>
+        </div>
+        @if (filteredAudit.length) {
+          <div class="table-wrap">
+            <table class="data-table audit-table">
+              <thead>
+                <tr><th>When</th><th>Category</th><th>Action</th><th>Details</th><th>Step / Document</th><th>By</th></tr>
+              </thead>
+              <tbody>
+                @for (row of pagedAudit; track row.id) {
+                  <tr>
+                    <td class="nowrap">{{ row.timestamp }}</td>
+                    <td><span class="badge" [class]="auditCategoryClass(row.category || 'Approval')">{{ row.category || 'Approval' }}</span></td>
+                    <td><strong>{{ row.action }}</strong></td>
+                    <td class="details-col">{{ row.details || '—' }}</td>
+                    <td>{{ row.documentName || row.stepTitle || '—' }}</td>
+                    <td>{{ row.user }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (filteredAudit.length > auditPageSize) {
+            <div class="pagination">
+              <button type="button" class="btn btn-outline btn-sm" [disabled]="auditPage <= 1" (click)="prevAuditPage()">← Prev</button>
+              <span>Page {{ auditPage }} of {{ auditTotalPages }}</span>
+              <button type="button" class="btn btn-outline btn-sm" [disabled]="auditPage >= auditTotalPages" (click)="nextAuditPage()">Next →</button>
+            </div>
+          }
+        } @else {
+          <p class="hint">No audit entries for this filter.</p>
+        }
+      </section>
+    </section>
+
+    <aside class="side-col">
+      @if (approvals.packageDocument; as pkg) {
+        <section class="card section-card package-card">
+          <div class="section-head">
+            <h3>Approval package</h3>
+            <span class="badge badge-purple">{{ pkg.version }}</span>
+          </div>
+          <div class="package-row">
+            <span class="doc-icon">📦</span>
+            <div class="package-info">
+              <strong>{{ pkg.name }}</strong>
+              <small>{{ pkg.generatedAt }} · {{ pkg.fileName }}</small>
+              @if (pkg.locked) { <span class="badge badge-green">Locked</span> }
+              @if (pkg.stale) { <span class="badge badge-orange">Stale</span> }
+            </div>
+            <div class="doc-actions">
+              <button type="button" class="btn btn-outline btn-sm" (click)="viewDocument(pkg)">View</button>
+              <button type="button" class="btn btn-outline btn-sm" (click)="downloadDocument(pkg)">Download</button>
+            </div>
+          </div>
+        </section>
+      }
+
+      <section class="card section-card">
+        <div class="section-head">
+          <h3>Generated documents</h3>
+          @if (approvals.documentsLocked) {
+            <span class="badge badge-green">🔒 Locked</span>
+          } @else {
+            <span class="badge badge-purple">{{ approvals.version }}</span>
+          }
+        </div>
+        <ul class="doc-list">
+          @for (doc of detailDocuments; track doc.id) {
+            <li [class.stale]="doc.stale" [class.locked]="doc.locked">
+              <span class="doc-icon">📄</span>
+              <div class="doc-info">
+                <strong>{{ doc.name }}</strong>
+                <small>{{ doc.version }} · {{ doc.generatedAt }}</small>
+                <div class="doc-tags">
+                  @if (doc.locked) { <span class="badge badge-green">Locked</span> }
+                  @if (doc.stale) { <span class="badge badge-orange">Stale</span> }
+                </div>
+              </div>
+              <div class="doc-actions">
+                <button type="button" class="btn btn-outline btn-sm" (click)="viewDocument(doc)">View</button>
+                <button type="button" class="btn btn-outline btn-sm" (click)="downloadDocument(doc)">↓</button>
+              </div>
+            </li>
+          }
+        </ul>
+        @if (!approvals.documentsLocked) {
+          <button type="button" class="btn btn-outline full" [disabled]="saving" (click)="regenerateDocs()">
+            {{ saving ? 'Regenerating…' : 'Regenerate documents' }}
+          </button>
+        }
+        @if (approvals.changesPendingReapproval) {
+          <p class="hint warn-text">Pricing, discount, product plan, or installment changes require regeneration and re-approval.</p>
+        }
+      </section>
+
+      <section class="card section-card final-output">
+        <h3>Final output</h3>
+        <p>EULA status: <strong>{{ approvals.eulaStatus }}</strong></p>
+        <p>Approval package: <strong>{{ approvals.documentsLocked ? 'Locked & ready' : 'Pending approvals' }}</strong></p>
+        @if (approvals.eulaDocument) {
+          <button type="button" class="btn btn-outline full" (click)="viewDocument(approvals.eulaDocument)">
+            Preview EULA ({{ approvals.eulaDocument.fillPercent }}% complete)
+          </button>
+        }
+      </section>
+
+      <section class="card section-card progress-card">
+        <h3>Approval progress</h3>
+        <div class="progress-ring">{{ approvals.progress?.percent ?? 0 }}%</div>
+        <div class="progress-stats">
+          <div><span>Total</span><strong>{{ approvals.progress?.total ?? 0 }}</strong></div>
+          <div><span>Approved</span><strong>{{ approvals.progress?.approved ?? 0 }}</strong></div>
+          <div><span>Pending</span><strong>{{ approvals.progress?.pending ?? 0 }}</strong></div>
+          <div><span>Changes</span><strong>{{ approvals.progress?.changesRequested ?? 0 }}</strong></div>
+        </div>
+      </section>
+
+      @if (deal?.pricing) {
+        <section class="card section-card">
+          <h3>Pricing snapshot</h3>
+          <p>Net: <strong>${{ deal.pricing.netContractValue | number }}</strong></p>
+          <p>Discount: <strong>{{ deal.pricing.discountPercent }}%</strong></p>
+          @if (deal.pricing.flexiblePaymentsEnabled) {
+            <p>Installments: <strong>{{ deal.pricing.installmentCount }}</strong></p>
+          }
+          @if (!approvals.documentsLocked) {
+            <a [routerLink]="['/deals', dealId, 'pricing']" class="btn btn-outline btn-sm full">Edit pricing →</a>
+          } @else if (approvals.allowPostApprovalEdits) {
+            <button type="button" class="btn btn-outline btn-sm full" (click)="unlockForEdits()">Unlock to edit pricing</button>
+          }
+        </section>
+      }
+    </aside>
+  </div>
+
+  <app-deal-flow-footer
+    hint="Once all required approvals are complete, submit the deal for offer request."
+    [backLink]="'/deals/' + dealId + '/meeting-notes'"
+    backLabel="← Previous"
+    [exitLink]="'/deals/' + dealId"
+    exitLabel="Save & Exit"
+    continueLabel="Proceed to Offer Request →"
+    [saving]="saving"
+    [continueDisabled]="(approvals.progress?.percent ?? 0) < 100"
+    (proceed)="submitDeal()" />
+} @else {
+  <div class="card empty-state">
+    <p class="hint">Approval data is not available for this deal yet.</p>
+    <button type="button" class="btn btn-primary" (click)="load()">Load approvals</button>
+  </div>
+}
+
+@if (previewDoc && previewUrl) {
+  <div class="doc-modal-backdrop" (click)="closePreview()">
+    <div class="doc-modal" (click)="$event.stopPropagation()">
+      <div class="doc-modal-header">
+        <div>
+          <strong>{{ previewDoc.name }}</strong>
+          <small>{{ previewDoc.version }} · {{ previewDoc.fileName }}</small>
+        </div>
+        <div class="doc-modal-actions">
+          <button type="button" class="btn btn-outline btn-sm" (click)="downloadDocument(previewDoc)">Download</button>
+          <button type="button" class="btn btn-outline btn-sm" (click)="closePreview()">Close</button>
+        </div>
+      </div>
+      <iframe class="doc-frame" [src]="previewUrl" title="Document preview"></iframe>
+    </div>
+  </div>
+}

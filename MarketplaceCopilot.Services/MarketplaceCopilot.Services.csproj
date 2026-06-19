@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MarketplaceCopilot.Services</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MarketplaceCopilot.Entities\MarketplaceCopilot.Entities.csproj" />
+    <ProjectReference Include="..\MarketplaceCopilot.Data\MarketplaceCopilot.Data.csproj" />
+    <ProjectReference Include="..\MarketplaceCopilot.Services.Contracts\MarketplaceCopilot.Services.Contracts.csproj" />
+    <ProjectReference Include="..\Service.Pattern\Service.Pattern.csproj" />
+  </ItemGroup>
+
+</Project>

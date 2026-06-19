@@ -1,0 +1,116 @@
+.app-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--sidebar);
+  color: white;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.brand .logo {
+  font-size: 28px;
+}
+
+.brand small {
+  display: block;
+  color: #c7d2fe;
+  font-size: 11px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #e0e7ff;
+  margin-bottom: 4px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: var(--sidebar-hover);
+  color: white;
+}
+
+.copilot-card {
+  margin-top: auto;
+  background: #312e81;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 13px;
+}
+
+.copilot-card .robot { font-size: 32px; margin-bottom: 8px; }
+.copilot-card p { color: #c7d2fe; }
+
+.main { display: flex; flex-direction: column; }
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+}
+
+.search {
+  flex: 1;
+  max-width: 520px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.name { font-weight: 600; font-size: 14px; }
+.role { font-size: 12px; color: var(--muted); }
+
+.content { padding: 24px; }
+
+.api-offline-banner {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.api-offline-banner code {
+  background: #ffedd5;
+  padding: 1px 4px;
+  border-radius: 4px;
+}

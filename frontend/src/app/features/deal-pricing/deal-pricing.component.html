@@ -1,0 +1,241 @@
+@if (loading) {
+  <p class="loading">Loading pricing calculator…</p>
+} @else if (error && !deal) {
+  <div class="center-card">
+    <p class="error">{{ error }}</p>
+    <a routerLink="/deals/new" class="btn btn-primary">Create New Deal</a>
+    <a routerLink="/deals" class="btn btn-outline">Back to Deals</a>
+  </div>
+} @else if (deal) {
+  <div class="page-nav">
+    <a [routerLink]="['/deals', dealId, 'products']" class="back-link">← Back to Products</a>
+    <span class="nav-sep">·</span>
+    <a [routerLink]="['/deals', dealId, 'edit']" class="back-link">Edit Deal Details</a>
+  </div>
+  <div class="breadcrumb">Home › Deals › {{ dealId }} › Configure Pricing</div>
+
+  @if (error) { <div class="alert error">{{ error }}</div> }
+
+  <div class="deal-meta card">
+    <div class="meta-item"><span>Customer</span><strong>{{ deal.customer }}</strong></div>
+    <div class="meta-item"><span>Marketplace</span><strong>{{ deal.marketplace }} Marketplace</strong></div>
+    <div class="meta-item"><span>Product</span><strong>{{ selectedProducts[0]?.name || '—' }}</strong></div>
+    <div class="meta-item"><span>Deal type</span><strong>{{ deal.dealType }}</strong></div>
+    <div class="meta-item"><span>Currency</span><strong>USD</strong></div>
+    <div class="meta-item"><span>Sales owner</span><strong>{{ deal.owner }}</strong></div>
+  </div>
+
+  <app-deal-stepper [activeStep]="3" />
+
+  <div class="page-layout">
+    <div class="main-col">
+      @if (selectedProducts.length) {
+        <section class="card section">
+          <div class="section-head"><span class="num">📦</span><h3>Selected product</h3></div>
+          @for (p of selectedProducts; track p.id) {
+            <div class="product-card">
+              <div>
+                <strong>{{ p.name }}</strong>
+                <p>{{ p.billingModel || 'Subscription' }} · List price <strong>${{ p.listPricePerYear | number }}/year</strong></p>
+              </div>
+            </div>
+          }
+        </section>
+      }
+
+      <section class="card section">
+        <div class="section-head"><span class="num">1</span><h3>Deal summary — offer type</h3></div>
+        <div class="choice-grid">
+          <button type="button" class="choice" [class.active]="pricing.offerType === 'Direct Private Offer'" (click)="setOfferType('Direct Private Offer')">
+            <span class="radio">{{ pricing.offerType === 'Direct Private Offer' ? '◉' : '○' }}</span>
+            <div><strong>Direct Private Offer</strong><p>Offer published directly to customer</p></div>
+          </button>
+          <button type="button" class="choice" [class.active]="pricing.offerType === 'Reseller Private Offer'" (click)="setOfferType('Reseller Private Offer')">
+            <span class="radio">{{ pricing.offerType === 'Reseller Private Offer' ? '◉' : '○' }}</span>
+            <div><strong>Reseller Private Offer</strong><p>Offer via reseller partner</p></div>
+          </button>
+        </div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head"><span class="num">2</span><h3>Contract & pricing</h3></div>
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Contract start date</label>
+            <input type="date" [(ngModel)]="pricing.contractStart" (ngModelChange)="onStartDateChange()" />
+          </div>
+          <div class="form-field">
+            <label>Contract end date</label>
+            <input type="date" [(ngModel)]="pricing.contractEnd" (ngModelChange)="onEndDateChange()" />
+          </div>
+          <div class="form-field">
+            <label>Duration type</label>
+            <select [(ngModel)]="pricing.durationType" (ngModelChange)="onDurationTypeChange()">
+              @for (t of durationTypes; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Duration ({{ durationUnitLabel() }})</label>
+            <input type="number" min="1" [(ngModel)]="pricing.durationValue" (ngModelChange)="onDurationValueChange()" />
+          </div>
+          <div class="form-field">
+            <label>Public price / year</label>
+            <input type="number" min="0" [(ngModel)]="pricing.publicPricePerYear" (ngModelChange)="recalc()" />
+          </div>
+        </div>
+
+        <div class="checkbox-row">
+          <label>
+            <input type="checkbox" [(ngModel)]="pricing.proRateEnabled" (ngModelChange)="recalc()" />
+            Pro-rate partial periods (scale list price by actual contract days)
+          </label>
+        </div>
+
+        <p class="sub-label">Pricing method</p>
+        <div class="choice-grid compact">
+          <button type="button" class="choice sm" [class.active]="pricing.pricingMethod === 'Discount Based'" (click)="setPricingMethod('Discount Based')">Discount Based</button>
+          <button type="button" class="choice sm" [class.active]="pricing.pricingMethod === 'Absolute Price'" (click)="setPricingMethod('Absolute Price')">Absolute Price</button>
+        </div>
+
+        @if (isAbsolutePrice) {
+          <div class="form-field inline-discount wide">
+            <label>Absolute contract price (USD)</label>
+            <input type="number" min="0" [(ngModel)]="pricing.absoluteContractPrice" (ngModelChange)="recalc()" />
+            <small>Can be above or below public list price for the contract period.</small>
+          </div>
+        } @else {
+          <p class="sub-label">Discount model</p>
+          <div class="radio-row">
+            <label><input type="radio" name="dm" value="same" [checked]="pricing.discountModel === 'same'" (change)="setDiscountModel('same')" /> Same discount for entire contract</label>
+            <label [class.disabled]="!showPerYearDiscount">
+              <input type="radio" name="dm" value="per-year" [checked]="pricing.discountModel === 'per-year'" [disabled]="!showPerYearDiscount" (change)="setDiscountModel('per-year')" />
+              Different discount per year
+              @if (!showPerYearDiscount) { <small>(only when duration is in years)</small> }
+            </label>
+          </div>
+
+          @if (pricing.discountModel === 'same') {
+            <div class="form-field inline-discount">
+              <label>Discount (%)</label>
+              <input type="number" min="0" max="100" [(ngModel)]="pricing.discountPercent" (ngModelChange)="recalc()" />
+            </div>
+          }
+        }
+
+        @if (yearlyRows.length) {
+          <h4 class="table-title">Pricing calculation by year</h4>
+          <table class="data-table yearly-table">
+            <thead>
+              <tr>
+                <th>Year</th><th>Period</th><th>List price</th><th>Discount %</th>
+                <th>Discount amt</th><th>Your price</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of yearlyRows; track row.year) {
+                <tr>
+                  <td>{{ row.year }}</td>
+                  <td>{{ row.period }}</td>
+                  <td>${{ row.listPrice | number }}</td>
+                  <td>
+                    @if (pricing.discountModel === 'per-year' && showPerYearDiscount) {
+                      <input type="number" class="cell-input" min="0" max="100"
+                        [ngModel]="pricing.yearlyDiscountPercents[row.year - 1]"
+                        (ngModelChange)="updateYearDiscount(row.year - 1, $event)" />
+                    } @else {
+                      {{ row.discountPercent }}%
+                    }
+                  </td>
+                  <td>-${{ row.discountAmount | number }}</td>
+                  <td><strong>${{ row.yourPrice | number }}</strong></td>
+                </tr>
+              }
+              <tr class="total-row">
+                <td colspan="5">Total contract net (before fees)</td>
+                <td><strong>${{ preview?.netPriceBeforeFees | number }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        }
+      </section>
+
+      <section class="card section">
+        <div class="section-head"><span class="num">3</span><h3>Marketplace fee</h3></div>
+        <div class="form-field">
+          <label>Marketplace fee (auto for {{ deal.marketplace }})</label>
+          <input type="number" [(ngModel)]="pricing.marketplaceFeePercent" (ngModelChange)="recalc()" /> %
+        </div>
+        <div class="info-banner">ℹ️ Marketplace fee is set by {{ deal.marketplace }} and applied on the transacted amount.</div>
+      </section>
+
+      <section class="card section">
+        <div class="section-head"><span class="num">4</span><h3>Flexible payment schedule (FPS)</h3></div>
+        <div class="checkbox-row">
+          <label>
+            <input type="checkbox" [(ngModel)]="pricing.flexiblePaymentsEnabled" (ngModelChange)="recalc()" />
+            Split total payable into installments (FPS)
+          </label>
+        </div>
+        @if (pricing.flexiblePaymentsEnabled) {
+          <div class="form-field inline-discount">
+            <label>Number of installments</label>
+            <input type="number" min="2" max="24" [(ngModel)]="pricing.installmentCount" (ngModelChange)="recalc()" />
+          </div>
+          @if (installments.length) {
+            <table class="data-table yearly-table">
+              <thead><tr><th>#</th><th>Due date</th><th>Amount</th></tr></thead>
+              <tbody>
+                @for (row of installments; track row.number) {
+                  <tr>
+                    <td>{{ row.number }}</td>
+                    <td>{{ row.dueDate }}</td>
+                    <td><strong>${{ row.amount | number }}</strong></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+      </section>
+
+      <app-deal-flow-footer
+        [backLink]="'/deals/' + dealId + '/products'"
+        backLabel="← Previous"
+        continueLabel="Continue to Meeting Notes →"
+        [saving]="saving"
+        [continueDisabled]="!preview"
+        (proceed)="save()" />
+    </div>
+
+    @if (preview) {
+      <aside class="side-col">
+        <section class="card summary">
+          <h3>Pricing results</h3>
+          <div class="row"><span>Public contract value</span><strong>${{ preview.publicContractValue | number }}</strong></div>
+          <div class="row" [class.red]="preview.totalDiscount >= 0" [class.green]="preview.totalDiscount < 0">
+            <span>{{ preview.totalDiscount < 0 ? 'Markup above list' : 'Total discount' }}</span>
+            <strong>{{ preview.totalDiscount < 0 ? '+' : '-' }}${{ (preview.totalDiscount < 0 ? -preview.totalDiscount : preview.totalDiscount) | number }}</strong>
+          </div>
+          <div class="row"><span>Net before fees</span><strong>${{ preview.netPriceBeforeFees | number }}</strong></div>
+          <div class="row"><span>Marketplace fee ({{ pricing.marketplaceFeePercent }}%)</span><strong>${{ preview.marketplaceFee | number }}</strong></div>
+          <div class="row highlight"><span>Net contract value</span><strong>${{ preview.netContractValue | number }}</strong></div>
+          <div class="row grand"><span>Total payable</span><strong>${{ preview.totalPayable | number }}</strong></div>
+          @if (preview.durationDays) {
+            <div class="row muted"><span>Contract length</span><strong>{{ preview.durationDays }} days</strong></div>
+          }
+        </section>
+
+        @if (insight) {
+          <section class="card insight-card">
+            <h4>✨ AI deal insight</h4>
+            <p>{{ insight }}</p>
+          </section>
+        }
+      </aside>
+    }
+  </div>
+} @else {
+  <p class="error">Deal not found. <a routerLink="/deals">Back to deals</a></p>
+}

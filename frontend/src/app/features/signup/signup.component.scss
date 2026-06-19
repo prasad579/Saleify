@@ -1,0 +1,28 @@
+@use '../login/login.component.scss' as *;
+
+input:not([type=checkbox]) {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-weight: 400;
+  font-size: 13px;
+  margin: 12px 0;
+}
+
+.social-buttons { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.btn-social {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+  background: white; font-weight: 600; cursor: pointer;
+}
+.btn-social.google .g { color: #ea4335; font-weight: 800; font-size: 18px; }
+.btn-social.microsoft .ms { color: #0078d4; font-size: 18px; }
+.divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--muted); font-size: 13px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.error { color: var(--danger); }

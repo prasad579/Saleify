@@ -1,0 +1,114 @@
+<h1 class="page-title">{{ isEdit ? 'Edit Deal' : 'Create New Deal' }}</h1>
+<p class="page-subtitle">{{ isEdit ? 'Update deal details and continue the workflow.' : 'Enter deal details to get started. You can add products and pricing next.' }}</p>
+
+@if (isEdit) {
+  <div class="page-nav">
+    <a [routerLink]="['/deals', editId, 'products']" class="back-link">← Back to Products</a>
+  </div>
+}
+
+@if (loading) { <p>Loading deal…</p> }
+
+@if (error) { <div class="alert error">{{ error }}</div> }
+@if (success) { <div class="alert success">{{ success }}</div> }
+
+<div class="layout">
+  <section class="card form-grid">
+    <div class="form-field full">
+      <label>Deal Name *</label>
+      <input [(ngModel)]="deal.name" placeholder="Enter a name for this deal" />
+    </div>
+
+    <div class="form-field">
+      <label>Customer / Company *</label>
+      <input [(ngModel)]="deal.customer" placeholder="Search or enter customer name" />
+    </div>
+
+    <div class="form-field">
+      <label>Primary Contact Name *</label>
+      <input [(ngModel)]="deal.contactName" placeholder="Enter primary contact name" />
+    </div>
+
+    <div class="form-field">
+      <label>Primary Contact Email *</label>
+      <input type="email" [(ngModel)]="deal.contactEmail" placeholder="Enter email address" />
+    </div>
+
+    <div class="form-field">
+      <label>Customer Location</label>
+      <select [(ngModel)]="deal.location">
+        <option value="">Select country</option>
+        @for (c of countries; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>Industry</label>
+      <select [(ngModel)]="deal.industry">
+        <option value="">Select industry</option>
+        @for (i of industries; track i) {
+          <option [value]="i">{{ i }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>Marketplace *</label>
+      <select [(ngModel)]="deal.marketplace">
+        <option value="">Select marketplace</option>
+        @for (m of marketplaces; track m) {
+          <option [value]="m">{{ m }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>Deal Type *</label>
+      <select [(ngModel)]="deal.dealType">
+        @for (t of dealTypes; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="form-field">
+      <label>Expected Contract Value (USD)</label>
+      <div class="money-input">
+        <span>$</span>
+        <input type="number" min="0" [(ngModel)]="deal.expectedValue" placeholder="Enter amount" />
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>Expected Close Date *</label>
+      <input type="date" [(ngModel)]="deal.expectedCloseDate" />
+    </div>
+
+    <div class="form-field full">
+      <label>Deal Description (optional)</label>
+      <textarea rows="4" maxlength="500" [(ngModel)]="deal.description" placeholder="Add a short description of the deal, business need, and objectives…"></textarea>
+      <small>{{ deal.description.length }} / 500</small>
+    </div>
+
+    <app-deal-flow-footer
+      backLink="/deals"
+      backLabel="Cancel"
+      [continueLabel]="isEdit ? 'Save & Continue →' : 'Create Deal →'"
+      [saving]="saving"
+      [continueDisabled]="loading"
+      (proceed)="submit()" />
+  </section>
+
+  <aside class="card">
+    <h3>What happens next?</h3>
+    <ol>
+      <li>Add Products</li>
+      <li>Configure Pricing</li>
+      <li>Add Meeting Notes</li>
+      <li>Start Approvals</li>
+      <li>Create Private Offer</li>
+    </ol>
+  </aside>
+</div>

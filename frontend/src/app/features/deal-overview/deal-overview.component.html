@@ -1,0 +1,62 @@
+@if (loading) {
+  <p>Loading deal…</p>
+} @else if (!deal) {
+  <p>Deal not found. <a routerLink="/deals">Back to deals</a></p>
+} @else {
+  <div class="header-row">
+    <div>
+      <h1 class="page-title">{{ deal.name || deal.customer }}</h1>
+      <p class="page-subtitle">{{ deal.id }} · {{ deal.customer }} · {{ deal.marketplace }}</p>
+    </div>
+    <a [routerLink]="continuePath(deal)" class="btn btn-primary">Continue workflow →</a>
+  </div>
+
+  <div class="meta-grid card">
+    <div><span>Stage</span><strong>{{ deal.stage }}</strong></div>
+    <div><span>Status</span><strong>{{ deal.marketplaceStatus }}</strong></div>
+    <div><span>Expected value</span><strong>${{ deal.expectedValue | number }}</strong></div>
+    <div><span>Owner</span><strong>{{ deal.owner }}</strong></div>
+    <div><span>Close date</span><strong>{{ deal.expectedCloseDate || '—' }}</strong></div>
+    <div><span>Last updated</span><strong>{{ deal.lastUpdated || '—' }}</strong></div>
+  </div>
+
+  <div class="layout">
+    <section class="main">
+      <app-last-meeting-snapshot
+        [dealId]="dealId"
+        [session]="lastSession()"
+        [showActions]="true" />
+
+      <section class="card quick-links">
+        <h3>Deal workflow</h3>
+        <div class="link-grid">
+          <a [routerLink]="['/deals', dealId, 'edit']" class="link-card">Deal details</a>
+          <a [routerLink]="['/deals', dealId, 'products']" class="link-card">Products</a>
+          <a [routerLink]="['/deals', dealId, 'pricing']" class="link-card">Pricing</a>
+          <a [routerLink]="['/deals', dealId, 'meeting-notes']" class="link-card">Meeting notes</a>
+          <a [routerLink]="['/deals', dealId, 'approvals']" class="link-card">Approvals</a>
+        </div>
+      </section>
+    </section>
+
+    <aside class="card">
+      <h3>Contact</h3>
+      <p><strong>{{ deal.contactName }}</strong></p>
+      <p class="muted">{{ deal.contactEmail }}</p>
+      @if (deal.pricing) {
+        <hr />
+        <h3>Pricing snapshot</h3>
+        <p>Net: <strong>${{ deal.pricing.netContractValue | number }}</strong></p>
+        <p>Discount: <strong>{{ deal.pricing.discountPercent }}%</strong></p>
+      }
+    </aside>
+  </div>
+
+  <app-deal-tracking-panel
+    [dealId]="dealId"
+    [editable]="false"
+    [sessions]="sessions"
+    [actionItems]="actionItems"
+    [reminders]="reminders"
+    [changeHistory]="changeHistory" />
+}

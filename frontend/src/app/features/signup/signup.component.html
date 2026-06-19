@@ -1,0 +1,46 @@
+<div class="auth-page">
+  <section class="hero">
+    <div class="logo">🤖</div>
+    <h1>Marketplace Copilot</h1>
+    <p class="tagline">AI-Powered Deal Desk</p>
+    <p>Join your team's deal desk workspace</p>
+  </section>
+
+  <section class="form-panel">
+    <h2>Create Account</h2>
+    <p class="subtitle">Sign up with Google (Gmail) or Microsoft, or use email & password</p>
+    @if (error) { <p class="error">{{ error }}</p> }
+
+    <div class="social-buttons">
+      <button type="button" class="btn-social google" (click)="googleSignup()">
+        <span class="g">G</span> Sign up with Google
+        @if (!googleEnabled) { <small class="badge">Setup required</small> }
+      </button>
+      <button type="button" class="btn-social microsoft" (click)="microsoftSignup()">
+        <span class="ms">⊞</span> Sign up with Microsoft
+        @if (!microsoftEnabled) { <small class="badge">Setup required</small> }
+      </button>
+    </div>
+    <div class="divider"><span>or create with email</span></div>
+
+    <label>Full Name *</label>
+    <input [(ngModel)]="fullName" placeholder="Enter your full name" />
+
+    <label>Email *</label>
+    <input type="email" [(ngModel)]="email" placeholder="you@company.com" />
+
+    <label>Password *</label>
+    <input type="password" [(ngModel)]="password" placeholder="Create a password" />
+
+    <label>Confirm Password *</label>
+    <input type="password" [(ngModel)]="confirmPassword" placeholder="Confirm password" />
+
+    <label class="check">
+      <input type="checkbox" [(ngModel)]="agreed" />
+      I agree to the Terms of Service and Privacy Policy
+    </label>
+
+    <button class="btn btn-primary full" (click)="submit()">Create Account</button>
+    <p class="footer">Already have an account? <a routerLink="/login">Sign in</a></p>
+  </section>
+</div>

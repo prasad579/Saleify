@@ -1,0 +1,15 @@
+@MarketplaceCopilot.Api_HostAddress = http://localhost:5280
+
+### Health check
+GET {{MarketplaceCopilot.Api_HostAddress}}/api/health
+Accept: application/json
+
+### List deals
+GET {{MarketplaceCopilot.Api_HostAddress}}/api/deals
+Accept: application/json
+
+### Lookups
+GET {{MarketplaceCopilot.Api_HostAddress}}/api/lookups
+Accept: application/json
+
+###

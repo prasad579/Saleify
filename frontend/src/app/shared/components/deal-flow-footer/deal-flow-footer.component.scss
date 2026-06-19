@@ -1,0 +1,26 @@
+.deal-flow-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-hint {
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.footer-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}

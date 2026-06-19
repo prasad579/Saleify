@@ -1,0 +1,100 @@
+<h1 class="page-title">Meeting Notes & Follow-up</h1>
+<p class="page-subtitle">Deal {{ dealId }} @if (deal) { — {{ deal.customer }} }</p>
+
+<div class="page-nav">
+  <a [routerLink]="['/deals', dealId]" class="back-link">← Deal overview</a>
+  <span class="nav-sep">·</span>
+  <a [routerLink]="['/deals', dealId, 'pricing']" class="back-link">Pricing</a>
+</div>
+
+@if (loading) {
+  <p>Loading deal…</p>
+} @else {
+  <app-deal-stepper [activeStep]="4" />
+
+  @if (deal?.pricing) {
+    <div class="deal-banner card">
+      <div><strong>Net contract value:</strong> ${{ deal.pricing.netContractValue | number }}</div>
+      <div><strong>Discount:</strong> {{ deal.pricing.discountPercent }}%</div>
+      <div><strong>Duration:</strong>
+        @if (deal.pricing.durationType && deal.pricing.durationValue) {
+          {{ deal.pricing.durationValue }} {{ deal.pricing.durationType }}
+        } @else {
+          {{ deal.pricing.durationMonths }} months
+        }
+      </div>
+    </div>
+  }
+
+  <app-last-meeting-snapshot [dealId]="dealId" [session]="lastSession" [showActions]="false" />
+
+  <div class="layout">
+    <section class="card main-col">
+      <h3>Add new discussion</h3>
+      <p class="hint">Enter notes from the latest client call. Extract builds dynamic summary fields, then save to add another meeting session.</p>
+
+      <div class="form-field">
+        <label>Session title (optional)</label>
+        <input [(ngModel)]="sessionTitle" placeholder="e.g. Follow-up call — pricing review" />
+      </div>
+
+      <textarea rows="5" [(ngModel)]="notes" placeholder="Enter notes from today's discussion…"></textarea>
+
+      @if (error) { <p class="error">{{ error }}</p> }
+
+      <div class="actions row-actions">
+        <button class="btn btn-primary" type="button" [disabled]="extracting" (click)="extract()">
+          {{ extracting ? 'Extracting…' : '✨ Extract Insights' }}
+        </button>
+        <button class="btn btn-outline" type="button" [disabled]="saving" (click)="save()">
+          {{ saving ? 'Saving…' : 'Save session' }}
+        </button>
+      </div>
+
+      @if (draftExtracted && draftFields.length) {
+        <h4 class="sub-heading">Draft summary <span class="badge badge-purple">Auto</span></h4>
+        <table class="data-table summary-table">
+          <thead><tr><th>Field</th><th>Value</th><th></th></tr></thead>
+          <tbody>
+            @for (row of draftFields; track row.key + row.label) {
+              <tr>
+                <td class="label-col">{{ row.label }}</td>
+                <td>{{ row.value }}</td>
+                <td>@if (row.dynamic) { <span class="tag-dynamic">Dynamic</span> }</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+
+    <aside class="card">
+      <h3>Copilot suggestion</h3>
+      <p>{{ insight || 'Add notes, extract insights, then save. Use the tracking tabs below to manage all sessions.' }}</p>
+      <a class="btn btn-outline full" [routerLink]="['/deals', dealId]">Deal overview</a>
+    </aside>
+  </div>
+
+  <app-deal-tracking-panel
+    [dealId]="dealId"
+    [editable]="true"
+    [saving]="saving"
+    [sessions]="sessions"
+    [actionItems]="actionItems"
+    [reminders]="reminders"
+    [changeHistory]="changeHistory"
+    [pendingSessionId]="pendingSessionId"
+    [(linkNewItemsToSession)]="linkNewItemsToSession"
+    (save)="save()" />
+
+  <app-deal-flow-footer
+    [backLink]="'/deals/' + dealId + '/pricing'"
+    backLabel="← Previous"
+    [exitLink]="'/deals/' + dealId"
+    saveLabel="Save all changes"
+    continueLabel="Proceed to Approvals →"
+    [showSave]="true"
+    [saving]="saving"
+    (save)="save()"
+    (proceed)="proceedToApprovals()" />
+}

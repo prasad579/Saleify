@@ -1,0 +1,78 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Deals</h1>
+    <p class="page-subtitle">Manage all your deals and track progress across the lifecycle.</p>
+  </div>
+  <a routerLink="/deals/new" class="btn btn-primary">+ New Deal</a>
+</div>
+
+@if (stats) {
+  <div class="stat-grid">
+    <div class="stat-card"><div class="value">{{ stats.total }}</div><div class="label">Total Deals</div></div>
+    <div class="stat-card"><div class="value">{{ stats.draft }}</div><div class="label">Draft</div></div>
+    <div class="stat-card"><div class="value">{{ stats.inProgress }}</div><div class="label">In Progress</div></div>
+    <div class="stat-card"><div class="value">{{ stats.submitted }}</div><div class="label">Submitted</div></div>
+    <div class="stat-card"><div class="value">{{ stats.accepted }}</div><div class="label">Accepted</div></div>
+  </div>
+}
+
+<section class="card section-card">
+  <div class="list-toolbar">
+    <label class="toolbar-field grow">
+      Search
+      <input type="search" [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Deal ID, customer, marketplace, stage…" />
+    </label>
+    <label class="toolbar-field">
+      Sort by created
+      <select [(ngModel)]="sortOrder" (ngModelChange)="onSortChange()">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+      </select>
+    </label>
+  </div>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Deal ID</th><th>Deal name</th><th>Customer</th><th>Created</th>
+        <th>Marketplace</th><th>Stage</th><th>Status</th><th>Value</th><th>Owner</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (d of pagedDeals; track d.id) {
+        <tr>
+          <td><strong>{{ d.id }}</strong></td>
+          <td>{{ d.name || '—' }}</td>
+          <td>{{ d.customer }}</td>
+          <td class="nowrap">{{ formatCreatedDate(d.createdAt) }}</td>
+          <td>{{ d.marketplace }}</td>
+          <td><span class="badge badge-purple">{{ d.stage }}</span></td>
+          <td>
+            <span class="badge"
+              [class.badge-blue]="d.marketplaceStatus==='In Review'"
+              [class.badge-orange]="d.marketplaceStatus==='Waiting for Info'"
+              [class.badge-gray]="d.marketplaceStatus==='Draft'">
+              {{ d.marketplaceStatus }}
+            </span>
+          </td>
+          <td>${{ d.expectedValue | number }}</td>
+          <td>{{ d.owner }}</td>
+          <td class="actions-col">
+            <a [routerLink]="['/deals', d.id]" class="btn btn-outline btn-sm">View</a>
+            <a [routerLink]="continuePath(d)" class="btn btn-outline btn-sm">Continue</a>
+          </td>
+        </tr>
+      } @empty {
+        <tr><td colspan="10" class="empty-row">No deals match your search.</td></tr>
+      }
+    </tbody>
+  </table>
+
+  @if (filteredDeals.length > pageSize) {
+    <div class="pagination">
+      <button type="button" class="btn btn-outline btn-sm" [disabled]="page <= 1" (click)="prevPage()">← Prev</button>
+      <span>Page {{ page }} of {{ totalPages }} ({{ filteredDeals.length }} deals)</span>
+      <button type="button" class="btn btn-outline btn-sm" [disabled]="page >= totalPages" (click)="nextPage()">Next →</button>
+    </div>
+  }
+</section>

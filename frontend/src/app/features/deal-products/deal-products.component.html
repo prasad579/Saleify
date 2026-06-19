@@ -1,0 +1,33 @@
+<h1 class="page-title">Select Products</h1>
+<p class="page-subtitle">Deal {{ dealId }} — choose products for this deal.</p>
+
+<div class="page-nav">
+  <a [routerLink]="['/deals', dealId, 'edit']" class="back-link">← Back to Deal Details</a>
+</div>
+
+@if (error) { <div class="alert error">{{ error }}</div> }
+@if (loading) { <p>Loading deal…</p> } @else {
+<app-deal-stepper [activeStep]="2" />
+
+<div class="product-grid">
+  @for (p of products; track p.id) {
+    <article class="card product-card">
+      <h3>{{ p.name }}</h3>
+      <p>{{ p.description }}</p>
+      <p><strong>${{ p.listPricePerYear | number }}/year</strong></p>
+      <p>Marketplaces: {{ p.marketplaces?.join(', ') }}</p>
+      <button class="btn" [class.btn-primary]="selected.includes(p.id)" [class.btn-outline]="!selected.includes(p.id)" (click)="toggle(p.id)">
+        {{ selected.includes(p.id) ? 'Selected' : 'Add to Deal' }}
+      </button>
+    </article>
+  }
+</div>
+
+<app-deal-flow-footer
+  [backLink]="'/deals/' + dealId + '/edit'"
+  backLabel="← Previous"
+  continueLabel="Continue to Pricing →"
+  [saving]="saving"
+  [continueDisabled]="!selected.length"
+  (proceed)="continue()" />
+}

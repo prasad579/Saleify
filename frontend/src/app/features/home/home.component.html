@@ -1,0 +1,123 @@
+<div class="home-header">
+  <div>
+    <h1 class="page-title">Welcome back, {{ auth.user()?.name || 'there' }}! 👋</h1>
+    <p class="page-subtitle">Here's what's happening with your deals today.</p>
+  </div>
+  <a routerLink="/deals/new" class="btn btn-primary">+ Create New Deal</a>
+</div>
+
+@if (data) {
+  <div class="stat-grid">
+    <div class="stat-card"><div class="value">{{ data.openDeals }}</div><div class="label">My Open Deals</div></div>
+    <div class="stat-card"><div class="value">{{ data.pendingApprovals }}</div><div class="label">Approval Pending</div></div>
+    <div class="stat-card"><div class="value">{{ data.offersSubmitted }}</div><div class="label">Offers Submitted</div></div>
+    <div class="stat-card"><div class="value">{{ data.pipelineValue }}</div><div class="label">Pipeline Value</div></div>
+  </div>
+
+  <div class="grid-2">
+    <section class="card section-card">
+      <div class="section-toolbar">
+        <h3>My Open Deals</h3>
+        <label class="sort-control">
+          Sort by created
+          <select [(ngModel)]="dealsSort" (ngModelChange)="onDealsSortChange()">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+        </label>
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Deal</th><th>Customer</th><th>Created</th><th>Stage</th><th>Value</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of pagedDeals; track d.id) {
+            <tr>
+              <td><strong>{{ d.name }}</strong><br><small>{{ d.id }}</small></td>
+              <td>{{ d.customer }}</td>
+              <td>{{ formatCreatedDate(d.createdAt) }}</td>
+              <td><span class="badge badge-purple">{{ d.stage }}</span></td>
+              <td>{{ d.value }}</td>
+              <td><a [routerLink]="['/deals', d.id]" class="btn btn-outline">View</a>
+                <a [routerLink]="continuePath(d)" class="btn btn-outline" style="margin-left:6px">Continue</a></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="empty-row">No open deals yet.</td></tr>
+          }
+        </tbody>
+      </table>
+      @if (sortedDeals.length > pageSize) {
+        <div class="pagination">
+          <button type="button" class="btn btn-outline btn-sm" [disabled]="dealsPage <= 1" (click)="prevDealsPage()">← Prev</button>
+          <span>Page {{ dealsPage }} of {{ dealsTotalPages }} ({{ sortedDeals.length }} deals)</span>
+          <button type="button" class="btn btn-outline btn-sm" [disabled]="dealsPage >= dealsTotalPages" (click)="nextDealsPage()">Next →</button>
+        </div>
+      }
+    </section>
+
+    <section class="card ai-card">
+      <h3>✨ AI Assistant</h3>
+      <p>Here are a few things you should focus on today:</p>
+      <ul>
+        @for (r of data.aiRecommendations; track r) { <li>{{ r }}</li> }
+      </ul>
+      <div class="chat">
+        <input [(ngModel)]="chatMessage" placeholder="Ask Copilot anything..." />
+        <button class="btn btn-primary" (click)="askCopilot()">Ask</button>
+      </div>
+      @if (chatReply) { <p class="reply">{{ chatReply }}</p> }
+    </section>
+  </div>
+
+  <div class="grid-2">
+    <section class="card section-card">
+      <h3>My Tasks</h3>
+      <table class="data-table">
+        <thead><tr><th>Task</th><th>Deal</th><th>Due</th><th>Status</th></tr></thead>
+        <tbody>
+          @for (t of pagedTasks; track t.id) {
+            <tr>
+              <td>{{ t.task }}</td><td>{{ t.deal }}</td><td>{{ t.dueDate }}</td>
+              <td><span class="badge" [class.badge-blue]="t.status==='In Progress'" [class.badge-orange]="t.status==='Pending'">{{ t.status }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="empty-row">No tasks right now.</td></tr>
+          }
+        </tbody>
+      </table>
+      @if ((data.tasks?.length || 0) > pageSize) {
+        <div class="pagination">
+          <button type="button" class="btn btn-outline btn-sm" [disabled]="tasksPage <= 1" (click)="prevTasksPage()">← Prev</button>
+          <span>Page {{ tasksPage }} of {{ tasksTotalPages }}</span>
+          <button type="button" class="btn btn-outline btn-sm" [disabled]="tasksPage >= tasksTotalPages" (click)="nextTasksPage()">Next →</button>
+        </div>
+      }
+    </section>
+
+    <section class="card section-card">
+      <h3>Today's Reminders</h3>
+      <table class="data-table">
+        <thead><tr><th>Reminder</th><th>Deal</th><th>When</th><th>Type</th></tr></thead>
+        <tbody>
+          @for (r of pagedReminders; track r.id) {
+            <tr>
+              <td>{{ r.reminder }}</td><td>{{ r.deal }}</td><td>{{ r.dateTime }}</td>
+              <td><span class="badge badge-purple">{{ r.type }}</span></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="empty-row">No reminders today.</td></tr>
+          }
+        </tbody>
+      </table>
+      @if ((data.reminders?.length || 0) > pageSize) {
+        <div class="pagination">
+          <button type="button" class="btn btn-outline btn-sm" [disabled]="remindersPage <= 1" (click)="prevRemindersPage()">← Prev</button>
+          <span>Page {{ remindersPage }} of {{ remindersTotalPages }}</span>
+          <button type="button" class="btn btn-outline btn-sm" [disabled]="remindersPage >= remindersTotalPages" (click)="nextRemindersPage()">Next →</button>
+        </div>
+      }
+    </section>
+  </div>
+}
