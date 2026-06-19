@@ -5772,7 +5772,159 @@
     },
     "meetingNotes": null,
     "changeHistory": [],
-    "approvals": null
+    "approvals": {
+      "version": "V1.0",
+      "lastUpdatedAt": "2026-06-19 20:01:21 UTC",
+      "lastUpdatedBy": "Srinivas K",
+      "pricingFingerprint": "15|0|Discount Based|years|3|36|False|1|False|prod-1",
+      "changesPendingReapproval": false,
+      "changeSummary": null,
+      "documentsLocked": false,
+      "allowPostApprovalEdits": true,
+      "eulaStatus": "Draft",
+      "packageSummaryId": "doc-package",
+      "ruleMatches": [
+        {
+          "id": "finance",
+          "title": "Finance Review",
+          "reason": "Discount within policy (15%).",
+          "matched": false
+        },
+        {
+          "id": "legal",
+          "title": "Legal Review",
+          "reason": "Contract duration \u003E 24 months (36 months).",
+          "matched": true
+        },
+        {
+          "id": "marketplace",
+          "title": "Marketplace Review",
+          "reason": "Marketplace: Azure.",
+          "matched": true
+        }
+      ],
+      "steps": [
+        {
+          "id": "legal",
+          "order": 1,
+          "title": "Legal Review",
+          "assignee": "Michael Chen",
+          "status": "Pending",
+          "ruleReason": "Contract duration \u003E 24 months (36 months).",
+          "completedAt": null,
+          "comment": null,
+          "comments": []
+        },
+        {
+          "id": "marketplace",
+          "order": 2,
+          "title": "Marketplace Review",
+          "assignee": "Priya Nair",
+          "status": "Pending",
+          "ruleReason": "Marketplace: Azure.",
+          "completedAt": null,
+          "comment": null,
+          "comments": []
+        },
+        {
+          "id": "eula",
+          "order": 3,
+          "title": "Generate EULA \u0026 Final Package",
+          "assignee": "System",
+          "status": "Pending",
+          "ruleReason": "Auto-triggered after all approvals complete.",
+          "completedAt": null,
+          "comment": null,
+          "comments": []
+        }
+      ],
+      "documents": [
+        {
+          "id": "doc-package",
+          "name": "Approval Package Summary",
+          "documentType": "package",
+          "version": "V1.0",
+          "generatedAt": "2026-06-19 20:01:21 UTC",
+          "fileName": "DL-1001-approval-package-V1.0.html",
+          "stale": false,
+          "locked": false,
+          "fillPercent": 100,
+          "htmlContent": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022utf-8\u0022/\u003E\n  \u003Ctitle\u003EApproval Package Summary \u2014 DL-1001\u003C/title\u003E\n  \u003Cstyle\u003E\nbody { font-family: Inter, Segoe UI, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }\n.page { max-width: 820px; margin: 24px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }\n.brand { background: linear-gradient(135deg, #1e1b4b, #4f46e5); color: #fff; padding: 24px 32px; }\n.brand-logo { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }\n.brand-logo span { opacity: 0.9; }\n.brand-tag { font-size: 13px; opacity: 0.85; margin-top: 4px; }\n.content { padding: 28px 32px 36px; }\nh2 { margin: 0 0 16px; font-size: 22px; }\nh3 { margin: 24px 0 8px; font-size: 16px; color: #3730a3; }\ntable.data { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }\ntable.data th, table.data td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; }\ntable.data th { background: #f1f5f9; font-weight: 600; }\n.footer { padding: 16px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }\n.muted { color: #64748b; font-size: 13px; }\n.fill-badge { display: inline-block; background: #ede9fe; color: #5b21b6; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }\n.partial-notice { background: #fffbeb; border: 1px solid #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }\n.placeholder-block { background: #f1f5f9; padding: 16px; border-radius: 8px; color: #64748b; font-style: italic; }\n.signature-block { margin-top: 32px; padding-top: 16px; border-top: 1px dashed #cbd5e1; }\n  \u003C/style\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Cdiv class=\u0022page\u0022\u003E\n    \u003Cdiv class=\u0022brand\u0022\u003E\n      \u003Cdiv class=\u0022brand-logo\u0022\u003E\uD83E\uDD16 \u003Cspan\u003ESaaSify\u003C/span\u003E\u003C/div\u003E\n      \u003Cdiv class=\u0022brand-tag\u0022\u003EMarketplace Copilot \u00B7 AI-Powered Deal Desk\u003C/div\u003E\n    \u003C/div\u003E\n    \u003Cdiv class=\u0022content\u0022\u003E\u003Ch2\u003EApproval package overview\u003C/h2\u003E\u003Cp\u003EDeal \u003Cstrong\u003EDL-1001\u003C/strong\u003E \u2014 Infosys Ltd.\u003C/p\u003E\u003Ctable class=\u0022data\u0022\u003E\u003Ctr\u003E\u003Cth\u003EDeal name\u003C/th\u003E\u003Ctd\u003EInfosys Enterprise Deal\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EMarketplace\u003C/th\u003E\u003Ctd\u003EAzure\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EPackage version\u003C/th\u003E\u003Ctd\u003EV1.0\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EGenerated\u003C/th\u003E\u003Ctd\u003E2026-06-19 20:01:21 UTC\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EStatus\u003C/th\u003E\u003Ctd\u003EDraft \u2014 pending approvals\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003ENet contract value\u003C/th\u003E\u003Ctd\u003E$3,21,300.00\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EDiscount\u003C/th\u003E\u003Ctd\u003E15%\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EDuration\u003C/th\u003E\u003Ctd\u003E3 years\u003C/td\u003E\u003C/tr\u003E\u003C/table\u003E\u003Ch3\u003EIncluded documents\u003C/h3\u003E\u003Cul\u003E\u003Cli\u003EPricing Summary\u003C/li\u003E\u003Cli\u003EFinancial Analysis\u003C/li\u003E\u003Cli\u003ELegal Summary\u003C/li\u003E\u003Cli\u003EMarketplace Guidelines\u003C/li\u003E\u003Cli\u003EEnd User License Agreement (EULA)\u003C/li\u003E\u003C/ul\u003E\u003C/div\u003E\n    \u003Cdiv class=\u0022footer\u0022\u003E\n      Deal DL-1001 \u00B7 Infosys Ltd. \u00B7 Version V1.0 \u00B7 Generated by Marketplace Copilot\n    \u003C/div\u003E\n  \u003C/div\u003E\n\u003C/body\u003E\n\u003C/html\u003E"
+        },
+        {
+          "id": "doc-1",
+          "name": "Pricing Summary",
+          "documentType": "pricing",
+          "version": "V1.0",
+          "generatedAt": "2026-06-19 20:01:21 UTC",
+          "fileName": "DL-1001-pricing-summary-V1.0.html",
+          "stale": false,
+          "locked": false,
+          "fillPercent": 100,
+          "htmlContent": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022utf-8\u0022/\u003E\n  \u003Ctitle\u003EPricing Summary \u2014 DL-1001\u003C/title\u003E\n  \u003Cstyle\u003E\nbody { font-family: Inter, Segoe UI, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }\n.page { max-width: 820px; margin: 24px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }\n.brand { background: linear-gradient(135deg, #1e1b4b, #4f46e5); color: #fff; padding: 24px 32px; }\n.brand-logo { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }\n.brand-logo span { opacity: 0.9; }\n.brand-tag { font-size: 13px; opacity: 0.85; margin-top: 4px; }\n.content { padding: 28px 32px 36px; }\nh2 { margin: 0 0 16px; font-size: 22px; }\nh3 { margin: 24px 0 8px; font-size: 16px; color: #3730a3; }\ntable.data { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }\ntable.data th, table.data td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; }\ntable.data th { background: #f1f5f9; font-weight: 600; }\n.footer { padding: 16px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }\n.muted { color: #64748b; font-size: 13px; }\n.fill-badge { display: inline-block; background: #ede9fe; color: #5b21b6; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }\n.partial-notice { background: #fffbeb; border: 1px solid #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }\n.placeholder-block { background: #f1f5f9; padding: 16px; border-radius: 8px; color: #64748b; font-style: italic; }\n.signature-block { margin-top: 32px; padding-top: 16px; border-top: 1px dashed #cbd5e1; }\n  \u003C/style\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Cdiv class=\u0022page\u0022\u003E\n    \u003Cdiv class=\u0022brand\u0022\u003E\n      \u003Cdiv class=\u0022brand-logo\u0022\u003E\uD83E\uDD16 \u003Cspan\u003ESaaSify\u003C/span\u003E\u003C/div\u003E\n      \u003Cdiv class=\u0022brand-tag\u0022\u003EMarketplace Copilot \u00B7 AI-Powered Deal Desk\u003C/div\u003E\n    \u003C/div\u003E\n    \u003Cdiv class=\u0022content\u0022\u003E\u003Ch2\u003EPricing summary\u003C/h2\u003E\u003Ctable class=\u0022data\u0022\u003E\u003Ctr\u003E\u003Cth\u003EOffer type\u003C/th\u003E\u003Ctd\u003EDirect Private Offer\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EContract start\u003C/th\u003E\u003Ctd\u003EJul 01, 2026\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EContract end\u003C/th\u003E\u003Ctd\u003EJun 30, 2029\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EPublic price / year\u003C/th\u003E\u003Ctd\u003E$1,20,000.00\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EDiscount\u003C/th\u003E\u003Ctd\u003E15%\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EPublic contract value\u003C/th\u003E\u003Ctd\u003E$3,60,000.00\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003ENet contract value\u003C/th\u003E\u003Ctd\u003E$3,21,300.00\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003ETotal payable\u003C/th\u003E\u003Ctd\u003E$3,21,300.00\u003C/td\u003E\u003C/tr\u003E\u003C/table\u003E\u003C/div\u003E\n    \u003Cdiv class=\u0022footer\u0022\u003E\n      Deal DL-1001 \u00B7 Infosys Ltd. \u00B7 Version V1.0 \u00B7 Generated by Marketplace Copilot\n    \u003C/div\u003E\n  \u003C/div\u003E\n\u003C/body\u003E\n\u003C/html\u003E"
+        },
+        {
+          "id": "doc-2",
+          "name": "Financial Analysis",
+          "documentType": "financial",
+          "version": "V1.0",
+          "generatedAt": "2026-06-19 20:01:21 UTC",
+          "fileName": "DL-1001-financial-analysis-V1.0.html",
+          "stale": false,
+          "locked": false,
+          "fillPercent": 100,
+          "htmlContent": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022utf-8\u0022/\u003E\n  \u003Ctitle\u003EFinancial Analysis \u2014 DL-1001\u003C/title\u003E\n  \u003Cstyle\u003E\nbody { font-family: Inter, Segoe UI, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }\n.page { max-width: 820px; margin: 24px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }\n.brand { background: linear-gradient(135deg, #1e1b4b, #4f46e5); color: #fff; padding: 24px 32px; }\n.brand-logo { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }\n.brand-logo span { opacity: 0.9; }\n.brand-tag { font-size: 13px; opacity: 0.85; margin-top: 4px; }\n.content { padding: 28px 32px 36px; }\nh2 { margin: 0 0 16px; font-size: 22px; }\nh3 { margin: 24px 0 8px; font-size: 16px; color: #3730a3; }\ntable.data { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }\ntable.data th, table.data td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; }\ntable.data th { background: #f1f5f9; font-weight: 600; }\n.footer { padding: 16px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }\n.muted { color: #64748b; font-size: 13px; }\n.fill-badge { display: inline-block; background: #ede9fe; color: #5b21b6; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }\n.partial-notice { background: #fffbeb; border: 1px solid #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }\n.placeholder-block { background: #f1f5f9; padding: 16px; border-radius: 8px; color: #64748b; font-style: italic; }\n.signature-block { margin-top: 32px; padding-top: 16px; border-top: 1px dashed #cbd5e1; }\n  \u003C/style\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Cdiv class=\u0022page\u0022\u003E\n    \u003Cdiv class=\u0022brand\u0022\u003E\n      \u003Cdiv class=\u0022brand-logo\u0022\u003E\uD83E\uDD16 \u003Cspan\u003ESaaSify\u003C/span\u003E\u003C/div\u003E\n      \u003Cdiv class=\u0022brand-tag\u0022\u003EMarketplace Copilot \u00B7 AI-Powered Deal Desk\u003C/div\u003E\n    \u003C/div\u003E\n    \u003Cdiv class=\u0022content\u0022\u003E\u003Ch2\u003EFinancial analysis\u003C/h2\u003E\u003Ctable class=\u0022data\u0022\u003E\u003Ctr\u003E\u003Cth\u003EExpected deal value\u003C/th\u003E\u003Ctd\u003E$3,21,300.00\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003ETotal discount\u003C/th\u003E\u003Ctd\u003E$54,000.00\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EMarketplace fee\u003C/th\u003E\u003Ctd\u003E$15,300.00 (5%)\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003ENet before fees\u003C/th\u003E\u003Ctd\u003E$3,06,000.00\u003C/td\u003E\u003C/tr\u003E\u003C/table\u003E\u003C/div\u003E\n    \u003Cdiv class=\u0022footer\u0022\u003E\n      Deal DL-1001 \u00B7 Infosys Ltd. \u00B7 Version V1.0 \u00B7 Generated by Marketplace Copilot\n    \u003C/div\u003E\n  \u003C/div\u003E\n\u003C/body\u003E\n\u003C/html\u003E"
+        },
+        {
+          "id": "doc-3",
+          "name": "Legal Summary",
+          "documentType": "legal",
+          "version": "V1.0",
+          "generatedAt": "2026-06-19 20:01:21 UTC",
+          "fileName": "DL-1001-legal-summary-V1.0.html",
+          "stale": false,
+          "locked": false,
+          "fillPercent": 100,
+          "htmlContent": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022utf-8\u0022/\u003E\n  \u003Ctitle\u003ELegal Summary \u2014 DL-1001\u003C/title\u003E\n  \u003Cstyle\u003E\nbody { font-family: Inter, Segoe UI, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }\n.page { max-width: 820px; margin: 24px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }\n.brand { background: linear-gradient(135deg, #1e1b4b, #4f46e5); color: #fff; padding: 24px 32px; }\n.brand-logo { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }\n.brand-logo span { opacity: 0.9; }\n.brand-tag { font-size: 13px; opacity: 0.85; margin-top: 4px; }\n.content { padding: 28px 32px 36px; }\nh2 { margin: 0 0 16px; font-size: 22px; }\nh3 { margin: 24px 0 8px; font-size: 16px; color: #3730a3; }\ntable.data { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }\ntable.data th, table.data td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; }\ntable.data th { background: #f1f5f9; font-weight: 600; }\n.footer { padding: 16px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }\n.muted { color: #64748b; font-size: 13px; }\n.fill-badge { display: inline-block; background: #ede9fe; color: #5b21b6; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }\n.partial-notice { background: #fffbeb; border: 1px solid #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }\n.placeholder-block { background: #f1f5f9; padding: 16px; border-radius: 8px; color: #64748b; font-style: italic; }\n.signature-block { margin-top: 32px; padding-top: 16px; border-top: 1px dashed #cbd5e1; }\n  \u003C/style\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Cdiv class=\u0022page\u0022\u003E\n    \u003Cdiv class=\u0022brand\u0022\u003E\n      \u003Cdiv class=\u0022brand-logo\u0022\u003E\uD83E\uDD16 \u003Cspan\u003ESaaSify\u003C/span\u003E\u003C/div\u003E\n      \u003Cdiv class=\u0022brand-tag\u0022\u003EMarketplace Copilot \u00B7 AI-Powered Deal Desk\u003C/div\u003E\n    \u003C/div\u003E\n    \u003Cdiv class=\u0022content\u0022\u003E\u003Ch2\u003ELegal summary\u003C/h2\u003E\u003Ctable class=\u0022data\u0022\u003E\u003Ctr\u003E\u003Cth\u003ECustomer\u003C/th\u003E\u003Ctd\u003EInfosys Ltd.\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EContact\u003C/th\u003E\u003Ctd\u003ERajesh Kumar (rajesh@infosys.com)\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EContract duration\u003C/th\u003E\u003Ctd\u003E36 months\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EDeal type\u003C/th\u003E\u003Ctd\u003ENew Deal\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003ELegal review required\u003C/th\u003E\u003Ctd\u003EYes \u2014 term exceeds 24 months\u003C/td\u003E\u003C/tr\u003E\u003C/table\u003E\u003Cp class=\u0022muted\u0022\u003EThis summary is generated from deal configuration and meeting notes. Final legal terms subject to counsel review.\u003C/p\u003E\u003C/div\u003E\n    \u003Cdiv class=\u0022footer\u0022\u003E\n      Deal DL-1001 \u00B7 Infosys Ltd. \u00B7 Version V1.0 \u00B7 Generated by Marketplace Copilot\n    \u003C/div\u003E\n  \u003C/div\u003E\n\u003C/body\u003E\n\u003C/html\u003E"
+        },
+        {
+          "id": "doc-4",
+          "name": "Marketplace Guidelines",
+          "documentType": "marketplace",
+          "version": "V1.0",
+          "generatedAt": "2026-06-19 20:01:21 UTC",
+          "fileName": "DL-1001-marketplace-guidelines-V1.0.html",
+          "stale": false,
+          "locked": false,
+          "fillPercent": 100,
+          "htmlContent": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022utf-8\u0022/\u003E\n  \u003Ctitle\u003EMarketplace Guidelines \u2014 DL-1001\u003C/title\u003E\n  \u003Cstyle\u003E\nbody { font-family: Inter, Segoe UI, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }\n.page { max-width: 820px; margin: 24px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }\n.brand { background: linear-gradient(135deg, #1e1b4b, #4f46e5); color: #fff; padding: 24px 32px; }\n.brand-logo { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }\n.brand-logo span { opacity: 0.9; }\n.brand-tag { font-size: 13px; opacity: 0.85; margin-top: 4px; }\n.content { padding: 28px 32px 36px; }\nh2 { margin: 0 0 16px; font-size: 22px; }\nh3 { margin: 24px 0 8px; font-size: 16px; color: #3730a3; }\ntable.data { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }\ntable.data th, table.data td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; }\ntable.data th { background: #f1f5f9; font-weight: 600; }\n.footer { padding: 16px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }\n.muted { color: #64748b; font-size: 13px; }\n.fill-badge { display: inline-block; background: #ede9fe; color: #5b21b6; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }\n.partial-notice { background: #fffbeb; border: 1px solid #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }\n.placeholder-block { background: #f1f5f9; padding: 16px; border-radius: 8px; color: #64748b; font-style: italic; }\n.signature-block { margin-top: 32px; padding-top: 16px; border-top: 1px dashed #cbd5e1; }\n  \u003C/style\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Cdiv class=\u0022page\u0022\u003E\n    \u003Cdiv class=\u0022brand\u0022\u003E\n      \u003Cdiv class=\u0022brand-logo\u0022\u003E\uD83E\uDD16 \u003Cspan\u003ESaaSify\u003C/span\u003E\u003C/div\u003E\n      \u003Cdiv class=\u0022brand-tag\u0022\u003EMarketplace Copilot \u00B7 AI-Powered Deal Desk\u003C/div\u003E\n    \u003C/div\u003E\n    \u003Cdiv class=\u0022content\u0022\u003E\u003Ch2\u003EMarketplace guidelines\u003C/h2\u003E\u003Ctable class=\u0022data\u0022\u003E\u003Ctr\u003E\u003Cth\u003EMarketplace\u003C/th\u003E\u003Ctd\u003EAzure\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EMarketplace status\u003C/th\u003E\u003Ctd\u003EIn Review\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Cth\u003EOffer type\u003C/th\u003E\u003Ctd\u003EDirect Private Offer\u003C/td\u003E\u003C/tr\u003E\u003C/table\u003E\u003Cp\u003EPrivate offer submission must comply with Azure marketplace listing and pricing policies.\u003C/p\u003E\u003C/div\u003E\n    \u003Cdiv class=\u0022footer\u0022\u003E\n      Deal DL-1001 \u00B7 Infosys Ltd. \u00B7 Version V1.0 \u00B7 Generated by Marketplace Copilot\n    \u003C/div\u003E\n  \u003C/div\u003E\n\u003C/body\u003E\n\u003C/html\u003E"
+        },
+        {
+          "id": "doc-eula",
+          "name": "End User License Agreement (EULA)",
+          "documentType": "eula",
+          "version": "V1.0",
+          "generatedAt": "2026-06-19 20:01:21 UTC",
+          "fileName": "DL-1001-eula-V1.0.html",
+          "stale": false,
+          "locked": false,
+          "fillPercent": 25,
+          "htmlContent": "\u003C!DOCTYPE html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n\u003Chead\u003E\n  \u003Cmeta charset=\u0022utf-8\u0022/\u003E\n  \u003Ctitle\u003EEULA \u2014 DL-1001\u003C/title\u003E\n  \u003Cstyle\u003E\nbody { font-family: Inter, Segoe UI, sans-serif; margin: 0; background: #f8fafc; color: #0f172a; }\n.page { max-width: 820px; margin: 24px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }\n.brand { background: linear-gradient(135deg, #1e1b4b, #4f46e5); color: #fff; padding: 24px 32px; }\n.brand-logo { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }\n.brand-logo span { opacity: 0.9; }\n.brand-tag { font-size: 13px; opacity: 0.85; margin-top: 4px; }\n.content { padding: 28px 32px 36px; }\nh2 { margin: 0 0 16px; font-size: 22px; }\nh3 { margin: 24px 0 8px; font-size: 16px; color: #3730a3; }\ntable.data { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }\ntable.data th, table.data td { border: 1px solid #e2e8f0; padding: 10px 12px; text-align: left; }\ntable.data th { background: #f1f5f9; font-weight: 600; }\n.footer { padding: 16px 32px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }\n.muted { color: #64748b; font-size: 13px; }\n.fill-badge { display: inline-block; background: #ede9fe; color: #5b21b6; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }\n.partial-notice { background: #fffbeb; border: 1px solid #fcd34d; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }\n.placeholder-block { background: #f1f5f9; padding: 16px; border-radius: 8px; color: #64748b; font-style: italic; }\n.signature-block { margin-top: 32px; padding-top: 16px; border-top: 1px dashed #cbd5e1; }\n  \u003C/style\u003E\n\u003C/head\u003E\n\u003Cbody\u003E\n  \u003Cdiv class=\u0022page\u0022\u003E\n    \u003Cdiv class=\u0022brand\u0022\u003E\n      \u003Cdiv class=\u0022brand-logo\u0022\u003E\uD83E\uDD16 \u003Cspan\u003ESaaSify\u003C/span\u003E\u003C/div\u003E\n      \u003Cdiv class=\u0022brand-tag\u0022\u003EMarketplace Copilot \u00B7 AI-Powered Deal Desk\u003C/div\u003E\n    \u003C/div\u003E\n    \u003Cdiv class=\u0022content\u0022\u003E\u003Cdiv class=\u0022fill-badge\u0022\u003EDraft \u2014 25% complete\u003C/div\u003E\u003Ch2\u003EEnd User License Agreement\u003C/h2\u003E\u003Cp\u003E\u003Cstrong\u003EBetween:\u003C/strong\u003E SaaSify, Inc. (\u201CLicensor\u201D)\u003Cbr/\u003E\u003Cstrong\u003EAnd:\u003C/strong\u003E Infosys Ltd. (\u201CLicensee\u201D)\u003C/p\u003E\u003Cdiv class=\u0022partial-notice\u0022\u003EPartial draft \u2014 remaining sections unlock after all required approvals are complete.\u003C/div\u003E\u003Ch3\u003E1. Grant of license\u003C/h3\u003E\u003Cp\u003ESubject to payment of fees, Licensor grants Licensee a non-exclusive subscription to SaaSify platform services for the contract term.\u003C/p\u003E\u003Cp class=\u0022placeholder-block\u0022\u003E[ Sections 3\u20136 pending final approval ]\u003C/p\u003E\u003C/div\u003E\n    \u003Cdiv class=\u0022footer\u0022\u003E\n      Deal DL-1001 \u00B7 Infosys Ltd. \u00B7 Version V1.0 \u00B7 Generated by Marketplace Copilot\n    \u003C/div\u003E\n  \u003C/div\u003E\n\u003C/body\u003E\n\u003C/html\u003E"
+        }
+      ],
+      "auditLog": [
+        {
+          "id": "fe0760e4",
+          "timestamp": "2026-06-19 20:01:21 UTC",
+          "category": "Approval",
+          "user": "Srinivas K",
+          "action": "Approval plan initialized",
+          "details": "Required approval steps generated from deal rules.",
+          "stepTitle": "",
+          "documentName": ""
+        }
+      ]
+    }
   },
   {
     "id": "DL-1002",

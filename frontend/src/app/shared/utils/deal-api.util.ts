@@ -46,7 +46,7 @@ export function dealContinuePath(deal: { id: string; stepNumber?: number; contin
 
 export function apiErrorMessage(err: any, fallback: string): string {
   if (err?.status === 0) {
-    return 'Cannot reach the API. Start the backend: cd backend && dotnet run (or run .\\start-demo.ps1), then click Retry.';
+    return 'Cannot reach the API. Start the backend: cd MarketplaceCopilot.Api && dotnet run (or run .\\start-demo.ps1), then click Retry.';
   }
   if (err?.status === 404) {
     return 'Approvals API not found — restart the backend to load the latest code, then click Retry.';

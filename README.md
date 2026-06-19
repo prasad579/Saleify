@@ -1,9 +1,11 @@
-# Marketplace Copilot
+# Saleify
 
 **AI-powered deal desk for cloud marketplace sellers.** Guide a deal from creation through product selection, pricing, meeting-note capture, and multi-step approvals — with rule-based AI assistance throughout. Built as a layered .NET 9 solution with an Angular frontend.
 
 > 🎯 Full demo walkthrough (feature tour, script for judges, troubleshooting): **[HACKATHON-DEMO.md](./HACKATHON-DEMO.md)**
 > 🔐 Google / Microsoft sign-in setup: **[AUTH_SETUP.md](./AUTH_SETUP.md)**
+
+![Saleify dashboard](docs/screenshots/02-dashboard.png)
 
 ---
 
@@ -33,6 +35,22 @@ The script launches the API (`:5280`) and the Angular dev server (`:4200`) in se
 | **Change history** | Every deal mutation logged with category, summary, and timestamp |
 
 All AI is **rule-based and offline** — no external API key required for the demo.
+
+---
+
+## Screenshots
+
+| Sign in | Deals |
+|---------|-------|
+| ![Login](docs/screenshots/01-login.png) | ![Deals list](docs/screenshots/03-deals.png) |
+
+| Pricing calculator | Approvals |
+|--------------------|-----------|
+| ![Pricing](docs/screenshots/05-pricing.png) | ![Approvals](docs/screenshots/06-approvals.png) |
+
+| Deal overview | Meeting notes + AI |
+|---------------|--------------------|
+| ![Deal overview](docs/screenshots/04-deal-overview.png) | ![Meeting notes](docs/screenshots/07-meeting-notes.png) |
 
 ---
 
