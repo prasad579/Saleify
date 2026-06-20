@@ -56,12 +56,19 @@
 
     <div class="form-field">
       <label>Marketplace *</label>
-      <select [(ngModel)]="deal.marketplace">
-        <option value="">Select marketplace</option>
+      <div class="checkbox-group">
+        <label class="checkbox-option">
+          <input type="checkbox" [checked]="allMarketplacesSelected" (change)="toggleAllMarketplaces()" />
+          <span>All</span>
+        </label>
         @for (m of marketplaces; track m) {
-          <option [value]="m">{{ m }}</option>
+          <label class="checkbox-option">
+            <input type="checkbox" [checked]="isMarketplaceSelected(m)" (change)="toggleMarketplace(m)" />
+            <span>{{ m }}</span>
+          </label>
         }
-      </select>
+      </div>
+      <small>Select one or more marketplaces.</small>
     </div>
 
     <div class="form-field">

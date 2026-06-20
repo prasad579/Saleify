@@ -31,4 +31,4 @@ export const SAAS_INDUSTRIES = [
 
 export const DEAL_TYPES = ['New Deal', 'Renewal'];
 
-export const MARKETPLACES = ['Azure', 'AWS', 'GCP'];
+export const MARKETPLACES = ['AWS', 'Azure', 'GCP'];

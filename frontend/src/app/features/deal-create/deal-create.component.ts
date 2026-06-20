@@ -32,6 +32,8 @@ export class DealCreateComponent implements OnInit {
   error = '';
   success = '';
 
+  selectedMarketplaces: string[] = [];
+
   deal = {
     name: '',
     customer: '',
@@ -45,6 +47,25 @@ export class DealCreateComponent implements OnInit {
     expectedCloseDate: '',
     description: ''
   };
+
+  get allMarketplacesSelected(): boolean {
+    return this.marketplaces.length > 0 &&
+      this.marketplaces.every(m => this.selectedMarketplaces.includes(m));
+  }
+
+  isMarketplaceSelected(m: string): boolean {
+    return this.selectedMarketplaces.includes(m);
+  }
+
+  toggleMarketplace(m: string): void {
+    this.selectedMarketplaces = this.selectedMarketplaces.includes(m)
+      ? this.selectedMarketplaces.filter(x => x !== m)
+      : [...this.selectedMarketplaces, m];
+  }
+
+  toggleAllMarketplaces(): void {
+    this.selectedMarketplaces = this.allMarketplacesSelected ? [] : [...this.marketplaces];
+  }
 
   ngOnInit() {
     this.editId = this.route.snapshot.paramMap.get('id') || '';
@@ -84,6 +105,10 @@ export class DealCreateComponent implements OnInit {
           expectedCloseDate: d.expectedCloseDate?.slice(0, 10) || '',
           description: d.description || ''
         };
+        this.selectedMarketplaces = (d.marketplace || '')
+          .split(',')
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length > 0);
         this.loading = false;
       },
       error: (err) => {
@@ -97,7 +122,7 @@ export class DealCreateComponent implements OnInit {
     if (!this.deal.customer.trim()) return 'Customer / Company is required.';
     if (!this.deal.contactName.trim()) return 'Primary contact name is required.';
     if (!this.deal.contactEmail.trim()) return 'Contact email is required.';
-    if (!this.deal.marketplace) return 'Marketplace is required.';
+    if (this.selectedMarketplaces.length === 0) return 'At least one marketplace is required.';
     if (!this.deal.expectedCloseDate) return 'Expected close date is required.';
     return null;
   }
@@ -110,6 +135,11 @@ export class DealCreateComponent implements OnInit {
       this.error = validationError;
       return;
     }
+
+    // Persist the selected marketplaces as a canonical, comma-separated string.
+    this.deal.marketplace = this.marketplaces
+      .filter(m => this.selectedMarketplaces.includes(m))
+      .join(', ');
 
     this.saving = true;
     const payload = {

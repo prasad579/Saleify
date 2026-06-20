@@ -42,6 +42,6 @@ public class LookupsController : ControllerBase
             "InsurTech"
         ],
         DealTypes = ["New Deal", "Renewal"],
-        Marketplaces = ["Azure", "AWS", "GCP"]
+        Marketplaces = ["AWS", "Azure", "GCP"]
     });
 }
