@@ -42,6 +42,10 @@ public class LookupsController : ControllerBase
             "InsurTech"
         ],
         DealTypes = ["New Deal", "Renewal"],
-        Marketplaces = ["AWS", "Azure", "GCP"]
+        Marketplaces = ["AWS", "Azure", "GCP"],
+        EngagementTypes = ["Private Offer", "Free Trial", "Workshop", "Hackathon", "POC", "Summit/Event Lead", "Internal Sales Activity", "External Source Lead"],
+        DealOwners = ["Srinivas K", "Priya Sharma", "Arjun Mehta", "Neha Gupta"],
+        OfferTypes = ["Free Trial", "Direct Private Offer", "Reseller Private Offer", "Renewal"],
+        Priorities = ["High", "Medium", "Low"]
     });
 }

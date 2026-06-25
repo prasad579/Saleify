@@ -200,7 +200,7 @@
       @if (filteredReminders.length) {
         <div class="table-wrap">
           <table class="data-table action-table">
-            <thead><tr><th>Reminder</th><th>Discussion</th><th>Date</th><th>Type</th>@if (editable) { <th></th> }</tr></thead>
+            <thead><tr><th>Reminder</th><th>Discussion</th><th>Remind on</th><th>Status</th><th>Type</th>@if (editable) { <th></th> }</tr></thead>
             <tbody>
               @for (r of pagedReminders; track r.id) {
                 <tr>
@@ -223,12 +223,18 @@
                       {{ discussionLabel(r.sessionId) }}
                     }
                   </td>
-                  <td>
+                  <td class="remind-on-cell">
                     @if (editable) {
                       <input type="date" class="date-input" [(ngModel)]="r.dateTime" />
                     } @else {
-                      {{ r.dateTime || '—' }}
+                      <span>{{ formatReminderDate(r.dateTime) }}</span>
                     }
+                    @if (r.createdAt) { <small class="added-note">Added {{ formatReminderDate(r.createdAt) }}</small> }
+                  </td>
+                  <td>
+                    <span class="badge" [class]="reminderBadgeClass(reminderStatus(r.dateTime).tone)">
+                      {{ reminderStatus(r.dateTime).label }}
+                    </span>
                   </td>
                   <td>
                     @if (editable) {

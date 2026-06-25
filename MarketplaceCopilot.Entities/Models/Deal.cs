@@ -7,10 +7,19 @@ public class Deal
     public string Customer { get; set; } = "";
     public string ContactName { get; set; } = "";
     public string ContactEmail { get; set; } = "";
+    public string Phone { get; set; } = "";
+    public string Priority { get; set; } = "";
     public string Location { get; set; } = "";
     public string Industry { get; set; } = "";
     public string Marketplace { get; set; } = "";
     public string DealType { get; set; } = "New Deal";
+    public string EngagementType { get; set; } = "";
+    public bool QuickCapture { get; set; }
+    public string CampaignEventId { get; set; } = "";
+    public string CampaignEventName { get; set; } = "";
+    public string BillingAccountId { get; set; } = "";
+    /// <summary>Per-marketplace billing account IDs, keyed by marketplace (e.g. "AWS", "Azure", "GCP").</summary>
+    public Dictionary<string, string> BillingAccountIds { get; set; } = new();
     public decimal ExpectedValue { get; set; }
     public string ExpectedCloseDate { get; set; } = "";
     public string Description { get; set; } = "";
@@ -21,6 +30,9 @@ public class Deal
     public string Owner { get; set; } = "Srinivas K";
     public string LastUpdated { get; set; } = "";
     public string CreatedAt { get; set; } = "";
+    /// <summary>Soft-hidden from active views; restorable. Tasks/reminders are preserved while archived.</summary>
+    public bool Archived { get; set; }
+    public string ArchivedAt { get; set; } = "";
     public List<string> ProductIds { get; set; } = [];
     public PricingConfig? Pricing { get; set; }
     public MeetingNotesData? MeetingNotes { get; set; }
@@ -35,6 +47,7 @@ public class PricingConfig
     public string ContractEnd { get; set; } = "";
     public string DurationType { get; set; } = "years";
     public int DurationValue { get; set; } = 3;
+    public int TrialDays { get; set; } = 14;
     public int DurationDays { get; set; }
     public int DurationMonths { get; set; } = 36;
     public string PricingMethod { get; set; } = "Discount Based";
@@ -79,8 +92,11 @@ public class DealReminder
 {
     public string Id { get; set; } = "";
     public string Reminder { get; set; } = "";
+    /// <summary>The date to be reminded on (yyyy-MM-dd). Drives the due / overdue status.</summary>
     public string DateTime { get; set; } = "";
     public string Type { get; set; } = "Follow-up";
+    /// <summary>When the reminder was created (yyyy-MM-dd). Set on first save.</summary>
+    public string CreatedAt { get; set; } = "";
     /// <summary>Optional link to a meeting session.</summary>
     public string SessionId { get; set; } = "";
 }
@@ -145,6 +161,7 @@ public class ApprovalRuleMatch
 {
     public string Id { get; set; } = "";
     public string Title { get; set; } = "";
+    public string Assignee { get; set; } = "";
     public string Reason { get; set; } = "";
     public bool Matched { get; set; }
 }

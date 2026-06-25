@@ -1,10 +1,10 @@
 <h1 class="page-title">Approvals</h1>
-<p class="page-subtitle">Deal {{ dealId }} @if (deal) { — {{ deal.customer }} }</p>
+<p class="page-subtitle">Engagement {{ dealId }} @if (deal) { — {{ deal.customer }} }</p>
 
 <div class="page-nav">
   <a [routerLink]="['/deals', dealId, 'meeting-notes']" class="back-link">← Meeting Notes</a>
   <span class="nav-sep">·</span>
-  <a [routerLink]="['/deals', dealId]" class="back-link">Deal overview</a>
+  <a [routerLink]="['/deals', dealId]" class="back-link">Engagement overview</a>
 </div>
 
 @if (loading) {
@@ -18,10 +18,16 @@
     </div>
   </div>
 } @else if (approvals) {
-  <app-deal-stepper [activeStep]="5" />
+  <app-deal-stepper [engagementType]="engagementType" activeKey="approvals" />
 
   @if (error) { <div class="alert error">{{ error }}</div> }
   @if (success) { <div class="alert success">{{ success }}</div> }
+
+  @if (approvals.isNoMoneyDeal) {
+    <div class="alert trial-banner">
+      🎟️ <strong>Free trial — minimal approval.</strong> {{ approvals.consumptionNote }}
+    </div>
+  }
 
   @if (approvals.documentsLocked) {
     <div class="alert locked-banner">
@@ -34,7 +40,7 @@
 
   <div class="summary-grid">
     <div class="card summary-card">
-      <span class="label">Deal version</span>
+      <span class="label">Engagement version</span>
       <strong>{{ approvals.version }}</strong>
       @if (approvals.documentsLocked) {
         <span class="badge badge-green">Locked</span>
@@ -263,6 +269,9 @@
 
       <section class="card section-card final-output">
         <h3>Final output</h3>
+        @if (approvals.consumptionNote) {
+          <p class="consumption-note">⚠️ {{ approvals.consumptionNote }}</p>
+        }
         <p>EULA status: <strong>{{ approvals.eulaStatus }}</strong></p>
         <p>Approval package: <strong>{{ approvals.documentsLocked ? 'Locked & ready' : 'Pending approvals' }}</strong></p>
         @if (approvals.eulaDocument) {
@@ -274,7 +283,9 @@
 
       <section class="card section-card progress-card">
         <h3>Approval progress</h3>
-        <div class="progress-ring">{{ approvals.progress?.percent ?? 0 }}%</div>
+        <div class="progress-ring" [class.complete]="(approvals.progress?.percent ?? 0) >= 100" [style.--pct]="approvals.progress?.percent ?? 0">
+          <span>{{ approvals.progress?.percent ?? 0 }}%</span>
+        </div>
         <div class="progress-stats">
           <div><span>Total</span><strong>{{ approvals.progress?.total ?? 0 }}</strong></div>
           <div><span>Approved</span><strong>{{ approvals.progress?.approved ?? 0 }}</strong></div>
@@ -302,18 +313,18 @@
   </div>
 
   <app-deal-flow-footer
-    hint="Once all required approvals are complete, submit the deal for offer request."
+    hint="Once all required approvals are complete, submit the engagement for offer request."
     [backLink]="'/deals/' + dealId + '/meeting-notes'"
     backLabel="← Previous"
     [exitLink]="'/deals/' + dealId"
     exitLabel="Save & Exit"
-    continueLabel="Proceed to Offer Request →"
+    [continueLabel]="submitLabel + ' →'"
     [saving]="saving"
     [continueDisabled]="(approvals.progress?.percent ?? 0) < 100"
     (proceed)="submitDeal()" />
 } @else {
   <div class="card empty-state">
-    <p class="hint">Approval data is not available for this deal yet.</p>
+    <p class="hint">Approval data is not available for this engagement yet.</p>
     <button type="button" class="btn btn-primary" (click)="load()">Load approvals</button>
   </div>
 }

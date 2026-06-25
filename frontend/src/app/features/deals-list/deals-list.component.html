@@ -1,14 +1,25 @@
 <div class="header-row">
   <div>
-    <h1 class="page-title">Deals</h1>
-    <p class="page-subtitle">Manage all your deals and track progress across the lifecycle.</p>
+    <h1 class="page-title">Engagements</h1>
+    <p class="page-subtitle">Manage all your engagements and track progress across the lifecycle.</p>
   </div>
-  <a routerLink="/deals/new" class="btn btn-primary">+ New Deal</a>
+  <div class="header-actions">
+    @if (snapSettings.snapshotButtonEnabled()) {
+      <button type="button" class="btn btn-outline" (click)="generateSnapshot()">📋 Generate Snapshot</button>
+    }
+    @if (snapSettings.emailButtonEnabled()) {
+      <button type="button" class="btn btn-outline" (click)="generateSnapshot(true)">✉️ Email Summary</button>
+    }
+    <button type="button" class="btn btn-outline" (click)="exportCsv()">⬇ Export</button>
+    <a routerLink="/deals/new" class="btn btn-primary">+ New Engagement</a>
+  </div>
 </div>
+
+@if (toast) { <div class="alert success list-toast">{{ toast }}</div> }
 
 @if (stats) {
   <div class="stat-grid">
-    <div class="stat-card"><div class="value">{{ stats.total }}</div><div class="label">Total Deals</div></div>
+    <div class="stat-card"><div class="value">{{ stats.total }}</div><div class="label">Total Engagements</div></div>
     <div class="stat-card"><div class="value">{{ stats.draft }}</div><div class="label">Draft</div></div>
     <div class="stat-card"><div class="value">{{ stats.inProgress }}</div><div class="label">In Progress</div></div>
     <div class="stat-card"><div class="value">{{ stats.submitted }}</div><div class="label">Submitted</div></div>
@@ -20,59 +31,186 @@
   <div class="list-toolbar">
     <label class="toolbar-field grow">
       Search
-      <input type="search" [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Deal ID, customer, marketplace, stage…" />
+      <input type="search" [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Engagement ID, customer, marketplace, stage, tag…" />
     </label>
-    <label class="toolbar-field">
-      Sort by created
-      <select [(ngModel)]="sortOrder" (ngModelChange)="onSortChange()">
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
-      </select>
-    </label>
+    <div class="seg view-seg" role="tablist">
+      <button type="button" class="seg-opt" [class.active]="view === 'active'" (click)="setView('active')">Active</button>
+      <button type="button" class="seg-opt" [class.active]="view === 'archived'" (click)="setView('archived')">📦 Archived</button>
+    </div>
   </div>
 
-  <table class="data-table">
-    <thead>
-      <tr>
-        <th>Deal ID</th><th>Deal name</th><th>Customer</th><th>Created</th>
-        <th>Marketplace</th><th>Stage</th><th>Status</th><th>Value</th><th>Owner</th><th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (d of pagedDeals; track d.id) {
-        <tr>
-          <td><strong>{{ d.id }}</strong></td>
-          <td>{{ d.name || '—' }}</td>
-          <td>{{ d.customer }}</td>
-          <td class="nowrap">{{ formatCreatedDate(d.createdAt) }}</td>
-          <td>{{ d.marketplace }}</td>
-          <td><span class="badge badge-purple">{{ d.stage }}</span></td>
-          <td>
-            <span class="badge"
-              [class.badge-blue]="d.marketplaceStatus==='In Review'"
-              [class.badge-orange]="d.marketplaceStatus==='Waiting for Info'"
-              [class.badge-gray]="d.marketplaceStatus==='Draft'">
-              {{ d.marketplaceStatus }}
-            </span>
-          </td>
-          <td>${{ d.expectedValue | number }}</td>
-          <td>{{ d.owner }}</td>
-          <td class="actions-col">
-            <a [routerLink]="['/deals', d.id]" class="btn btn-outline btn-sm">View</a>
-            <a [routerLink]="continuePath(d)" class="btn btn-outline btn-sm">Continue</a>
-          </td>
-        </tr>
-      } @empty {
-        <tr><td colspan="10" class="empty-row">No deals match your search.</td></tr>
+  @if (hasFilters) {
+    <div class="filter-chips">
+      <span class="chips-label">Filtered by:</span>
+      @for (f of activeFilters; track f.key) {
+        <button type="button" class="chip" (click)="removeFilter(f.key)">{{ f.label }} <span class="chip-x">✕</span></button>
       }
-    </tbody>
-  </table>
+      <button type="button" class="chip-clear" (click)="clearAll()">Clear all</button>
+    </div>
+  }
+
+  <div class="table-wrap">
+    <table class="data-table list-table">
+      <thead>
+        <tr>
+          @for (c of columns; track c.key) {
+            <th class="sortable" [class.sorted]="sortKey === c.key" [class.num]="c.align === 'right'"
+                (click)="setSort(c.key)" [attr.aria-sort]="sortKey === c.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'">
+              <span class="th-label">{{ c.label }}<span class="sort-ind">{{ sortArrow(c.key) }}</span></span>
+            </th>
+          }
+          <th class="actions-head" aria-label="Actions"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (d of pagedDeals; track d.id) {
+          <tr [class]="'row-' + (rowToneOf(d) || 'none')">
+            <td>
+              <strong>{{ d.name || '—' }}</strong>
+              <div class="cell-sub">{{ d.id }}</div>
+              @if (flagsOf(d).length) {
+                <div class="flag-row">
+                  @for (f of flagsOf(d); track f.label) {
+                    <span class="badge flag-badge" [class]="f.badgeClass" [title]="f.title">{{ f.icon }} {{ f.label }}</span>
+                  }
+                </div>
+              }
+            </td>
+            <td>{{ d.customer }}</td>
+            <td class="nowrap">{{ formatCreatedDate(d.createdAt) }}</td>
+            <td class="nowrap">{{ d.expectedCloseDate ? formatCreatedDate(d.expectedCloseDate) : '—' }}</td>
+            <td>{{ d.marketplace }}</td>
+            <td>
+              @if (d.engagementType) { <span class="cell-strong">{{ d.engagementType }}</span> }
+              @if (d.campaignEventName) {
+                <div><span class="badge badge-purple">🎟️ {{ d.campaignEventName }}</span></div>
+              } @else if (!d.engagementType) {
+                <span class="cell-sub">—</span>
+              } @else {
+                <div class="cell-sub">No tag</div>
+              }
+            </td>
+            <td>
+              <span class="badge badge-purple">{{ d.stage }}</span>
+              <div class="cell-stack">
+                <span class="badge"
+                  [class.badge-blue]="d.marketplaceStatus==='In Review'"
+                  [class.badge-orange]="d.marketplaceStatus==='Waiting for Info'"
+                  [class.badge-gray]="d.marketplaceStatus==='Draft'">
+                  {{ d.marketplaceStatus }}
+                </span>
+              </div>
+            </td>
+            <td class="num">${{ d.expectedValue | number }}</td>
+            <td>{{ d.owner }}</td>
+            <td class="actions-col">
+              <div class="kebab-wrap">
+                <button type="button" class="kebab-btn" [class.open]="openMenuId === d.id"
+                        (click)="toggleMenu(d.id, $event)" title="Actions" aria-label="Actions">⋮</button>
+                @if (openMenuId === d.id) {
+                  <div class="kebab-menu" (click)="$event.stopPropagation()">
+                    <a [routerLink]="['/deals', d.id]" class="kebab-item" (click)="closeMenu()">👁 View engagement</a>
+                    @if (view === 'active') {
+                      <a [routerLink]="continuePath(d)" class="kebab-item" (click)="closeMenu()">
+                        {{ d.quickCapture ? '✅ Complete' : '➡ Continue' }}
+                      </a>
+                    }
+                    <button type="button" class="kebab-item" (click)="openActivity(d)">🗒️ Action items &amp; reminders</button>
+                    <div class="kebab-sep"></div>
+                    @if (view === 'active') {
+                      <button type="button" class="kebab-item" (click)="runAction(archive.bind(this, d))">📦 Archive</button>
+                    } @else {
+                      <button type="button" class="kebab-item" (click)="runAction(restore.bind(this, d))">♻️ Restore</button>
+                    }
+                    <button type="button" class="kebab-item danger" (click)="runAction(remove.bind(this, d))">🗑 Delete permanently</button>
+                  </div>
+                }
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr><td [attr.colspan]="columns.length + 1" class="empty-row">
+            {{ view === 'archived' ? 'No archived engagements.' : 'No engagements match your search.' }}
+          </td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (openMenuId) { <div class="menu-backdrop" (click)="closeMenu()"></div> }
 
   @if (filteredDeals.length > pageSize) {
     <div class="pagination">
       <button type="button" class="btn btn-outline btn-sm" [disabled]="page <= 1" (click)="prevPage()">← Prev</button>
-      <span>Page {{ page }} of {{ totalPages }} ({{ filteredDeals.length }} deals)</span>
+      <span>Page {{ page }} of {{ totalPages }} ({{ filteredDeals.length }} engagements)</span>
       <button type="button" class="btn btn-outline btn-sm" [disabled]="page >= totalPages" (click)="nextPage()">Next →</button>
     </div>
   }
 </section>
+
+@if (activityDeal) {
+  <div class="activity-backdrop" (click)="closeActivity()">
+    <div class="activity-modal" (click)="$event.stopPropagation()">
+      <header class="activity-head">
+        <div>
+          <h2>🗒️ Action Items &amp; Reminders</h2>
+          <p class="activity-sub">{{ activityDeal.name || activityDeal.id }} · {{ activityDeal.customer }}</p>
+        </div>
+        <button type="button" class="activity-close" (click)="closeActivity()" aria-label="Close">✕</button>
+      </header>
+
+      <div class="activity-body">
+        <section class="activity-section">
+          <h3>✅ Action Items <span class="count-pill">{{ activityActions.length }}</span></h3>
+          @if (activityActions.length) {
+            <ul class="mini-list">
+              @for (a of activityActions; track a.id) {
+                <li>
+                  <div class="mini-main">
+                    <span class="mini-title">{{ a.task }}</span>
+                    <span class="badge" [class]="actionStatusClass(a.status)">{{ a.status }}</span>
+                  </div>
+                  <div class="mini-meta">
+                    <span>👤 {{ a.owner }}</span>
+                    @if (a.dueDate) { <span class="dot">·</span><span>📅 {{ formatReminderDate(a.dueDate) }}</span> }
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="mini-empty">No action items captured for this engagement.</p>
+          }
+        </section>
+
+        <section class="activity-section">
+          <h3>⏰ Reminders <span class="count-pill">{{ activityReminders.length }}</span></h3>
+          @if (activityReminders.length) {
+            <ul class="mini-list">
+              @for (r of activityReminders; track r.id) {
+                <li>
+                  <div class="mini-main">
+                    <span class="mini-title">{{ r.reminder }}</span>
+                    @if (reminderStatus(r.dateTime).tone !== 'none') {
+                      <span class="badge" [class]="reminderBadgeClass(reminderStatus(r.dateTime).tone)">{{ reminderStatus(r.dateTime).label }}</span>
+                    }
+                  </div>
+                  <div class="mini-meta">
+                    <span class="badge badge-purple">{{ r.type }}</span>
+                    @if (r.dateTime) { <span class="dot">·</span><span>📅 {{ formatReminderDate(r.dateTime) }}</span> }
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="mini-empty">No reminders set for this engagement.</p>
+          }
+        </section>
+      </div>
+
+      <footer class="activity-foot">
+        <a [routerLink]="['/deals', activityDeal.id, 'meeting-notes']" class="btn btn-outline" (click)="closeActivity()">Open in engagement →</a>
+        <button type="button" class="btn btn-primary" (click)="closeActivity()">Close</button>
+      </footer>
+    </div>
+  </div>
+}

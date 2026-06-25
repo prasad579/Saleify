@@ -1,16 +1,16 @@
 <h1 class="page-title">Meeting Notes & Follow-up</h1>
-<p class="page-subtitle">Deal {{ dealId }} @if (deal) { — {{ deal.customer }} }</p>
+<p class="page-subtitle">Engagement {{ dealId }} @if (deal) { — {{ deal.customer }} }</p>
 
 <div class="page-nav">
-  <a [routerLink]="['/deals', dealId]" class="back-link">← Deal overview</a>
+  <a [routerLink]="['/deals', dealId]" class="back-link">← Engagement overview</a>
   <span class="nav-sep">·</span>
   <a [routerLink]="['/deals', dealId, 'pricing']" class="back-link">Pricing</a>
 </div>
 
 @if (loading) {
-  <p>Loading deal…</p>
+  <p>Loading engagement…</p>
 } @else {
-  <app-deal-stepper [activeStep]="4" />
+  <app-deal-stepper [engagementType]="engagementType" activeKey="meeting-notes" />
 
   @if (deal?.pricing) {
     <div class="deal-banner card">
@@ -71,7 +71,7 @@
     <aside class="card">
       <h3>Copilot suggestion</h3>
       <p>{{ insight || 'Add notes, extract insights, then save. Use the tracking tabs below to manage all sessions.' }}</p>
-      <a class="btn btn-outline full" [routerLink]="['/deals', dealId]">Deal overview</a>
+      <a class="btn btn-outline full" [routerLink]="['/deals', dealId]">Engagement overview</a>
     </aside>
   </div>
 
@@ -88,11 +88,11 @@
     (save)="save()" />
 
   <app-deal-flow-footer
-    [backLink]="'/deals/' + dealId + '/pricing'"
+    [backLink]="backPath"
     backLabel="← Previous"
     [exitLink]="'/deals/' + dealId"
     saveLabel="Save all changes"
-    continueLabel="Proceed to Approvals →"
+    [continueLabel]="proceedLabel"
     [showSave]="true"
     [saving]="saving"
     (save)="save()"

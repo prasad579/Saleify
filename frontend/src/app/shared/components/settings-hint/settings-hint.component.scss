@@ -1,0 +1,47 @@
+.hint-wrap {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.hint-btn {
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 50%;
+  &:hover { background: #eef2ff; }
+}
+
+.hint-pop {
+  position: absolute;
+  top: 130%;
+  left: 0;
+  z-index: 50;
+  width: 260px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 400;
+}
+
+.hint-text {
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.hint-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary);
+  &:hover { text-decoration: underline; }
+}

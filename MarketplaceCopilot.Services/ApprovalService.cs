@@ -1,13 +1,24 @@
+using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Entities;
 using MarketplaceCopilot.Services.Contracts;
 
 namespace MarketplaceCopilot.Services;
 
-public class ApprovalService(IDealHistoryService history, IApprovalDocumentService documents) : IApprovalService
+public class ApprovalService(IDealHistoryService history, IApprovalDocumentService documents, DataStore store) : IApprovalService
 {
     private const string DefaultUser = "Srinivas K";
-    private const decimal FinanceDiscountThreshold = 15m;
-    private const int LegalDurationMonthsThreshold = 24;
+
+    private const string ConsumptionNoteText =
+        "This is a free trial with no upfront charge. On crossing the included consumption limit, " +
+        "the customer will be automatically charged at standard list rates as per the EULA.";
+
+    /// <summary>True when the deal carries no contract value (free trial / no-money offer).</summary>
+    public static bool IsNoMoneyDeal(Deal deal)
+    {
+        var offerType = deal.Pricing?.OfferType;
+        if (PricingService.IsNoMoneyOffer(offerType)) return true;
+        return deal.Pricing is not null && deal.Pricing.NetContractValue <= 0;
+    }
 
     public ApprovalData EnsurePlan(Deal deal)
     {
@@ -61,9 +72,9 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
         deal.Approvals.ChangeSummary = DescribePricingChange(deal, oldFp, fp);
         deal.Approvals.Version = BumpVersion(deal.Approvals.Version);
 
+        // Any approved reviewer step (everything except the auto EULA step) needs re-approval.
         foreach (var step in deal.Approvals.Steps.Where(s =>
-            s.Status is "Approved" or "Pending" &&
-            s.Id is "finance" or "marketplace" or "legal"))
+            s.Status is "Approved" or "Pending" && s.Id != "eula"))
         {
             if (step.Status == "Approved")
             {
@@ -220,6 +231,8 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
             DocumentsLocked = deal.Approvals.DocumentsLocked,
             AllowPostApprovalEdits = deal.Approvals.AllowPostApprovalEdits,
             EulaStatus = deal.Approvals.EulaStatus,
+            IsNoMoneyDeal = IsNoMoneyDeal(deal),
+            ConsumptionNote = IsNoMoneyDeal(deal) ? ConsumptionNoteText : null,
             PackageSummaryId = deal.Approvals.PackageSummaryId,
             NextStep = steps.FirstOrDefault(s => s.Status is "Pending" or "Changes Requested" or "Needs Re-approval")?.Title ?? "Complete",
             RuleMatches = deal.Approvals.RuleMatches,
@@ -248,42 +261,17 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
         var steps = new List<ApprovalStep>();
         var order = 1;
 
-        if (rules.Any(r => r.Id == "finance" && r.Matched))
+        // One reviewer step per matched rule, in the order the rules are configured in Settings.
+        foreach (var rule in rules.Where(r => r.Matched))
         {
             steps.Add(new ApprovalStep
             {
-                Id = "finance",
+                Id = rule.Id,
                 Order = order++,
-                Title = "Finance Review",
-                Assignee = "Sarah Lee",
+                Title = string.IsNullOrWhiteSpace(rule.Title) ? rule.Id : rule.Title,
+                Assignee = string.IsNullOrWhiteSpace(rule.Assignee) ? "Unassigned" : rule.Assignee,
                 Status = "Pending",
-                RuleReason = rules.First(r => r.Id == "finance").Reason
-            });
-        }
-
-        if (rules.Any(r => r.Id == "legal" && r.Matched))
-        {
-            steps.Add(new ApprovalStep
-            {
-                Id = "legal",
-                Order = order++,
-                Title = "Legal Review",
-                Assignee = "Michael Chen",
-                Status = "Pending",
-                RuleReason = rules.First(r => r.Id == "legal").Reason
-            });
-        }
-
-        if (rules.Any(r => r.Id == "marketplace" && r.Matched))
-        {
-            steps.Add(new ApprovalStep
-            {
-                Id = "marketplace",
-                Order = order++,
-                Title = "Marketplace Review",
-                Assignee = "Priya Nair",
-                Status = "Pending",
-                RuleReason = rules.First(r => r.Id == "marketplace").Reason
+                RuleReason = rule.Reason
             });
         }
 
@@ -294,12 +282,18 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
             Title = "Generate EULA & Final Package",
             Assignee = "System",
             Status = "Pending",
-            RuleReason = "Auto-triggered after all approvals complete."
+            RuleReason = IsNoMoneyDeal(deal)
+                ? ConsumptionNoteText
+                : "Auto-triggered after all approvals complete."
         });
 
         deal.Approvals.Steps = steps;
     }
 
+    /// <summary>
+    /// Evaluate the configurable approval rules (Settings → Approval Rules) against the deal.
+    /// Only rules that are enabled and apply to the deal's engagement type are considered.
+    /// </summary>
     private List<ApprovalRuleMatch> EvaluateRules(Deal deal)
     {
         var p = deal.Pricing;
@@ -310,34 +304,65 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
         if (durationMonths <= 0 && p?.DurationType == "months")
             durationMonths = p?.DurationValue ?? 0;
 
-        return
-        [
-            new ApprovalRuleMatch
+        var noMoney = IsNoMoneyDeal(deal);
+        var type = deal.EngagementType ?? "";
+        var matches = new List<ApprovalRuleMatch>();
+
+        foreach (var rule in store.ApprovalRulesSettings.Rules)
+        {
+            if (!rule.Enabled) continue;
+            if (rule.EngagementTypes.Count > 0 &&
+                !rule.EngagementTypes.Contains(type, StringComparer.OrdinalIgnoreCase))
+                continue;
+
+            bool matched;
+            string reason;
+            switch ((rule.ConditionType ?? "always").ToLowerInvariant())
             {
-                Id = "finance",
-                Title = "Finance Review",
-                Reason = discount > FinanceDiscountThreshold
-                    ? $"Discount exceeds {FinanceDiscountThreshold}% (current: {discount}%)."
-                    : $"Discount within policy ({discount}%).",
-                Matched = discount > FinanceDiscountThreshold
-            },
-            new ApprovalRuleMatch
-            {
-                Id = "legal",
-                Title = "Legal Review",
-                Reason = durationMonths > LegalDurationMonthsThreshold
-                    ? $"Contract duration > {LegalDurationMonthsThreshold} months ({durationMonths} months)."
-                    : $"Contract duration within policy ({durationMonths} months).",
-                Matched = durationMonths > LegalDurationMonthsThreshold
-            },
-            new ApprovalRuleMatch
-            {
-                Id = "marketplace",
-                Title = "Marketplace Review",
-                Reason = $"Marketplace: {deal.Marketplace}.",
-                Matched = !string.IsNullOrWhiteSpace(deal.Marketplace)
+                case "discountgreaterthan":
+                    matched = !noMoney && discount > rule.Threshold;
+                    reason = noMoney
+                        ? "Skipped — no contract value for a free trial."
+                        : matched
+                            ? $"Discount exceeds {rule.Threshold:0.##}% (current: {discount:0.##}%)."
+                            : $"Discount within policy ({discount:0.##}%, limit {rule.Threshold:0.##}%).";
+                    break;
+
+                case "durationmonthsgreaterthan":
+                    matched = !noMoney && durationMonths > rule.Threshold;
+                    reason = noMoney
+                        ? "Skipped — standard EULA applies for the free trial."
+                        : matched
+                            ? $"Contract duration > {rule.Threshold:0.##} months ({durationMonths} months)."
+                            : $"Contract duration within policy ({durationMonths} months, limit {rule.Threshold:0.##}).";
+                    break;
+
+                case "marketplacepresent":
+                    matched = !string.IsNullOrWhiteSpace(deal.Marketplace);
+                    reason = noMoney
+                        ? $"Minimal approval — free trial activation on {deal.Marketplace}."
+                        : matched
+                            ? $"Marketplace: {deal.Marketplace}."
+                            : "No marketplace selected.";
+                    break;
+
+                default: // "always"
+                    matched = true;
+                    reason = $"Required for all {(string.IsNullOrWhiteSpace(type) ? "" : type + " ")}engagements.";
+                    break;
             }
-        ];
+
+            matches.Add(new ApprovalRuleMatch
+            {
+                Id = rule.Id,
+                Title = rule.Title,
+                Assignee = rule.Assignee,
+                Reason = reason,
+                Matched = matched
+            });
+        }
+
+        return matches;
     }
 
     private void RefreshRuleMatches(Deal deal)

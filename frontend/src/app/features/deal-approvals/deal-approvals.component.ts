@@ -8,6 +8,7 @@ import { DealStepperComponent } from '@shared/components/deal-stepper/deal-stepp
 import { DealFlowFooterComponent } from '@shared/components/deal-flow-footer/deal-flow-footer.component';
 import { paginateSlice, totalPages } from '@shared/utils/pagination.util';
 import { apiErrorMessage } from '@shared/utils/deal-api.util';
+import { getEngagementConfig, screenApplies } from '@shared/utils/engagement.util';
 
 type ApprovalAuditRow = {
   id: string;
@@ -74,6 +75,9 @@ export class DealApprovalsComponent implements OnInit {
 
   previewDoc: ApprovalDoc | null = null;
   previewUrl: SafeResourceUrl | null = null;
+
+  get engagementType(): string { return this.deal?.engagementType || 'Private Offer'; }
+  get submitLabel(): string { return getEngagementConfig(this.engagementType).submitLabel; }
 
   ngOnInit() {
     this.dealId = this.route.snapshot.paramMap.get('id') || '';
@@ -147,6 +151,11 @@ export class DealApprovalsComponent implements OnInit {
   private applyResponse(res: any) {
     const detail = res.deal;
     this.deal = detail?.deal ?? detail;
+    // Approvals don't apply to every engagement type — bounce to the overview if so.
+    if (this.deal && !screenApplies(this.deal.engagementType || 'Private Offer', 'approvals')) {
+      this.router.navigate(['/deals', this.dealId]);
+      return;
+    }
     this.approvals = res.approvals ?? this.buildSummaryFromDeal(this.deal?.approvals);
     if (!this.approvals) {
       this.error = 'No approval data returned from the server.';
@@ -285,7 +294,8 @@ export class DealApprovalsComponent implements OnInit {
   submitDeal() {
     this.saving = true;
     this.error = '';
-    this.api.submitApprovals(this.dealId).subscribe({
+    // Status outcome depends on engagement type (Submit to SaaSify / Mark Completed).
+    this.api.submitEngagement(this.dealId).subscribe({
       next: () => {
         this.saving = false;
         this.router.navigate(['/deals', this.dealId]);

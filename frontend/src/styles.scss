@@ -71,6 +71,7 @@ button, input, select, textarea {
 .badge-green { background: #dcfce7; color: #15803d; }
 .badge-gray { background: #f1f5f9; color: #475569; }
 .badge-purple { background: #ede9fe; color: #6d28d9; }
+.badge-red { background: #fee2e2; color: #b91c1c; }
 
 .page-title {
   font-size: 28px;
@@ -182,4 +183,20 @@ table.data-table th {
 .step.done {
   background: #dcfce7;
   color: #15803d;
+}
+
+/* ---- App-wide responsive rules (mobile-friendly base) ---- */
+@media (max-width: 768px) {
+  /* Forms collapse to a single column */
+  .form-grid { grid-template-columns: 1fr; }
+
+  /* Wide tables scroll horizontally instead of overflowing the page */
+  table.data-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .page-title { font-size: 20px; }
+  .page-subtitle { font-size: 13px; }
 }

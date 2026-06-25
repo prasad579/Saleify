@@ -5,6 +5,7 @@ import { ApiService } from '@core/services/api.service';
 import { apiErrorMessage, normalizeDealDetail } from '@shared/utils/deal-api.util';
 import { DealStepperComponent } from '@shared/components/deal-stepper/deal-stepper.component';
 import { DealFlowFooterComponent } from '@shared/components/deal-flow-footer/deal-flow-footer.component';
+import { getEngagementConfig, nextScreenPath, prevScreenPath, screenApplies } from '@shared/utils/engagement.util';
 
 @Component({
   selector: 'app-deal-products',
@@ -26,11 +27,15 @@ export class DealProductsComponent implements OnInit {
   saving = false;
   error = '';
 
+  get engagementType(): string { return this.deal?.engagementType || 'Private Offer'; }
+  get productsOptional(): boolean { return getEngagementConfig(this.engagementType).products === 'optional'; }
+  get backPath(): string { return prevScreenPath(this.engagementType, this.dealId, 'products') || `/deals/${this.dealId}/edit`; }
+
   ngOnInit() {
     this.dealId = this.route.snapshot.paramMap.get('id') || '';
     if (!this.dealId || this.dealId === 'new') {
       this.loading = false;
-      this.error = 'Invalid deal. Create a deal first.';
+      this.error = 'Invalid engagement. Create an engagement first.';
       return;
     }
 
@@ -39,8 +44,14 @@ export class DealProductsComponent implements OnInit {
         const detail = normalizeDealDetail(raw);
         this.deal = detail.deal;
         if (!this.deal) {
-          this.error = `Deal ${this.dealId} was not found. It may have been lost after a backend restart — create a new deal.`;
+          this.error = `Engagement ${this.dealId} was not found. It may have been lost after a backend restart — create a new engagement.`;
           this.loading = false;
+          return;
+        }
+        // Skip this screen if Products doesn't apply to the engagement type.
+        if (!screenApplies(this.engagementType, 'products')) {
+          const next = nextScreenPath(this.engagementType, this.dealId, 'products') || `/deals/${this.dealId}`;
+          this.router.navigateByUrl(next);
           return;
         }
         this.selected = this.deal.productIds || [];
@@ -49,7 +60,7 @@ export class DealProductsComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.error = apiErrorMessage(err, `Deal ${this.dealId} not found.`);
+        this.error = apiErrorMessage(err, `Engagement ${this.dealId} not found.`);
       }
     });
   }
@@ -81,14 +92,23 @@ export class DealProductsComponent implements OnInit {
       : [...this.selected, id];
   }
 
+  private gotoNext() {
+    const next = nextScreenPath(this.engagementType, this.dealId, 'products') || `/deals/${this.dealId}`;
+    this.router.navigateByUrl(next);
+  }
+
   continue() {
-    if (!this.selected.length) return;
+    // Products may be optional (e.g. Workshop) — allow continuing with nothing selected.
+    if (!this.selected.length) {
+      if (this.productsOptional) { this.gotoNext(); }
+      return;
+    }
     this.saving = true;
     this.error = '';
     this.api.setProducts(this.dealId, this.selected).subscribe({
       next: () => {
         this.saving = false;
-        this.router.navigate(['/deals', this.dealId, 'pricing']);
+        this.gotoNext();
       },
       error: (err) => {
         this.saving = false;

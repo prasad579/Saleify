@@ -1,0 +1,49 @@
+.cd-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1100;
+}
+
+.cd-modal {
+  background: var(--card);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 460px;
+  padding: 22px 24px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+  border-top: 4px solid var(--primary);
+
+  &.danger { border-top-color: var(--danger); }
+}
+
+.cd-title {
+  margin: 0 0 10px;
+  font-size: 17px;
+}
+
+.cd-body {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+
+  p { margin: 0 0 8px; }
+  p:last-child { margin-bottom: 0; }
+}
+
+.cd-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+  &:hover { background: #b91c1c; }
+}

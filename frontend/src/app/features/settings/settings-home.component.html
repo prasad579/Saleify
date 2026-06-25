@@ -1,0 +1,19 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Settings</h1>
+    <p class="page-subtitle">Configure tags, playbooks, and the snapshot &amp; email experience.</p>
+  </div>
+</div>
+
+<div class="settings-grid">
+  @for (c of cards; track c.path) {
+    <a [routerLink]="c.path" class="settings-card">
+      <span class="settings-icon">{{ c.icon }}</span>
+      <div class="settings-body">
+        <strong>{{ c.title }}</strong>
+        <p>{{ c.description }}</p>
+      </div>
+      <span class="settings-go">Open →</span>
+    </a>
+  }
+</div>

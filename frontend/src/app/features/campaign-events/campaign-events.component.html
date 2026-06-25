@@ -1,0 +1,122 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Campaign / Event Tags</h1>
+    <p class="page-subtitle">Manage marketplace events engagements can be associated with, and track conversion.</p>
+  </div>
+  <button class="btn btn-primary" (click)="newEvent()">+ New Event</button>
+</div>
+
+@if (error) { <div class="alert error">{{ error }}</div> }
+@if (success) { <div class="alert success">{{ success }}</div> }
+
+@if (showForm) {
+  <section class="card form-card">
+    <h3>{{ editId ? 'Edit Event' : 'New Event' }}</h3>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Event Name *</label>
+        <input [(ngModel)]="form.name" placeholder="e.g. AWS Summit 2026" />
+      </div>
+      <div class="form-field">
+        <label>Marketplace</label>
+        <select [(ngModel)]="form.marketplace">
+          @for (m of marketplaces; track m) { <option [value]="m">{{ m }}</option> }
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Start Date *</label>
+        <input type="date" [(ngModel)]="form.startDate" />
+      </div>
+      <div class="form-field">
+        <label>End Date *</label>
+        <input type="date" [(ngModel)]="form.endDate" />
+      </div>
+      <div class="form-field full">
+        <label>Description</label>
+        <textarea rows="2" [(ngModel)]="form.description" placeholder="Short event description"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-outline" (click)="cancel()">Cancel</button>
+      <button class="btn btn-primary" (click)="save()">{{ editId ? 'Save Event' : 'Create Event' }}</button>
+    </div>
+  </section>
+}
+
+@if (loading) { <p>Loading events…</p> } @else {
+  <section class="card">
+    <div class="list-toolbar">
+      <label class="toolbar-field grow">
+        Search tags
+        <input type="search" [(ngModel)]="search" placeholder="Event name, marketplace, status…" />
+      </label>
+      <span class="result-count">{{ filteredEvents.length }} of {{ events.length }}</span>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Marketplace</th>
+          <th>Duration</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ev of filteredEvents; track ev.id) {
+          <tr>
+            <td>
+              <strong>{{ ev.name }}</strong>
+              <div class="muted">{{ ev.description }}</div>
+            </td>
+            <td>{{ ev.marketplace }}</td>
+            <td>{{ ev.startDate }} → {{ ev.endDate }}</td>
+            <td>
+              <span class="badge" [class]="statusBadgeClass(statusOf(ev))">{{ statusOf(ev) }}</span>
+              @if (ev.paused) { <span class="badge badge-gray" style="margin-left:6px">⏸ Paused</span> }
+            </td>
+            <td class="actions-cell">
+              @if (snapSettings.snapshotButtonEnabled()) {
+                <button class="btn btn-sm btn-outline" (click)="snapshot(ev)" title="Generate engagement snapshot">📋 Snapshot</button>
+              }
+              @if (snapSettings.emailButtonEnabled()) {
+                <button class="btn btn-sm btn-outline" (click)="snapshot(ev, true)" title="Email engagement summary">✉️ Email</button>
+              }
+              <button class="btn btn-sm btn-outline" (click)="togglePause(ev)" [title]="ev.paused ? 'Resume — show in dropdown' : 'Pause — hide from dropdown'">
+                {{ ev.paused ? '▶ Resume' : '⏸ Pause' }}
+              </button>
+              <button class="btn btn-sm btn-outline" (click)="toggleConversion(ev)">
+                {{ conversionFor === ev.id ? 'Hide' : 'Conversion' }}
+              </button>
+              <button class="btn btn-sm btn-outline" (click)="edit(ev)">Edit</button>
+              <button class="btn btn-sm btn-outline danger" (click)="remove(ev)">Delete</button>
+            </td>
+          </tr>
+          @if (conversionFor === ev.id) {
+            <tr class="conversion-row">
+              <td colspan="5">
+                @if (!conversion) { <p>Loading conversion…</p> } @else {
+                  <div class="funnel">
+                    <h4>{{ conversion.eventName }} — Conversion Funnel</h4>
+                    @for (s of conversion.stages; track s.label) {
+                      <div class="funnel-stage">
+                        <span class="funnel-label">{{ s.label }}</span>
+                        <div class="funnel-bar-track">
+                          <div class="funnel-bar" [style.width.%]="stagePercent(s.count)"></div>
+                        </div>
+                        <span class="funnel-count">{{ s.count }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        }
+        @empty {
+          <tr><td colspan="5">{{ search ? 'No tags match your search.' : 'No events yet. Create one to get started.' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </section>
+}

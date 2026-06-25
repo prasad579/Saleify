@@ -7,6 +7,7 @@ export interface PricingFormState {
   durationType: DurationType;
   durationValue: number;
   durationMonths: number;
+  trialDays: number;
   pricingMethod: string;
   publicPricePerYear: number;
   discountModel: 'same' | 'per-year';
@@ -68,6 +69,7 @@ export function defaultPricingState(publicPrice = 0): PricingFormState {
     durationType: 'years',
     durationValue: 3,
     durationMonths: 36,
+    trialDays: 14,
     pricingMethod: 'Discount Based',
     publicPricePerYear: publicPrice,
     discountModel: 'same',
@@ -98,6 +100,7 @@ export function mapBackendPricing(p: any, publicPrice: number): PricingFormState
     durationType,
     durationValue,
     durationMonths: p.durationMonths || base.durationMonths,
+    trialDays: p.trialDays || base.trialDays,
     pricingMethod: p.pricingMethod || base.pricingMethod,
     publicPricePerYear: p.publicPricePerYear || publicPrice,
     discountModel: p.discountModel?.toLowerCase().includes('different') ? 'per-year' : 'same',
@@ -121,6 +124,7 @@ export function buildPricingPayload(form: PricingFormState) {
     durationType: form.durationType,
     durationValue: form.durationValue,
     durationMonths: form.durationMonths,
+    trialDays: form.trialDays,
     pricingMethod: form.pricingMethod,
     publicPricePerYear: form.publicPricePerYear,
     discountModel: form.discountModel === 'per-year'

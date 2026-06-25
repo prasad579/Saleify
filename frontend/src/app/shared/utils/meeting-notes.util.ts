@@ -24,8 +24,11 @@ export interface ActionItemRow {
 export interface ReminderRow {
   id: string;
   reminder: string;
+  /** The "remind on" / due date (yyyy-MM-dd). */
   dateTime: string;
   type: string;
+  /** When the reminder was created (yyyy-MM-dd). */
+  createdAt: string;
   sessionId?: string;
 }
 
@@ -116,13 +119,78 @@ export function normalizeActionItems(items: any[]): ActionItemRow[] {
 }
 
 export function normalizeReminders(items: any[]): ReminderRow[] {
-  return (items || []).map(r => ({
+  const rows = (items || []).map(r => ({
     id: r.id || newId(),
     reminder: r.reminder || '',
     dateTime: r.dateTime || '',
     type: r.type || 'Follow-up',
+    createdAt: r.createdAt || '',
     sessionId: r.sessionId || ''
   }));
+  return sortRemindersByDue(rows);
+}
+
+/** Soonest first; overdue at the top; reminders with no/unknown date last. */
+export function sortRemindersByDue(rows: ReminderRow[]): ReminderRow[] {
+  return [...rows].sort((a, b) => {
+    const da = isoDateValue(a.dateTime);
+    const db = isoDateValue(b.dateTime);
+    if (da === null && db === null) return 0;
+    if (da === null) return 1;
+    if (db === null) return -1;
+    return da - db;
+  });
+}
+
+function isoDateValue(value: string): number | null {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const t = new Date(value + 'T00:00:00').getTime();
+  return Number.isNaN(t) ? null : t;
+}
+
+export type ReminderTone = 'overdue' | 'today' | 'soon' | 'upcoming' | 'none';
+
+export interface ReminderStatus {
+  label: string;
+  tone: ReminderTone;
+  /** Days until due (negative = overdue), or null when there's no valid date. */
+  days: number | null;
+}
+
+/** Status of a reminder relative to today: Overdue / Due today / Due in N days / Upcoming. */
+export function reminderStatus(dueIso: string): ReminderStatus {
+  const due = isoDateValue(dueIso);
+  if (due === null) return { label: 'No date set', tone: 'none', days: null };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const days = Math.round((due - today.getTime()) / 86_400_000);
+  if (days < 0) return { label: `Overdue by ${Math.abs(days)} day${days === -1 ? '' : 's'}`, tone: 'overdue', days };
+  if (days === 0) return { label: 'Due today', tone: 'today', days };
+  if (days <= 3) return { label: `Due in ${days} day${days === 1 ? '' : 's'}`, tone: 'soon', days };
+  return { label: `Due in ${days} days`, tone: 'upcoming', days };
+}
+
+/** Maps a reminder tone to a global badge class. */
+export function reminderBadgeClass(tone: ReminderTone): string {
+  switch (tone) {
+    case 'overdue': return 'badge-red';
+    case 'today': return 'badge-orange';
+    case 'soon': return 'badge-orange';
+    case 'upcoming': return 'badge-blue';
+    default: return 'badge-gray';
+  }
+}
+
+/** Render an ISO date as "02 Jul 2026"; pass through non-ISO legacy strings. */
+export function formatReminderDate(iso: string): string {
+  if (!iso) return '—';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    const d = new Date(iso + 'T00:00:00');
+    if (!Number.isNaN(d.getTime())) {
+      return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+  }
+  return iso;
 }
 
 export function normalizeSessions(sessions: any[], legacyNotes?: any): MeetingSessionRow[] {
@@ -193,11 +261,13 @@ export function newActionItem(sessionId = ''): ActionItemRow {
 }
 
 export function newReminder(sessionId = ''): ReminderRow {
+  const today = new Date().toISOString().slice(0, 10);
   return {
     id: newId(),
     reminder: '',
-    dateTime: new Date().toISOString().slice(0, 10),
+    dateTime: today,
     type: 'Follow-up',
+    createdAt: today,
     sessionId
   };
 }

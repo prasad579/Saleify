@@ -1,0 +1,221 @@
+.snap-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.snap-modal {
+  background: var(--card);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 880px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 80px);
+}
+
+.snap-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border);
+
+  h2 { margin: 0; font-size: 18px; }
+  .snap-sub { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+}
+
+.snap-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 4px 8px;
+  border-radius: 6px;
+  &:hover { background: var(--bg); color: var(--text); }
+}
+
+.snap-body {
+  padding: 18px 22px;
+  overflow-y: auto;
+}
+
+.snap-loading { color: var(--muted); }
+
+.snap-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.snap-section {
+  margin-bottom: 18px;
+
+  h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+// Workshop summaries mirror the compact, email-style bullet layout.
+.snap-intro {
+  margin: 0 0 14px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.snap-footer-note {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.snap-bullets {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  font-size: 14px;
+  li {
+    margin: 2px 0;
+    line-height: 1.45;
+  }
+}
+
+.snap-event {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  span { color: var(--muted); }
+}
+
+.snap-metric {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  .num { font-size: 26px; font-weight: 700; color: var(--text); }
+  .lbl { font-size: 12px; color: var(--muted); }
+}
+
+.snap-counts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  li {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    &.muted { color: var(--muted); border: none; }
+  }
+}
+
+.count-pill {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.nowrap { white-space: nowrap; }
+
+.link-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.row-link { color: var(--primary); font-weight: 600; }
+
+.link-copy {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 12px;
+  &:hover { background: var(--bg); }
+}
+
+.snap-email {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.email-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  label {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    gap: 4px;
+    &.full { grid-column: 1 / -1; }
+    input {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-weight: 400;
+      color: var(--text);
+    }
+  }
+  @media (max-width: 640px) { grid-template-columns: 1fr; }
+}
+
+.email-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 10px 0;
+  code { background: var(--card); padding: 1px 5px; border-radius: 4px; }
+}
+
+.email-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.snap-alert {
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin: 8px 0;
+  &.success { background: #dcfce7; color: #15803d; }
+  &.info { background: #dbeafe; color: #1d4ed8; }
+  &.error { background: #fee2e2; color: #b91c1c; }
+}
+
+.muted { color: var(--muted); }
+
+.snap-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 0 0 14px 14px;
+}

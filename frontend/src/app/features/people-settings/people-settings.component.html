@@ -1,0 +1,131 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">People</h1>
+    <p class="page-subtitle">The customizable list of people who can own engagements. Enable or disable anyone, set their role, and restrict who can own which engagement types.</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary" (click)="openAdd()">+ Add Person</button>
+    <button class="btn btn-outline" (click)="resetAll()">Reset to defaults</button>
+  </div>
+</div>
+
+<div class="tenant-note">
+  🔗 Source today is a manual list. The model keeps a <code>source</code> flag so an external tenant / directory sync can populate these people (by role) later without changing this screen.
+</div>
+
+@if (error) { <div class="alert error">{{ error }}</div> }
+@if (success) { <div class="alert success">{{ success }}</div> }
+
+@if (loading) { <p>Loading people…</p> } @else {
+  <section class="card">
+    <div class="list-toolbar">
+      <label class="toolbar-field grow">
+        Search people
+        <input type="search" [(ngModel)]="search" placeholder="Name, email, role, engagement type…" />
+      </label>
+      <span class="result-count">{{ filteredPeople.length }} of {{ people.length }}</span>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Person</th>
+          <th>Role</th>
+          <th>Engagement Types</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of filteredPeople; track p.id) {
+          <tr [class.row-disabled]="!p.enabled">
+            <td>
+              <strong>{{ p.name }}</strong>
+              <div class="muted">{{ p.email || '—' }}</div>
+            </td>
+            <td>{{ p.role || '—' }}</td>
+            <td>
+              @if (p.engagementTypes.length) {
+                <span class="type-tags">
+                  @for (t of p.engagementTypes; track t) { <span class="type-tag">{{ t }}</span> }
+                </span>
+              } @else {
+                <span class="muted">All types</span>
+              }
+            </td>
+            <td>
+              <span class="badge" [class.badge-green]="p.enabled" [class.badge-gray]="!p.enabled">
+                {{ p.enabled ? 'Enabled' : 'Disabled' }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button class="btn btn-sm btn-outline" (click)="toggleEnabled(p)"
+                [title]="p.enabled ? 'Disable — hide from the owner dropdown' : 'Enable — show in the owner dropdown'">
+                {{ p.enabled ? '⏸ Disable' : '▶ Enable' }}
+              </button>
+              <button class="btn btn-sm btn-outline" (click)="openEdit(p)">Edit</button>
+              <button class="btn btn-sm btn-outline danger" (click)="remove(p)">Delete</button>
+            </td>
+          </tr>
+        }
+        @empty {
+          <tr><td colspan="5">{{ search ? 'No people match your search.' : 'No people yet. Click “+ Add Person” to add an engagement owner.' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </section>
+}
+
+@if (showModal) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h3>{{ editId ? 'Edit Person' : 'Add Person' }}</h3>
+        <button type="button" class="modal-close" (click)="closeModal()" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-field">
+            <label>Name *</label>
+            <input [(ngModel)]="form.name" placeholder="Full name" />
+          </div>
+          <div class="form-field">
+            <label>Email</label>
+            <input type="email" [(ngModel)]="form.email" placeholder="name@company.com" />
+          </div>
+          <div class="form-field full">
+            <label>Role</label>
+            <select [(ngModel)]="form.role">
+              <option value="">Select a role</option>
+              @for (r of roleOptions; track r) { <option [value]="r">{{ r }}</option> }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Engagement types this person can own
+            <small>(none selected = eligible for all types)</small>
+          </label>
+          <div class="type-chips">
+            @for (t of engagementTypes; track t) {
+              <label class="type-chip" [class.on]="hasType(t)">
+                <input type="checkbox" [checked]="hasType(t)" (change)="toggleType(t)" />
+                <span>{{ t }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <label class="enable-toggle">
+          <input type="checkbox" [(ngModel)]="form.enabled" />
+          <span>Enabled — can own engagements</span>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="closeModal()">Cancel</button>
+        <button type="button" class="btn btn-primary" (click)="save()">{{ editId ? 'Save Changes' : 'Add Person' }}</button>
+      </div>
+    </div>
+  </div>
+}

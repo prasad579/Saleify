@@ -1,5 +1,6 @@
 using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Entities;
+using MarketplaceCopilot.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketplaceCopilot.Api.Controllers;
@@ -8,10 +9,15 @@ namespace MarketplaceCopilot.Api.Controllers;
 [Route("api/[controller]")]
 public class DashboardController(DataStore store) : ControllerBase
 {
+    /// <summary>Counters for the Home "Engagement Insights" card.</summary>
+    [HttpGet("insights")]
+    public ActionResult<DashboardInsights> GetInsights([FromServices] ISnapshotService snapshots)
+        => snapshots.BuildDashboardInsights();
+
     [HttpGet]
     public ActionResult<DashboardSummary> Get()
     {
-        var deals = store.Deals;
+        var deals = store.Deals.Where(d => !d.Archived).ToList();
         var openDeals = deals
             .Where(d => d.MarketplaceStatus is not "Published" and not "Abandoned")
             .OrderByDescending(d => d.CreatedAt)
@@ -27,6 +33,8 @@ public class DashboardController(DataStore store) : ControllerBase
                 Id = a.Id,
                 Task = a.Task,
                 Deal = d.Id,
+                DealName = d.Name,
+                Customer = d.Customer,
                 DueDate = a.DueDate,
                 Status = a.Status
             }))
@@ -41,6 +49,8 @@ public class DashboardController(DataStore store) : ControllerBase
                     Id = d.Id,
                     Task = $"Continue {d.Stage.ToLower()} for {d.Customer}",
                     Deal = d.Id,
+                    DealName = d.Name,
+                    Customer = d.Customer,
                     DueDate = "Today",
                     Status = d.StepNumber >= 3 ? "In Progress" : "Pending"
                 })
@@ -54,6 +64,8 @@ public class DashboardController(DataStore store) : ControllerBase
                 Id = r.Id,
                 Reminder = r.Reminder,
                 Deal = d.Id,
+                DealName = d.Name,
+                Customer = d.Customer,
                 DateTime = r.DateTime,
                 Type = r.Type
             }))
@@ -73,11 +85,33 @@ public class DashboardController(DataStore store) : ControllerBase
                         _ => $"Approval needed for {d.Customer}"
                     },
                     Deal = d.Id,
+                    DealName = d.Name,
+                    Customer = d.Customer,
                     DateTime = d.LastUpdated,
                     Type = d.Stage == "Pricing" ? "Follow-up" : "Meeting"
                 })
                 .ToList();
         }
+
+        // Recent activity across all engagements — flatten each deal's change history,
+        // newest first, so the Home widget shows what just happened and links to the engagement.
+        var recentActivity = deals
+            .Where(d => d.ChangeHistory is { Count: > 0 })
+            .SelectMany(d => d.ChangeHistory.Select(h => new RecentActivityRow
+            {
+                Id = h.Id,
+                DealId = d.Id,
+                DealName = string.IsNullOrWhiteSpace(d.Name) ? d.Id : d.Name,
+                Customer = d.Customer,
+                Category = h.Category,
+                Summary = h.Summary,
+                Details = h.Details,
+                ChangedBy = h.ChangedBy,
+                Timestamp = h.Timestamp
+            }))
+            .OrderByDescending(a => DateTime.TryParse(a.Timestamp.Replace(" UTC", ""), out var dt) ? dt : DateTime.MinValue)
+            .Take(15)
+            .ToList();
 
         var recommendations = new List<string>();
         var approvalCount = deals.Count(d => d.Stage == "Approval");
@@ -113,6 +147,7 @@ public class DashboardController(DataStore store) : ControllerBase
             }).ToList(),
             Tasks = tasks,
             Reminders = reminders,
+            RecentActivity = recentActivity,
             AiRecommendations = recommendations
         };
     }

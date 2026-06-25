@@ -1,0 +1,236 @@
+@if (launcher.isOpen()) {
+  <div class="snap-overlay" (click)="close()">
+    <div class="snap-modal" (click)="$event.stopPropagation()">
+      <header class="snap-head">
+        <div>
+          <h2>📋 Engagement Snapshot
+            <app-settings-hint
+              text="Choose which sections and fields appear here and in the email — and turn these buttons on/off — from Settings → Snapshot & Email."
+              link="/settings/snapshot"
+              linkLabel="Open Snapshot & Email" />
+          </h2>
+          @if (snapshot()) { <p class="snap-sub">{{ snapshot()!.title }} · {{ snapshot()!.generatedAt }}</p> }
+        </div>
+        <button type="button" class="snap-close" (click)="close()" aria-label="Close">✕</button>
+      </header>
+
+      @if (loading()) {
+        <div class="snap-body"><p class="snap-loading">Generating snapshot…</p></div>
+      } @else if (error()) {
+        <div class="snap-body"><div class="snap-alert error">{{ error() }}</div></div>
+      } @else if (snapshot()) {
+        @if (snapshot(); as s) {
+        <div class="snap-body" [class.snap-email-style]="isWorkshop">
+
+          <!-- Intro line (Workshop summaries mirror the email layout) -->
+          @if (isWorkshop && emailIntro) { <p class="snap-intro">{{ emailIntro }}</p> }
+
+          @if (isWorkshop) {
+            <!-- Workshop summary — compact, email-style bullet layout -->
+
+            <!-- Section 1 — Event Information (only when a tag applies) -->
+            @if (s.event && sectionOn('eventInfo')) {
+              <section class="snap-section">
+                <h3>{{ sectionTitle('eventInfo', 'Event Information') }}</h3>
+                <ul class="snap-bullets">
+                  @if (fieldOn('eventInfo','name')) { <li><strong>{{ s.event.name }}</strong></li> }
+                  @if (fieldOn('eventInfo','dates')) { <li>{{ s.event.startDate }} → {{ s.event.endDate }}</li> }
+                  @if (fieldOn('eventInfo','status')) { <li>{{ fieldLabel('eventInfo','status','Status') }}: {{ s.event.status }}</li> }
+                </ul>
+              </section>
+            }
+
+            <!-- Section 2 — Engagement Summary -->
+            @if (sectionOn('engagementSummary')) {
+              <section class="snap-section">
+                <h3>{{ sectionTitle('engagementSummary', 'Engagement Summary') }}</h3>
+                <ul class="snap-bullets">
+                  @if (fieldOn('engagementSummary','total')) {
+                    <li><strong>{{ fieldLabel('engagementSummary','total','Total Engagements') }}: {{ s.summary.total }}</strong></li>
+                  }
+                  @if (fieldOn('engagementSummary','byType')) {
+                    @for (c of s.summary.byType; track c.label) {
+                      <li>{{ c.label }}: {{ c.count }}</li>
+                    }
+                  }
+                </ul>
+              </section>
+            }
+
+            <!-- Section 3 — Pipeline Summary -->
+            @if (sectionOn('pipelineSummary')) {
+              <section class="snap-section">
+                <h3>{{ sectionTitle('pipelineSummary', 'Pipeline Summary') }}</h3>
+                <ul class="snap-bullets">
+                  @if (fieldOn('pipelineSummary','expectedPipeline')) {
+                    <li>{{ fieldLabel('pipelineSummary','expectedPipeline','Expected Pipeline') }}: <strong>{{ s.pipeline.expectedPipelineDisplay }}</strong></li>
+                  }
+                  @if (fieldOn('pipelineSummary','activePrivateOffers')) {
+                    <li>{{ fieldLabel('pipelineSummary','activePrivateOffers','Active Private Offers') }}: {{ s.pipeline.activePrivateOffers }}</li>
+                  }
+                </ul>
+              </section>
+            }
+          } @else {
+
+            <!-- Section 1 — Event Information (only when a tag applies) -->
+            @if (s.event && sectionOn('eventInfo')) {
+              <section class="snap-section">
+                <h3>{{ sectionTitle('eventInfo', 'Event Information') }}</h3>
+                <div class="snap-event">
+                  @if (fieldOn('eventInfo','name')) { <strong>{{ s.event.name }}</strong> }
+                  @if (fieldOn('eventInfo','dates')) { <span>{{ s.event.startDate }} → {{ s.event.endDate }}</span> }
+                  @if (fieldOn('eventInfo','status')) {
+                    <span class="badge"
+                      [class.badge-green]="s.event.status==='Active'"
+                      [class.badge-blue]="s.event.status==='Upcoming'"
+                      [class.badge-orange]="s.event.status==='Completed'">{{ s.event.status }}</span>
+                  }
+                </div>
+              </section>
+            }
+
+            <!-- Section 2 + 3 — Engagement & Pipeline Summary -->
+            <div class="snap-grid">
+              @if (sectionOn('engagementSummary')) {
+                <section class="snap-section">
+                  <h3>{{ sectionTitle('engagementSummary', 'Engagement Summary') }}</h3>
+                  @if (fieldOn('engagementSummary','total')) {
+                    <div class="snap-metric"><span class="num">{{ s.summary.total }}</span><span class="lbl">{{ fieldLabel('engagementSummary','total','Total Engagements') }}</span></div>
+                  }
+                  @if (fieldOn('engagementSummary','byType')) {
+                    <ul class="snap-counts">
+                      @for (c of s.summary.byType; track c.label) {
+                        <li><span>{{ c.label }}</span><strong>{{ c.count }}</strong></li>
+                      } @empty {
+                        <li class="muted">No engagements in scope.</li>
+                      }
+                    </ul>
+                  }
+                </section>
+              }
+
+              @if (sectionOn('pipelineSummary')) {
+                <section class="snap-section">
+                  <h3>{{ sectionTitle('pipelineSummary', 'Pipeline Summary') }}</h3>
+                  @if (fieldOn('pipelineSummary','expectedPipeline')) {
+                    <div class="snap-metric"><span class="num">{{ s.pipeline.expectedPipelineDisplay }}</span><span class="lbl">{{ fieldLabel('pipelineSummary','expectedPipeline','Expected Pipeline') }}</span></div>
+                  }
+                  @if (fieldOn('pipelineSummary','activePrivateOffers')) {
+                    <ul class="snap-counts">
+                      <li><span>{{ fieldLabel('pipelineSummary','activePrivateOffers','Active Private Offers') }}</span><strong>{{ s.pipeline.activePrivateOffers }}</strong></li>
+                    </ul>
+                  }
+                </section>
+              }
+            </div>
+          }
+
+          <!-- Section 4 — Engagements Requiring Attention -->
+          @if (s.attention.length && sectionOn('attention')) {
+            <section class="snap-section">
+              <h3>{{ sectionTitle('attention', 'Engagements Requiring Attention') }} <span class="count-pill">{{ s.attention.length }}</span></h3>
+              <table class="data-table">
+                <thead><tr>@for (f of cols('attention'); track f.key) { <th>{{ f.label }}</th> }</tr></thead>
+                <tbody>
+                  @for (r of s.attention; track r.dealId) {
+                    <tr>
+                      @for (f of cols('attention'); track f.key) {
+                        @if (f.key === 'link') {
+                          <td class="link-cell">
+                            <a [routerLink]="['/deals', r.dealId]" (click)="close()" class="row-link">View</a>
+                            <button type="button" class="link-copy" (click)="copyLink(r)" title="Copy deep link">{{ copiedLinkId() === r.dealId ? '✓' : '🔗' }}</button>
+                          </td>
+                        } @else if (f.key === 'status') {
+                          <td><span class="badge badge-purple">{{ r.status }}</span></td>
+                        } @else if (f.key === 'nextActionDate') {
+                          <td class="nowrap">{{ r.nextActionDate }}</td>
+                        } @else {
+                          <td>{{ attentionValue(r, f.key) }}</td>
+                        }
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </section>
+          }
+
+          <!-- Section 5 — Active Private Offers -->
+          @if (s.privateOffers.length && sectionOn('privateOffers')) {
+            <section class="snap-section">
+              <h3>{{ sectionTitle('privateOffers', 'Active Private Offers') }} <span class="count-pill">{{ s.privateOffers.length }}</span></h3>
+              <table class="data-table">
+                <thead><tr>@for (f of cols('privateOffers'); track f.key) { <th>{{ f.label }}</th> }</tr></thead>
+                <tbody>
+                  @for (r of s.privateOffers; track r.dealId) {
+                    <tr>
+                      @for (f of cols('privateOffers'); track f.key) {
+                        @if (f.key === 'link') {
+                          <td class="link-cell">
+                            <a [routerLink]="['/deals', r.dealId]" (click)="close()" class="row-link">View</a>
+                            <button type="button" class="link-copy" (click)="copyLink(r)" title="Copy deep link">{{ copiedLinkId() === r.dealId ? '✓' : '🔗' }}</button>
+                          </td>
+                        } @else if (f.key === 'status') {
+                          <td><span class="badge badge-blue">{{ r.status }}</span></td>
+                        } @else if (f.key === 'expectedCloseDate') {
+                          <td class="nowrap">{{ r.expectedCloseDate }}</td>
+                        } @else {
+                          <td>{{ offerValueOf(r, f.key) }}</td>
+                        }
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </section>
+          }
+
+          @if (!s.attention.length && !s.privateOffers.length && !s.summary.total) {
+            <p class="muted">No engagements match this scope yet.</p>
+          }
+
+          <!-- Footer line (Workshop summaries mirror the email layout) -->
+          @if (isWorkshop && emailFooter) { <p class="snap-footer-note">{{ emailFooter }}</p> }
+
+          <!-- Email compose panel -->
+          @if (showEmail()) {
+            <section class="snap-section snap-email">
+              <h3>✉️ Email Summary</h3>
+              <div class="email-form">
+                <label>To<input type="text" [(ngModel)]="emailTo" placeholder="leadership@company.com, ..." /></label>
+                <label>Cc<input type="text" [(ngModel)]="emailCc" placeholder="optional" /></label>
+                <label class="full">Subject<input type="text" [(ngModel)]="emailSubject" /></label>
+              </div>
+              <p class="email-note">Sends a compact, table-based summary (tables + bullets, under a page). Configure SMTP in <code>appsettings.json</code> to deliver for real; otherwise this is a demo preview.</p>
+              @if (emailResult(); as res) {
+                <div class="snap-alert" [class.success]="res.success && res.delivered" [class.info]="res.success && !res.delivered" [class.error]="!res.success">
+                  {{ res.message }}
+                </div>
+              }
+              <div class="email-actions">
+                <button type="button" class="btn btn-outline" (click)="toggleEmail()">Hide</button>
+                <button type="button" class="btn btn-primary" [disabled]="sending()" (click)="sendEmail()">
+                  {{ sending() ? 'Sending…' : 'Send Summary' }}
+                </button>
+              </div>
+            </section>
+          }
+        </div>
+
+        <footer class="snap-foot">
+          <button type="button" class="btn btn-outline" (click)="copySummary()">
+            {{ copiedSummary() ? '✓ Copied' : 'Copy Summary' }}
+          </button>
+          <button type="button" class="btn btn-outline" (click)="downloadPdf()">Download PDF</button>
+          @if (emailButtonEnabled) {
+            <button type="button" class="btn btn-primary" (click)="toggleEmail()">
+              {{ showEmail() ? 'Hide Email' : 'Email Summary' }}
+            </button>
+          }
+        </footer>
+        }
+      }
+    </div>
+  </div>
+}

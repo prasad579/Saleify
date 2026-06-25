@@ -1,3 +1,5 @@
+import { ScreenKey, applicableScreens } from '@shared/utils/engagement.util';
+
 export interface DealDetailResponse {
   deal: any;
   selectedProducts?: any[];
@@ -34,14 +36,16 @@ export function isCreateDealSuccess(res: any, id: string | null): boolean {
   return res?.success !== false;
 }
 
-export function dealContinuePath(deal: { id: string; stepNumber?: number; continueRoute?: string }) {
+export function dealContinuePath(deal: { id: string; stepNumber?: number; continueRoute?: string; engagementType?: string }) {
   if (deal.continueRoute) return `/deals/${deal.id}/${deal.continueRoute}`;
-  const step = deal.stepNumber ?? 1;
-  if (step >= 5) return `/deals/${deal.id}/approvals`;
-  if (step >= 4) return `/deals/${deal.id}/meeting-notes`;
-  if (step >= 3) return `/deals/${deal.id}/meeting-notes`;
-  if (step >= 2) return `/deals/${deal.id}/pricing`;
-  return `/deals/${deal.id}/products`;
+  // Map legacy step number to a screen, then snap to the first applicable screen for this engagement type.
+  const legacy: ScreenKey[] = ['details', 'products', 'pricing', 'meeting-notes', 'approvals'];
+  const step = Math.min(Math.max(deal.stepNumber ?? 1, 1), 5);
+  const desired = legacy[step - 1];
+  const screens = applicableScreens(deal.engagementType || 'Private Offer');
+  // First applicable screen at or after the desired one (fall back to the last applicable).
+  const target = screens.find(s => legacy.indexOf(s) >= legacy.indexOf(desired)) ?? screens[screens.length - 1] ?? 'details';
+  return target === 'details' ? `/deals/${deal.id}/edit` : `/deals/${deal.id}/${target}`;
 }
 
 export function apiErrorMessage(err: any, fallback: string): string {

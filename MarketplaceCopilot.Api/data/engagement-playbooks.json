@@ -1,0 +1,139 @@
+[
+  {
+    "engagementType": "Private Offer",
+    "headline": "Private Offer \u2014 path to a signed deal",
+    "nextSteps": [
+      "Confirm products \u0026 quantities",
+      "Configure pricing \u0026 discount",
+      "Run Finance / Legal / Marketplace approvals",
+      "Generate EULA \u0026 private offer",
+      "Buyer accepts in the marketplace"
+    ],
+    "talkingPoints": [
+      "We\u0027ll send a private offer straight to your marketplace billing account.",
+      "Once approved, pricing is locked for the full contract term.",
+      "Typical internal approval turnaround is 3\u20135 business days."
+    ],
+    "timeline": "Usually 1\u20133 weeks from today to an accepted offer.",
+    "updatedAt": ""
+  },
+  {
+    "engagementType": "Free Trial",
+    "headline": "Free Trial \u2014 quick, no-cost activation",
+    "nextSteps": [
+      "Pick trial length (14 / 30 days)",
+      "Light marketplace review",
+      "Activate trial \u2014 no charge",
+      "Track usage during the trial",
+      "Convert to a private offer before it expires"
+    ],
+    "talkingPoints": [
+      "There\u0027s no cost during the trial \u2014 you\u0027re only charged if you exceed the included usage, per the EULA.",
+      "We can usually activate within 1\u20132 business days.",
+      "We\u0027ll check in before the trial ends to plan the conversion."
+    ],
+    "timeline": "Active within ~2 days; trial runs 14\u201330 days.",
+    "updatedAt": ""
+  },
+  {
+    "engagementType": "Workshop",
+    "headline": "Workshop \u2014 hands-on enablement",
+    "nextSteps": [
+      "Agree scope \u0026 audience",
+      "Schedule the session",
+      "Run the workshop",
+      "Capture outcomes \u0026 follow-ups",
+      "Mark completed"
+    ],
+    "talkingPoints": [
+      "This is a hands-on enablement session for your team \u2014 no marketplace pricing involved.",
+      "We\u0027ll capture action items and suggest the best next engagement afterward."
+    ],
+    "timeline": "Typically scheduled within 1\u20132 weeks.",
+    "updatedAt": ""
+  },
+  {
+    "engagementType": "Hackathon",
+    "headline": "Hackathon \u2014 build with your team",
+    "nextSteps": [
+      "Define the challenge \u0026 products",
+      "Provision environments",
+      "Run the hackathon",
+      "Review outcomes (optional approvals)",
+      "Mark completed / plan next steps"
+    ],
+    "talkingPoints": [
+      "Your teams build on our products against a real challenge.",
+      "A great precursor to a POC or a private offer.",
+      "We can optionally attach products and a light approval if budget is involved."
+    ],
+    "timeline": "1\u20134 weeks depending on prep.",
+    "updatedAt": ""
+  },
+  {
+    "engagementType": "POC",
+    "headline": "POC \u2014 prove the value",
+    "nextSteps": [
+      "Agree success criteria",
+      "Select products",
+      "Set scope \u0026 optional pricing/approvals",
+      "Run the POC",
+      "Review results \u2192 convert to an offer"
+    ],
+    "talkingPoints": [
+      "We\u0027ll define clear, measurable success criteria up front.",
+      "It\u0027s a scoped, time-boxed evaluation on your own data.",
+      "On success, we move straight to a private offer."
+    ],
+    "timeline": "Typically 2\u20136 weeks.",
+    "updatedAt": ""
+  },
+  {
+    "engagementType": "Summit/Event Lead",
+    "headline": "Summit / Event Lead \u2014 capture \u0026 nurture",
+    "nextSteps": [
+      "Capture contact \u0026 interest",
+      "Tag to the event",
+      "Qualify the lead",
+      "Save \u0026 convert later",
+      "Convert to a POC / Private Offer when ready"
+    ],
+    "talkingPoints": [
+      "Great to connect at the event \u2014 there\u0027s no commitment right now.",
+      "We\u0027ll follow up with next steps tailored to your needs."
+    ],
+    "timeline": "Follow-up within a few days.",
+    "updatedAt": ""
+  },
+  {
+    "engagementType": "Internal Sales Activity",
+    "headline": "Internal Sales Activity \u2014 track the motion",
+    "nextSteps": [
+      "Log the activity",
+      "Link related accounts",
+      "Plan follow-up",
+      "Convert to a customer engagement when relevant"
+    ],
+    "talkingPoints": [
+      "Internal tracking only \u2014 no marketplace offer is created."
+    ],
+    "timeline": "N/A \u2014 internal.",
+    "updatedAt": ""
+  },
+  {
+    "engagementType": "External Source Lead",
+    "headline": "External Source Lead \u2014 qualify the source",
+    "nextSteps": [
+      "Record source \u0026 contact",
+      "Qualify fit",
+      "Assign an owner",
+      "Convert to an engagement once qualified"
+    ],
+    "talkingPoints": [
+      "Lead sourced externally \u2014 qualify fit before investing.",
+      "We\u0027ll route it to the right owner and follow up."
+    ],
+    "timeline": "Qualify within a week.",
+    "updatedAt": ""
+  }
+]

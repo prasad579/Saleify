@@ -1,0 +1,49 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Engagement Playbooks</h1>
+    <p class="page-subtitle">Configure the "what's next" guidance and talking points reps see for each engagement type. Changes apply immediately.</p>
+  </div>
+  <button class="btn btn-outline" (click)="resetAll()">Reset to defaults</button>
+</div>
+
+@if (error) { <div class="alert error">{{ error }}</div> }
+@if (success) { <div class="alert success">{{ success }}</div> }
+
+@if (loading) { <p>Loading playbooks…</p> } @else {
+  <div class="playbook-list">
+    @for (pb of playbooks; track pb.engagementType) {
+      <section class="card playbook-edit-card">
+        <div class="pb-head">
+          <span class="badge badge-purple">{{ pb.engagementType }}</span>
+          @if (pb.savedFlash) { <span class="badge badge-green">Saved ✓</span> }
+          @if (pb.updatedAt) { <span class="pb-updated">Updated {{ pb.updatedAt }}</span> }
+        </div>
+
+        <div class="form-field">
+          <label>Headline</label>
+          <input [(ngModel)]="pb.headline" placeholder="Short title shown on the playbook card" />
+        </div>
+
+        <div class="pb-grid">
+          <div class="form-field">
+            <label>What's next <small>(one step per line)</small></label>
+            <textarea rows="6" [(ngModel)]="pb.nextStepsText" placeholder="One step per line"></textarea>
+          </div>
+          <div class="form-field">
+            <label>Talking points <small>(one per line — what reps say to the client)</small></label>
+            <textarea rows="6" [(ngModel)]="pb.talkingPointsText" placeholder="One talking point per line"></textarea>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Timeline</label>
+          <input [(ngModel)]="pb.timeline" placeholder="e.g. Usually 1–3 weeks to an accepted offer" />
+        </div>
+
+        <div class="pb-actions">
+          <button class="btn btn-primary" (click)="save(pb)">Save {{ pb.engagementType }}</button>
+        </div>
+      </section>
+    }
+  </div>
+}

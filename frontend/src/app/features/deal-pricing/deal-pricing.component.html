@@ -3,16 +3,16 @@
 } @else if (error && !deal) {
   <div class="center-card">
     <p class="error">{{ error }}</p>
-    <a routerLink="/deals/new" class="btn btn-primary">Create New Deal</a>
-    <a routerLink="/deals" class="btn btn-outline">Back to Deals</a>
+    <a routerLink="/deals/new" class="btn btn-primary">Create New Engagement</a>
+    <a routerLink="/deals" class="btn btn-outline">Back to Engagements</a>
   </div>
 } @else if (deal) {
   <div class="page-nav">
     <a [routerLink]="['/deals', dealId, 'products']" class="back-link">← Back to Products</a>
     <span class="nav-sep">·</span>
-    <a [routerLink]="['/deals', dealId, 'edit']" class="back-link">Edit Deal Details</a>
+    <a [routerLink]="['/deals', dealId, 'edit']" class="back-link">Edit Engagement Details</a>
   </div>
-  <div class="breadcrumb">Home › Deals › {{ dealId }} › Configure Pricing</div>
+  <div class="breadcrumb">Home › Engagements › {{ dealId }} › Configure Pricing</div>
 
   @if (error) { <div class="alert error">{{ error }}</div> }
 
@@ -25,7 +25,7 @@
     <div class="meta-item"><span>Sales owner</span><strong>{{ deal.owner }}</strong></div>
   </div>
 
-  <app-deal-stepper [activeStep]="3" />
+  <app-deal-stepper [engagementType]="deal.engagementType" activeKey="pricing" />
 
   <div class="page-layout">
     <div class="main-col">
@@ -44,19 +44,45 @@
       }
 
       <section class="card section">
-        <div class="section-head"><span class="num">1</span><h3>Deal summary — offer type</h3></div>
+        <div class="section-head"><span class="num">1</span><h3>Offer type</h3></div>
         <div class="choice-grid">
-          <button type="button" class="choice" [class.active]="pricing.offerType === 'Direct Private Offer'" (click)="setOfferType('Direct Private Offer')">
-            <span class="radio">{{ pricing.offerType === 'Direct Private Offer' ? '◉' : '○' }}</span>
-            <div><strong>Direct Private Offer</strong><p>Offer published directly to customer</p></div>
-          </button>
-          <button type="button" class="choice" [class.active]="pricing.offerType === 'Reseller Private Offer'" (click)="setOfferType('Reseller Private Offer')">
-            <span class="radio">{{ pricing.offerType === 'Reseller Private Offer' ? '◉' : '○' }}</span>
-            <div><strong>Reseller Private Offer</strong><p>Offer via reseller partner</p></div>
-          </button>
+          @for (ot of offerTypes; track ot) {
+            <button type="button" class="choice" [class.active]="pricing.offerType === ot" (click)="setOfferType(ot)">
+              <span class="radio">{{ pricing.offerType === ot ? '◉' : '○' }}</span>
+              <div><strong>{{ ot }}</strong><p>{{ offerTypeBlurb(ot) }}</p></div>
+            </button>
+          }
         </div>
       </section>
 
+      @if (isNoMoney) {
+        <section class="card section">
+          <div class="section-head"><span class="num">2</span><h3>{{ evalTitle }}</h3></div>
+          <p class="sub-label">{{ evalLengthLabel }}</p>
+          <div class="choice-grid compact">
+            @for (d of trialDayOptions; track d) {
+              <button type="button" class="choice sm" [class.active]="pricing.trialDays === d" (click)="setTrialDays(d)">{{ d }} days</button>
+            }
+          </div>
+          <div class="form-field inline-discount" style="margin-top:12px">
+            <label>Or enter custom number of days</label>
+            <input type="number" min="1" max="365" [(ngModel)]="pricing.trialDays" (ngModelChange)="onTrialDaysChange()" />
+          </div>
+          <div class="form-grid" style="margin-top:12px">
+            <div class="form-field">
+              <label>{{ evalStartLabel }}</label>
+              <input type="date" [(ngModel)]="pricing.contractStart" (ngModelChange)="recalc()" />
+            </div>
+            <div class="form-field">
+              <label>{{ evalEndLabel }}</label>
+              <input type="date" [value]="preview?.contractEnd?.slice(0,10) || pricing.contractEnd" disabled />
+            </div>
+          </div>
+          <div class="info-banner">{{ evalBanner }}</div>
+        </section>
+      }
+
+      @if (showContractSection) {
       <section class="card section">
         <div class="section-head"><span class="num">2</span><h3>Contract & pricing</h3></div>
         <div class="form-grid">
@@ -199,9 +225,10 @@
           }
         }
       </section>
+      }
 
       <app-deal-flow-footer
-        [backLink]="'/deals/' + dealId + '/products'"
+        [backLink]="backPath"
         backLabel="← Previous"
         continueLabel="Continue to Meeting Notes →"
         [saving]="saving"
@@ -229,7 +256,7 @@
 
         @if (insight) {
           <section class="card insight-card">
-            <h4>✨ AI deal insight</h4>
+            <h4>✨ AI engagement insight</h4>
             <p>{{ insight }}</p>
           </section>
         }
@@ -237,5 +264,5 @@
     }
   </div>
 } @else {
-  <p class="error">Deal not found. <a routerLink="/deals">Back to deals</a></p>
+  <p class="error">Engagement not found. <a routerLink="/deals">Back to engagements</a></p>
 }

@@ -33,6 +33,10 @@ public class MeetingNotesService : IMeetingNotesService
 
         foreach (var r in notes.Reminders.Where(r => string.IsNullOrWhiteSpace(r.Id)))
             r.Id = Guid.NewGuid().ToString("N")[..8];
+
+        // Backfill a created date for reminders that predate the field.
+        foreach (var r in notes.Reminders.Where(r => string.IsNullOrWhiteSpace(r.CreatedAt)))
+            r.CreatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd");
     }
 
     public int ApplySave(Deal deal, SaveMeetingNotesRequest request)

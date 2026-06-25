@@ -1,0 +1,39 @@
+<div class="search-box">
+  <span class="search-icon">🔍</span>
+  <input
+    [(ngModel)]="term"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+    (keyup.enter)="submit()"
+    [placeholder]="placeholder" />
+
+  @if (open) {
+    <div class="search-panel">
+      @if (term.trim()) {
+        @if (suggestions.length) {
+          <div class="panel-section">
+            <div class="panel-label">Engagements</div>
+            @for (d of suggestions; track d.id) {
+              <button type="button" class="suggestion" (mousedown)="pick(d)">
+                <span class="sg-name">{{ d.name || d.customer }}</span>
+                <span class="sg-meta">{{ d.customer }} · {{ d.id }}@if (d.campaignEventName) { · 🎟️ {{ d.campaignEventName }} }</span>
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="panel-empty">No matches for "{{ term }}"</div>
+        }
+        <button type="button" class="search-all" (mousedown)="submit()">Search all engagements for "{{ term }}" →</button>
+      } @else {
+        <div class="panel-section">
+          <div class="panel-label">Quick filters</div>
+          <div class="quick-grid">
+            @for (f of quickFilters; track f.label) {
+              <button type="button" class="quick-chip" (mousedown)="applyFilter(f)">{{ f.icon }} {{ f.label }}</button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

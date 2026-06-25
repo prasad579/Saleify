@@ -1,121 +1,273 @@
-<h1 class="page-title">{{ isEdit ? 'Edit Deal' : 'Create New Deal' }}</h1>
-<p class="page-subtitle">{{ isEdit ? 'Update deal details and continue the workflow.' : 'Enter deal details to get started. You can add products and pricing next.' }}</p>
+<h1 class="page-title">{{ isEdit ? 'Edit Engagement' : 'Create Engagement' }}</h1>
+<p class="page-subtitle">{{ isEdit ? 'Update engagement details and continue the workflow.' : 'First choose what you want to create, then fill in the details.' }}</p>
 
 @if (isEdit) {
   <div class="page-nav">
-    <a [routerLink]="['/deals', editId, 'products']" class="back-link">← Back to Products</a>
+    <a [routerLink]="['/deals', editId]" class="back-link">← Back to Engagement</a>
   </div>
 }
 
-@if (loading) { <p>Loading deal…</p> }
-
+@if (loading) { <p>Loading engagement…</p> }
 @if (error) { <div class="alert error">{{ error }}</div> }
 @if (success) { <div class="alert success">{{ success }}</div> }
 
+<!-- Step 1: Select engagement type -->
+<section class="card step-card">
+  <div class="step-head"><span class="step-badge">1</span><h3>What would you like to create?</h3></div>
+  <div class="type-grid">
+    @for (c of engagementConfigs; track c.type) {
+      <button type="button" class="type-choice" [class.active]="deal.engagementType === c.type" (click)="selectEngagementType(c.type)">
+        <span class="radio">{{ deal.engagementType === c.type ? '◉' : '○' }}</span>
+        <div><strong>{{ c.type }}</strong><p>{{ c.blurb }}</p></div>
+      </button>
+    }
+  </div>
+</section>
+
+@if (typeChosen && playbook) {
+  <section class="card playbook-card" [class.collapsed]="playbookCollapsed">
+    <div class="playbook-head">
+      <button type="button" class="playbook-toggle" (click)="togglePlaybook()"
+        [attr.aria-expanded]="!playbookCollapsed" [attr.aria-label]="playbookCollapsed ? 'Show AI Playbook' : 'Hide AI Playbook'">
+        {{ playbookCollapsed ? '▸' : '▾' }}
+      </button>
+      <span class="playbook-badge">✨ AI Playbook</span>
+      <strong class="playbook-title">{{ playbook.headline }}</strong>
+      <app-settings-hint
+        text="This guidance is configurable per engagement type from Settings → Playbooks."
+        link="/settings/playbooks"
+        linkLabel="Open Playbooks" />
+      <a routerLink="/settings/playbooks" class="playbook-edit">Edit</a>
+    </div>
+
+    @if (!playbookCollapsed) {
+      <div class="playbook-cols">
+        <div>
+          <h4>What's next</h4>
+          <ol>
+            @for (s of playbook.nextSteps; track s) { <li>{{ s }}</li> }
+          </ol>
+        </div>
+        <div>
+          <h4>Talking points <span class="playbook-hint">— say this to the client</span></h4>
+          <ul>
+            @for (t of playbook.talkingPoints; track t) { <li>💬 {{ t }}</li> }
+          </ul>
+        </div>
+      </div>
+      @if (playbook.timeline) {
+        <div class="playbook-timeline">🕒 <strong>Timeline:</strong> {{ playbook.timeline }}</div>
+      }
+    }
+  </section>
+}
+
+@if (typeChosen) {
 <div class="layout">
   <section class="card form-grid">
-    <div class="form-field full">
-      <label>Deal Name *</label>
-      <input [(ngModel)]="deal.name" placeholder="Enter a name for this deal" />
+    <div class="form-grid-head full">
+      <span class="step-badge">2</span><h3>Engagement Details</h3>
+      <span class="type-chip">{{ deal.engagementType }}</span>
+    </div>
+
+    <div class="form-field full mode-toggle-field">
+      <div class="mode-toggle" role="tablist">
+        <button type="button" class="mode-opt" [class.active]="mode === 'quick'" (click)="setMode('quick')">
+          ⚡ Quick Capture
+        </button>
+        <button type="button" class="mode-opt" [class.active]="mode === 'full'" (click)="setMode('full')">
+          📋 Full Details
+        </button>
+      </div>
+      <small>{{ isQuick ? 'Capture the essentials now and complete the rest later.' : 'Fill everything and continue into the workflow.' }}</small>
     </div>
 
     <div class="form-field">
-      <label>Customer / Company *</label>
-      <input [(ngModel)]="deal.customer" placeholder="Search or enter customer name" />
+      <label>Work Email *</label>
+      <input type="email" [(ngModel)]="deal.contactEmail" (ngModelChange)="onWorkEmailChange()" placeholder="name@company.com" />
+      <small>Company &amp; contact are auto-filled from the work email.</small>
     </div>
 
     <div class="form-field">
-      <label>Primary Contact Name *</label>
-      <input [(ngModel)]="deal.contactName" placeholder="Enter primary contact name" />
-    </div>
-
-    <div class="form-field">
-      <label>Primary Contact Email *</label>
-      <input type="email" [(ngModel)]="deal.contactEmail" placeholder="Enter email address" />
-    </div>
-
-    <div class="form-field">
-      <label>Customer Location</label>
-      <select [(ngModel)]="deal.location">
-        <option value="">Select country</option>
-        @for (c of countries; track c) {
-          <option [value]="c">{{ c }}</option>
+      <label>Engagement Owner *
+        <app-settings-hint
+          text="Manage who can own engagements — add people, set their role, enable/disable them, and restrict by engagement type — from Settings → People."
+          link="/settings/people"
+          linkLabel="Open People" />
+      </label>
+      <select [(ngModel)]="deal.owner">
+        <option value="">Select engagement owner</option>
+        @for (o of eligibleOwners; track o.name) {
+          <option [value]="o.name">{{ o.name }}{{ o.role ? ' — ' + o.role : '' }}</option>
         }
       </select>
+      <small>Only people enabled for {{ deal.engagementType || 'this engagement type' }} are listed.</small>
     </div>
 
-    <div class="form-field">
-      <label>Industry</label>
-      <select [(ngModel)]="deal.industry">
-        <option value="">Select industry</option>
-        @for (i of industries; track i) {
-          <option [value]="i">{{ i }}</option>
-        }
-      </select>
-    </div>
+    @if (existingCustomer) {
+      <div class="form-field full">
+        <div class="customer-card">
+          <div class="customer-card-head">
+            <span class="badge badge-purple">Existing Customer</span>
+            <strong>{{ existingCustomer.name }}</strong>
+          </div>
+          <div class="customer-card-stats">
+            <span><b>{{ existingCustomer.totalDeals }}</b> total engagements</span>
+            <span><b>{{ existingCustomer.openDeals }}</b> open</span>
+            <span><b>{{ existingCustomer.privateOffers }}</b> private offers</span>
+            <span>Last activity: <b>{{ existingCustomer.lastActivity }}</b></span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm" (click)="viewCustomerHistory()">View Customer History →</button>
+        </div>
+      </div>
+    }
+
+    @if (!isQuick) {
+      <div class="form-field">
+        <label>Company Name <span class="optional-tag">(auto)</span></label>
+        <input [(ngModel)]="deal.customer" (ngModelChange)="onCustomerEdited()" placeholder="Auto-filled from work email" />
+      </div>
+
+      <div class="form-field">
+        <label>Primary Contact Name <span class="optional-tag">(auto)</span></label>
+        <input [(ngModel)]="deal.contactName" (ngModelChange)="onContactEdited()" placeholder="Auto-filled from work email" />
+      </div>
+    }
 
     <div class="form-field">
-      <label>Marketplace *</label>
+      <label>Marketplace @if (marketplaceRequired) { * } @else { <span class="optional-tag">(optional)</span> }
+        @if (marketplaceLocked) { <span class="optional-tag">🔒 derived from tag</span> }
+      </label>
       <div class="checkbox-group">
-        <label class="checkbox-option">
-          <input type="checkbox" [checked]="allMarketplacesSelected" (change)="toggleAllMarketplaces()" />
-          <span>All</span>
-        </label>
-        @for (m of marketplaces; track m) {
+        @if (!marketplaceLocked) {
           <label class="checkbox-option">
-            <input type="checkbox" [checked]="isMarketplaceSelected(m)" (change)="toggleMarketplace(m)" />
+            <input type="checkbox" [checked]="allMarketplacesSelected" (change)="toggleAllMarketplaces()" />
+            <span>All</span>
+          </label>
+        }
+        @for (m of marketplaces; track m) {
+          <label class="checkbox-option" [class.disabled]="marketplaceLocked">
+            <input type="checkbox" [checked]="isMarketplaceSelected(m)" [disabled]="marketplaceLocked" (change)="toggleMarketplace(m)" />
             <span>{{ m }}</span>
           </label>
         }
       </div>
-      <small>Select one or more marketplaces.</small>
+      @if (marketplaceLocked) {
+        <small>Derived from the campaign / event tag <strong>{{ selectedEvent?.name }}</strong> ({{ selectedEvent?.marketplace }}). Change the tag to change the marketplace.</small>
+      } @else {
+        <small>{{ marketplaceRequired ? 'Select one or more marketplaces.' : 'Optional for this engagement type — no marketplace offer is created.' }}</small>
+      }
     </div>
 
-    <div class="form-field">
-      <label>Deal Type *</label>
-      <select [(ngModel)]="deal.dealType">
-        @for (t of dealTypes; track t) {
-          <option [value]="t">{{ t }}</option>
-        }
-      </select>
-    </div>
-
-    <div class="form-field">
-      <label>Expected Contract Value (USD)</label>
-      <div class="money-input">
-        <span>$</span>
-        <input type="number" min="0" [(ngModel)]="deal.expectedValue" placeholder="Enter amount" />
-      </div>
-    </div>
-
-    <div class="form-field">
-      <label>Expected Close Date *</label>
-      <input type="date" [(ngModel)]="deal.expectedCloseDate" />
-    </div>
+    @if (!isQuick) {
+      @for (acct of accountFields; track acct.marketplace) {
+        <div class="form-field">
+          <label>{{ acct.label }}</label>
+          <input [(ngModel)]="billingAccountIds[acct.marketplace]" [placeholder]="acct.placeholder" />
+          <small>Optional — needed when you create a {{ acct.marketplace }} private offer.</small>
+        </div>
+      }
+    }
 
     <div class="form-field full">
-      <label>Deal Description (optional)</label>
-      <textarea rows="4" maxlength="500" [(ngModel)]="deal.description" placeholder="Add a short description of the deal, business need, and objectives…"></textarea>
-      <small>{{ deal.description.length }} / 500</small>
+      <label>Campaign / Event Tag @if (tagRequired) { * } @else { <span class="optional-tag">(optional)</span> }
+        <app-settings-hint
+          text="Add, edit, pause, or remove campaign / event tags from Settings → Campaign Tags. Paused tags don't appear in this list."
+          link="/settings/campaign-events"
+          linkLabel="Open Campaign Tags" />
+      </label>
+      <select [(ngModel)]="deal.campaignEventId" (ngModelChange)="onEventChange()">
+        <option value="">{{ tagRequired ? 'Select a campaign or event' : 'No tag (not applicable)' }}</option>
+        <option [value]="noEventTag.id">— {{ noEventTag.name }} —</option>
+        @for (ev of selectableEvents; track ev.id) {
+          <option [value]="ev.id">{{ ev.name }} ({{ ev.marketplace }}){{ ev.paused ? ' — paused' : '' }}</option>
+        }
+      </select>
+
+      @if (selectedEvent; as ev) {
+        <div class="event-card">
+          <div class="event-card-head">
+            <strong>{{ ev.name }}</strong>
+            <span class="badge" [class]="statusBadgeClass(eventStatusOf(ev))">{{ eventStatusOf(ev) }}</span>
+          </div>
+          <table class="event-meta">
+            <tr><td>Marketplace</td><td>{{ ev.marketplace || '—' }}</td></tr>
+            <tr><td>Duration</td><td>{{ ev.startDate }} to {{ ev.endDate }}</td></tr>
+            <tr><td>Description</td><td>{{ ev.description || '—' }}</td></tr>
+          </table>
+          @if (eventStatusOf(ev) === 'Completed') {
+            <div class="event-warning">
+              ⚠ Event Completed — this event ended on <b>{{ ev.endDate }}</b>.
+              You can still associate this engagement with this event.
+            </div>
+          }
+        </div>
+      }
     </div>
 
-    <app-deal-flow-footer
-      backLink="/deals"
-      backLabel="Cancel"
-      [continueLabel]="isEdit ? 'Save & Continue →' : 'Create Deal →'"
-      [saving]="saving"
-      [continueDisabled]="loading"
-      (proceed)="submit()" />
+    @if (!isQuick) {
+      <div class="form-field">
+        <label>Phone Number <span class="optional-tag">(optional)</span></label>
+        <input [(ngModel)]="deal.phone" placeholder="Contact phone number" />
+      </div>
+
+      <div class="form-field">
+        <label>Priority <span class="optional-tag">(optional)</span></label>
+        <select [(ngModel)]="deal.priority">
+          <option value="">Not set</option>
+          @for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>Expected Close Date <span class="optional-tag">(optional)</span></label>
+        <input type="date" [(ngModel)]="deal.expectedCloseDate" />
+      </div>
+
+      <div class="form-field">
+        <label>Engagement Name <span class="optional-tag">(optional)</span></label>
+        <input [(ngModel)]="deal.name" (ngModelChange)="onNameEdited()" placeholder="Auto-named from type & company" />
+      </div>
+
+      <div class="form-field full">
+        <label>Notes <span class="optional-tag">(optional)</span></label>
+        <textarea rows="4" maxlength="500" [(ngModel)]="deal.description" placeholder="Add a short description of the engagement, business need, and objectives…"></textarea>
+        <small>{{ deal.description.length }} / 500</small>
+      </div>
+    }
+
+    @if (isQuick) {
+      <div class="form-field full quick-note">
+        ⚡ Quick capture saves the essentials. You can open this engagement later to add products, pricing, and the rest.
+      </div>
+    }
+
+    <div class="sticky-footer">
+      <app-deal-flow-footer
+        backLink="/deals"
+        backLabel="Cancel"
+        [continueLabel]="isQuick ? 'Save Quick Capture →' : (isEdit ? 'Save & Continue →' : 'Create & Continue →')"
+        [saving]="saving"
+        [continueDisabled]="loading"
+        (proceed)="submit()" />
+    </div>
   </section>
 
   <aside class="card">
-    <h3>What happens next?</h3>
-    <ol>
-      <li>Add Products</li>
-      <li>Configure Pricing</li>
-      <li>Add Meeting Notes</li>
-      <li>Start Approvals</li>
-      <li>Create Private Offer</li>
-    </ol>
+    @if (isQuick) {
+      <h3>⚡ Quick Capture</h3>
+      <p class="footnote">Saving the essentials now. The full workflow for <strong>{{ deal.engagementType }}</strong> stays available when you come back to complete it.</p>
+      <ol>
+        @for (s of flowSteps; track s.key) { <li>{{ s.label }}</li> }
+      </ol>
+    } @else {
+      <h3>Workflow for {{ deal.engagementType }}</h3>
+      <ol>
+        @for (s of flowSteps; track s.key) { <li>{{ s.label }}</li> }
+      </ol>
+      <p class="footnote">Screens that don't apply to this engagement type are hidden.</p>
+      <p class="footnote"><strong>On submit:</strong> {{ config.submitLabel }}</p>
+    }
   </aside>
 </div>
+}

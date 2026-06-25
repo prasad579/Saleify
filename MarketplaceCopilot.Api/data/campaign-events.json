@@ -1,0 +1,46 @@
+[
+  {
+    "id": "EVT-104",
+    "name": "sample azure",
+    "marketplace": "AWS",
+    "startDate": "2026-07-02",
+    "endDate": "2026-07-03",
+    "description": "",
+    "createdAt": "2026-06-24",
+    "paused": false,
+    "status": "Upcoming"
+  },
+  {
+    "id": "EVT-101",
+    "name": "Workshop on ACE Co-sell July 2026",
+    "marketplace": "AWS",
+    "startDate": "2026-07-01",
+    "endDate": "2026-07-01",
+    "description": "In this workshop we will present how to create ACE Co-sell on top of deals in HubSpot. Also how create partner originated co-sell. How to reject and accept ACE originated Co-sell and more...\n\nAlso audience can play around with same features",
+    "createdAt": "2026-06-20",
+    "paused": false,
+    "status": "Upcoming"
+  },
+  {
+    "id": "EVT-102",
+    "name": "Microsoft Build 2026",
+    "marketplace": "Azure",
+    "startDate": "2026-06-18",
+    "endDate": "2026-06-20",
+    "description": "Developer conference for Azure and Microsoft 365.",
+    "createdAt": "2026-06-20",
+    "paused": true,
+    "status": "Completed"
+  },
+  {
+    "id": "EVT-103",
+    "name": "Google Cloud Next \u002726",
+    "marketplace": "GCP",
+    "startDate": "2026-05-11",
+    "endDate": "2026-05-15",
+    "description": "Google Cloud\u0027s annual conference (already concluded).",
+    "createdAt": "2026-04-21",
+    "paused": true,
+    "status": "Completed"
+  }
+]

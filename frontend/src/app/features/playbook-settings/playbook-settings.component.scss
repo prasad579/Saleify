@@ -1,0 +1,48 @@
+.header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+.alert.error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+.alert.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+.playbook-list { display: flex; flex-direction: column; gap: 16px; }
+
+.playbook-edit-card { display: flex; flex-direction: column; gap: 14px; }
+
+.pb-head { display: flex; align-items: center; gap: 10px; }
+.pb-updated { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+.pb-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label { font-size: 13px; font-weight: 600; }
+.form-field label small { color: var(--muted); font-weight: 400; }
+.form-field input,
+.form-field textarea {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.pb-actions { display: flex; justify-content: flex-end; }
+
+@media (max-width: 720px) {
+  .pb-grid { grid-template-columns: 1fr; }
+}

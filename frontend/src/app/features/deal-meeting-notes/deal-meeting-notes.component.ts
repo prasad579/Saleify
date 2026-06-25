@@ -7,6 +7,7 @@ import { LastMeetingSnapshotComponent } from '@shared/components/last-meeting-sn
 import { DealTrackingPanelComponent } from '@shared/components/deal-tracking-panel/deal-tracking-panel.component';
 import { DealStepperComponent } from '@shared/components/deal-stepper/deal-stepper.component';
 import { DealFlowFooterComponent } from '@shared/components/deal-flow-footer/deal-flow-footer.component';
+import { getEngagementConfig, prevScreenPath, screenApplies } from '@shared/utils/engagement.util';
 import {
   ActionItemRow,
   ChangeHistoryRow,
@@ -57,6 +58,13 @@ export class DealMeetingNotesComponent implements OnInit {
   ngOnInit() {
     this.dealId = this.route.snapshot.paramMap.get('id') || '';
     this.loadDeal();
+  }
+
+  get engagementType(): string { return this.deal?.engagementType || 'Private Offer'; }
+  get hasApprovals(): boolean { return screenApplies(this.engagementType, 'approvals'); }
+  get backPath(): string { return prevScreenPath(this.engagementType, this.dealId, 'meeting-notes') || `/deals/${this.dealId}/products`; }
+  get proceedLabel(): string {
+    return this.hasApprovals ? 'Continue to Approvals →' : getEngagementConfig(this.engagementType).submitLabel;
   }
 
   get lastSession(): MeetingSessionRow | null {
@@ -202,13 +210,24 @@ export class DealMeetingNotesComponent implements OnInit {
     this.api.setMeetingNotes(this.dealId, payload).subscribe({
       next: (res: any) => {
         this.applySaveResult(res);
-        this.api.enterApprovals(this.dealId).subscribe({
-          next: () => this.router.navigate(['/deals', this.dealId, 'approvals']),
-          error: () => {
-            this.saving = false;
-            this.router.navigate(['/deals', this.dealId, 'approvals']);
-          }
-        });
+        if (this.hasApprovals) {
+          this.api.enterApprovals(this.dealId).subscribe({
+            next: () => this.router.navigate(['/deals', this.dealId, 'approvals']),
+            error: () => {
+              this.saving = false;
+              this.router.navigate(['/deals', this.dealId, 'approvals']);
+            }
+          });
+        } else {
+          // No approvals for this engagement type — this is the final submit.
+          this.api.submitEngagement(this.dealId).subscribe({
+            next: () => this.router.navigate(['/deals', this.dealId]),
+            error: () => {
+              this.saving = false;
+              this.router.navigate(['/deals', this.dealId]);
+            }
+          });
+        }
       },
       error: () => {
         this.saving = false;

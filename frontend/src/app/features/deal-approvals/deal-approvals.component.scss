@@ -35,6 +35,20 @@
   gap: 12px;
   flex-wrap: wrap;
 }
+.alert.trial-banner {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+}
+.consumption-note {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
 
 .filter-control {
   display: flex;
@@ -343,19 +357,42 @@
 .progress-card { text-align: center; }
 
 .progress-ring {
-  width: 80px;
-  height: 80px;
+  --pct: 0;
+  position: relative;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
-  border: 6px solid #ede9fe;
-  border-top-color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 12px auto;
+  /* Filled arc grows with --pct; reaches a full circle at 100%. */
+  background: conic-gradient(var(--primary) calc(var(--pct) * 1%), #ede9fe 0);
+  transition: background 0.4s ease;
+}
+
+/* Punch out the middle to make it a ring (donut). */
+.progress-ring::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.progress-ring span {
+  position: relative;
+  z-index: 1;
   font-size: 18px;
   font-weight: 700;
-  margin: 12px auto;
   color: var(--primary);
 }
+
+.progress-ring.complete {
+  background: conic-gradient(var(--success) 100%, var(--success) 0);
+}
+
+.progress-ring.complete span { color: var(--success); }
 
 .progress-stats {
   display: grid;

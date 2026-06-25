@@ -1,23 +1,85 @@
 <div class="home-header">
   <div>
     <h1 class="page-title">Welcome back, {{ auth.user()?.name || 'there' }}! 👋</h1>
-    <p class="page-subtitle">Here's what's happening with your deals today.</p>
+    <p class="page-subtitle">Here's what's happening with your engagements today.</p>
   </div>
-  <a routerLink="/deals/new" class="btn btn-primary">+ Create New Deal</a>
+  <div class="header-actions">
+    @if (snapSettings.snapshotButtonEnabled()) {
+      <button type="button" class="btn btn-outline" (click)="snapshotMine()">📋 Generate Snapshot</button>
+    }
+    @if (snapSettings.emailButtonEnabled()) {
+      <button type="button" class="btn btn-outline" (click)="snapshotMine(true)">✉️ Email Summary</button>
+    }
+    <a routerLink="/deals/new" class="btn btn-primary">+ Create Engagement</a>
+  </div>
 </div>
 
 @if (data) {
   <div class="stat-grid">
-    <div class="stat-card"><div class="value">{{ data.openDeals }}</div><div class="label">My Open Deals</div></div>
-    <div class="stat-card"><div class="value">{{ data.pendingApprovals }}</div><div class="label">Approval Pending</div></div>
-    <div class="stat-card"><div class="value">{{ data.offersSubmitted }}</div><div class="label">Offers Submitted</div></div>
+    <button type="button" class="stat-card clickable" (click)="goMyEngagements()">
+      <div class="value">{{ data.openDeals }}</div><div class="label">My Open Engagements</div>
+      <span class="stat-go">View →</span>
+    </button>
+    <button type="button" class="stat-card clickable" (click)="goApprovals()">
+      <div class="value">{{ data.pendingApprovals }}</div><div class="label">Approval Pending</div>
+      <span class="stat-go">View →</span>
+    </button>
+    <button type="button" class="stat-card clickable" (click)="goOffers()">
+      <div class="value">{{ data.offersSubmitted }}</div><div class="label">Offers Submitted</div>
+      <span class="stat-go">View →</span>
+    </button>
     <div class="stat-card"><div class="value">{{ data.pipelineValue }}</div><div class="label">Pipeline Value</div></div>
   </div>
+
+  @if (insights) {
+    <section class="card section-card insights-card">
+      <div class="section-toolbar">
+        <h3>📊 Engagement Insights</h3>
+        <div class="insights-actions">
+          @if (snapSettings.snapshotButtonEnabled()) {
+            <button type="button" class="btn btn-outline btn-sm" (click)="snapshotLeadership()">Generate Snapshot</button>
+          }
+          @if (snapSettings.emailButtonEnabled()) {
+            <button type="button" class="btn btn-primary btn-sm" (click)="snapshotLeadership(true)">Email Leadership Summary</button>
+          }
+        </div>
+      </div>
+      <div class="insights-grid">
+        <div class="insight"><span class="num">{{ insights.activeEvents }}</span><span class="lbl">Active Events</span></div>
+        <div class="insight"><span class="num">{{ insights.activeEngagements }}</span><span class="lbl">Active Engagements</span></div>
+        <div class="insight"><span class="num">{{ insights.pendingFollowUps }}</span><span class="lbl">Pending Follow-Ups</span></div>
+        <div class="insight"><span class="num">{{ insights.pendingApprovals }}</span><span class="lbl">Pending Approvals</span></div>
+      </div>
+    </section>
+  }
+
+  @if (events.length) {
+    <section class="card section-card">
+      <div class="section-toolbar">
+        <h3>🎟️ Campaign / Event Tags</h3>
+        <a routerLink="/settings/campaign-events" class="btn btn-outline btn-sm">Manage tags →</a>
+      </div>
+      <div class="tag-card-grid">
+        @for (ev of events; track ev.id) {
+          <button type="button" class="tag-card" (click)="goTag(ev)" [title]="'View engagements tagged ' + ev.name">
+            <div class="tag-card-head">
+              <strong>{{ ev.name }}</strong>
+              <span class="badge" [class]="statusBadgeClass(statusOf(ev))">{{ statusOf(ev) }}</span>
+            </div>
+            <div class="tag-card-meta">{{ ev.marketplace }} · {{ ev.startDate }} → {{ ev.endDate }}</div>
+            <div class="tag-card-foot">
+              <span class="tag-deals">{{ dealCountFor(ev) }} engagement(s) →</span>
+            </div>
+          </button>
+        }
+      </div>
+    </section>
+  }
 
   <div class="grid-2">
     <section class="card section-card">
       <div class="section-toolbar">
-        <h3>My Open Deals</h3>
+        <h3>My Open Engagements</h3>
         <label class="sort-control">
           Sort by created
           <select [(ngModel)]="dealsSort" (ngModelChange)="onDealsSortChange()">
@@ -29,34 +91,66 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Deal</th><th>Customer</th><th>Created</th><th>Stage</th><th>Value</th><th></th>
+            <th>Engagement</th><th>Customer</th><th>Created</th><th>Stage</th><th>Value</th><th></th>
           </tr>
         </thead>
         <tbody>
           @for (d of pagedDeals; track d.id) {
             <tr>
-              <td><strong>{{ d.name }}</strong><br><small>{{ d.id }}</small></td>
+              <td><a [routerLink]="['/deals', d.id]" class="row-link"><strong>{{ d.name }}</strong></a><br><small>{{ d.id }}</small></td>
               <td>{{ d.customer }}</td>
               <td>{{ formatCreatedDate(d.createdAt) }}</td>
               <td><span class="badge badge-purple">{{ d.stage }}</span></td>
               <td>{{ d.value }}</td>
               <td><a [routerLink]="['/deals', d.id]" class="btn btn-outline">View</a>
-                <a [routerLink]="continuePath(d)" class="btn btn-outline" style="margin-left:6px">Continue</a></td>
+                <a [routerLink]="continuePath(d)" class="btn btn-outline" style="margin-left:6px">{{ d.quickCapture ? 'Complete' : 'Continue' }}</a></td>
             </tr>
           } @empty {
-            <tr><td colspan="6" class="empty-row">No open deals yet.</td></tr>
+            <tr><td colspan="6" class="empty-row">No open engagements yet.</td></tr>
           }
         </tbody>
       </table>
       @if (sortedDeals.length > pageSize) {
         <div class="pagination">
           <button type="button" class="btn btn-outline btn-sm" [disabled]="dealsPage <= 1" (click)="prevDealsPage()">← Prev</button>
-          <span>Page {{ dealsPage }} of {{ dealsTotalPages }} ({{ sortedDeals.length }} deals)</span>
+          <span>Page {{ dealsPage }} of {{ dealsTotalPages }} ({{ sortedDeals.length }} engagements)</span>
           <button type="button" class="btn btn-outline btn-sm" [disabled]="dealsPage >= dealsTotalPages" (click)="nextDealsPage()">Next →</button>
         </div>
       }
     </section>
 
+    <section class="card section-card activity-card">
+      <div class="section-toolbar">
+        <h3>🕒 Recent Activity</h3>
+        <span class="activity-sub">Latest changes across your engagements</span>
+      </div>
+      @if (data.recentActivity?.length) {
+        <ul class="activity-list">
+          @for (a of data.recentActivity; track a.id) {
+            <li class="activity-item">
+              <span class="activity-icon" [title]="a.category">{{ activityIcon(a.category) }}</span>
+              <div class="activity-body">
+                <p class="activity-summary">{{ a.summary }}</p>
+                <div class="activity-meta">
+                  <a [routerLink]="['/deals', a.dealId]" class="row-link">{{ a.customer || a.dealName || a.dealId }}</a>
+                  <span class="dot">·</span>
+                  <span class="badge" [class]="activityBadgeClass(a.category)">{{ a.category }}</span>
+                  <span class="dot">·</span>
+                  <span class="muted-sm">{{ a.changedBy }}</span>
+                  <span class="dot">·</span>
+                  <span class="muted-sm">{{ formatActivityTime(a.timestamp) }}</span>
+                </div>
+              </div>
+              <a [routerLink]="['/deals', a.dealId]" class="activity-go" title="Open engagement">View →</a>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="empty-row">No recent activity yet.</p>
+      }
+    </section>
+
+    <!-- AI Assistant — hidden for now (kept for easy restore)
     <section class="card ai-card">
       <h3>✨ AI Assistant</h3>
       <p>Here are a few things you should focus on today:</p>
@@ -69,29 +163,73 @@
       </div>
       @if (chatReply) { <p class="reply">{{ chatReply }}</p> }
     </section>
+    -->
   </div>
 
   <div class="grid-2">
-    <section class="card section-card">
-      <h3>My Tasks</h3>
-      <table class="data-table">
-        <thead><tr><th>Task</th><th>Deal</th><th>Due</th><th>Status</th></tr></thead>
-        <tbody>
-          @for (t of pagedTasks; track t.id) {
-            <tr>
-              <td>{{ t.task }}</td><td>{{ t.deal }}</td><td>{{ t.dueDate }}</td>
-              <td><span class="badge" [class.badge-blue]="t.status==='In Progress'" [class.badge-orange]="t.status==='Pending'">{{ t.status }}</span></td>
-            </tr>
-          } @empty {
-            <tr><td colspan="4" class="empty-row">No tasks right now.</td></tr>
+    <section class="card section-card tasks-card">
+      <div class="section-toolbar">
+        <h3>✅ My Tasks <span class="count-pill">{{ tasksCount }}</span></h3>
+        <div class="tasks-controls">
+          <div class="seg" role="tablist">
+            <button type="button" class="seg-opt" [class.active]="tasksView === 'list'" (click)="tasksView = 'list'">List</button>
+            <button type="button" class="seg-opt" [class.active]="tasksView === 'grouped'" (click)="tasksView = 'grouped'">By engagement</button>
+          </div>
+          @if (tasksView === 'list' && tasksCount > pageSize) {
+            <button type="button" class="btn btn-outline btn-sm" (click)="showAllTasks = !showAllTasks">
+              {{ showAllTasks ? 'Paginate' : 'Show all' }}
+            </button>
           }
-        </tbody>
-      </table>
-      @if ((data.tasks?.length || 0) > pageSize) {
-        <div class="pagination">
-          <button type="button" class="btn btn-outline btn-sm" [disabled]="tasksPage <= 1" (click)="prevTasksPage()">← Prev</button>
-          <span>Page {{ tasksPage }} of {{ tasksTotalPages }}</span>
-          <button type="button" class="btn btn-outline btn-sm" [disabled]="tasksPage >= tasksTotalPages" (click)="nextTasksPage()">Next →</button>
+        </div>
+      </div>
+
+      @if (tasksView === 'list') {
+        <table class="data-table">
+          <thead><tr><th>Task</th><th>Engagement</th><th>Due</th><th>Status</th></tr></thead>
+          <tbody>
+            @for (t of pagedTasks; track t.id) {
+              <tr>
+                <td>{{ t.task }}</td>
+                <td><a [routerLink]="['/deals', t.deal]" class="row-link">{{ t.customer || t.dealName || t.deal }}</a></td>
+                <td>{{ t.dueDate }}</td>
+                <td><span class="badge" [class.badge-blue]="t.status==='In Progress'" [class.badge-orange]="t.status==='Pending'">{{ t.status }}</span></td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4" class="empty-row">No tasks right now.</td></tr>
+            }
+          </tbody>
+        </table>
+        @if (!showAllTasks && tasksCount > pageSize) {
+          <div class="pagination">
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="tasksPage <= 1" (click)="prevTasksPage()">← Prev</button>
+            <span>Page {{ tasksPage }} of {{ tasksTotalPages }}</span>
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="tasksPage >= tasksTotalPages" (click)="nextTasksPage()">Next →</button>
+          </div>
+        }
+      } @else {
+        <div class="task-groups">
+          @for (g of groupedTasks; track g.dealId) {
+            <div class="task-group">
+              <a [routerLink]="['/deals', g.dealId]" class="task-group-head">
+                <strong>{{ g.customer || g.dealName }}</strong>
+                <span class="task-group-sub">{{ g.dealName }} · {{ g.dealId }}</span>
+                <span class="count-pill">{{ g.items.length }}</span>
+              </a>
+              <ul class="task-group-items">
+                @for (t of g.items; track t.id) {
+                  <li>
+                    <span class="ti-task">{{ t.task }}</span>
+                    <span class="ti-meta">
+                      <span class="badge" [class.badge-blue]="t.status==='In Progress'" [class.badge-orange]="t.status==='Pending'">{{ t.status }}</span>
+                      <span class="ti-due">{{ t.dueDate }}</span>
+                    </span>
+                  </li>
+                }
+              </ul>
+            </div>
+          } @empty {
+            <p class="empty-row">No tasks right now.</p>
+          }
         </div>
       }
     </section>
@@ -99,15 +237,24 @@
     <section class="card section-card">
       <h3>Today's Reminders</h3>
       <table class="data-table">
-        <thead><tr><th>Reminder</th><th>Deal</th><th>When</th><th>Type</th></tr></thead>
+        <thead><tr><th>Reminder</th><th>Engagement</th><th>Remind on</th><th>Status</th><th>Type</th></tr></thead>
         <tbody>
           @for (r of pagedReminders; track r.id) {
             <tr>
-              <td>{{ r.reminder }}</td><td>{{ r.deal }}</td><td>{{ r.dateTime }}</td>
+              <td>{{ r.reminder }}</td>
+              <td><a [routerLink]="['/deals', r.deal]" class="row-link">{{ r.customer || r.dealName || r.deal }}</a></td>
+              <td class="nowrap">{{ formatReminderDate(r.dateTime) }}</td>
+              <td>
+                @if (reminderStatus(r.dateTime).tone !== 'none') {
+                  <span class="badge" [class]="reminderBadgeClass(reminderStatus(r.dateTime).tone)">{{ reminderStatus(r.dateTime).label }}</span>
+                } @else {
+                  <span class="muted-sm">—</span>
+                }
+              </td>
               <td><span class="badge badge-purple">{{ r.type }}</span></td>
             </tr>
           } @empty {
-            <tr><td colspan="4" class="empty-row">No reminders today.</td></tr>
+            <tr><td colspan="5" class="empty-row">No reminders today.</td></tr>
           }
         </tbody>
       </table>

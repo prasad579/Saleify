@@ -1,0 +1,42 @@
+.header-row { margin-bottom: 20px; }
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.settings-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  position: relative;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    transform: translateY(-2px);
+  }
+}
+
+.settings-icon { font-size: 28px; line-height: 1; }
+
+.settings-body {
+  flex: 1;
+  strong { font-size: 16px; }
+  p { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+}
+
+.settings-go {
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 13px;
+}

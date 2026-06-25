@@ -1,15 +1,37 @@
 @if (loading) {
-  <p>Loading deal…</p>
+  <p>Loading engagement…</p>
 } @else if (!deal) {
-  <p>Deal not found. <a routerLink="/deals">Back to deals</a></p>
+  <p>Engagement not found. <a routerLink="/deals">Back to engagements</a></p>
 } @else {
   <div class="header-row">
     <div>
       <h1 class="page-title">{{ deal.name || deal.customer }}</h1>
       <p class="page-subtitle">{{ deal.id }} · {{ deal.customer }} · {{ deal.marketplace }}</p>
     </div>
-    <a [routerLink]="continuePath(deal)" class="btn btn-primary">Continue workflow →</a>
+    <div class="header-actions">
+      @if (snapSettings.snapshotButtonEnabled()) {
+        <button type="button" class="btn btn-outline" (click)="snapshot()">📋 Generate Snapshot</button>
+      }
+      @if (snapSettings.emailButtonEnabled()) {
+        <button type="button" class="btn btn-outline" (click)="snapshot(true)">✉️ Email Summary</button>
+      }
+      @if (deal.archived) {
+        <button type="button" class="btn btn-outline" (click)="restore()">♻️ Restore</button>
+      } @else {
+        <button type="button" class="btn btn-outline" (click)="archive()">📦 Archive</button>
+      }
+      <button type="button" class="btn btn-outline danger" (click)="remove()">🗑 Delete</button>
+      @if (!deal.archived) {
+        <a [routerLink]="continuePath(deal)" class="btn btn-primary">Continue workflow →</a>
+      }
+    </div>
   </div>
+
+  @if (deal.archived) {
+    <div class="archived-banner">
+      📦 This engagement is <strong>archived</strong> — hidden from dashboards, lists, and summaries. Restore it to make it active again.
+    </div>
+  }
 
   <div class="meta-grid card">
     <div><span>Stage</span><strong>{{ deal.stage }}</strong></div>
@@ -28,13 +50,11 @@
         [showActions]="true" />
 
       <section class="card quick-links">
-        <h3>Deal workflow</h3>
+        <h3>Engagement workflow</h3>
         <div class="link-grid">
-          <a [routerLink]="['/deals', dealId, 'edit']" class="link-card">Deal details</a>
-          <a [routerLink]="['/deals', dealId, 'products']" class="link-card">Products</a>
-          <a [routerLink]="['/deals', dealId, 'pricing']" class="link-card">Pricing</a>
-          <a [routerLink]="['/deals', dealId, 'meeting-notes']" class="link-card">Meeting notes</a>
-          <a [routerLink]="['/deals', dealId, 'approvals']" class="link-card">Approvals</a>
+          @for (l of workflowLinks; track l.label) {
+            <a [routerLink]="l.path" class="link-card">{{ l.label }}</a>
+          }
         </div>
       </section>
     </section>

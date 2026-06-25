@@ -104,7 +104,7 @@ public class AiService : IAiService
 
         return items;
     }
-
+        
     public string BuildInsight(string notes, AiExtractedSummary summary)
     {
         if (string.IsNullOrWhiteSpace(notes))

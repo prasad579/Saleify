@@ -1,0 +1,16 @@
+@if (svc.config(); as c) {
+  <div class="cd-overlay" (click)="svc.resolve(false)">
+    <div class="cd-modal" [class.danger]="c.danger" (click)="$event.stopPropagation()">
+      <h3 class="cd-title">{{ c.title }}</h3>
+      <div class="cd-body">
+        @for (line of c.lines; track $index) { <p>{{ line }}</p> }
+      </div>
+      <div class="cd-actions">
+        <button type="button" class="btn btn-outline" (click)="svc.resolve(false)">{{ c.cancelLabel || 'Cancel' }}</button>
+        <button type="button" class="btn" [class.btn-danger]="c.danger" [class.btn-primary]="!c.danger" (click)="svc.resolve(true)">
+          {{ c.confirmLabel }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

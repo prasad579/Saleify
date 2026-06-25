@@ -4,6 +4,16 @@
   overflow: hidden;
 }
 
+.remind-on-cell {
+  white-space: nowrap;
+  .added-note {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+}
+
 .tracking-tabs {
   display: flex;
   gap: 0;

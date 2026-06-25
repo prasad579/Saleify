@@ -1,0 +1,47 @@
+{
+  "rules": [
+    {
+      "id": "finance",
+      "title": "Finance Review",
+      "assignee": "Sarah Lee",
+      "enabled": true,
+      "conditionType": "discountGreaterThan",
+      "threshold": 15,
+      "engagementTypes": [
+        "Private Offer",
+        "Free Trial",
+        "Hackathon",
+        "POC"
+      ]
+    },
+    {
+      "id": "legal",
+      "title": "Legal Review",
+      "assignee": "Michael Chen",
+      "enabled": true,
+      "conditionType": "durationMonthsGreaterThan",
+      "threshold": 24,
+      "engagementTypes": [
+        "Private Offer",
+        "Free Trial",
+        "Hackathon",
+        "POC"
+      ]
+    },
+    {
+      "id": "marketplace",
+      "title": "Marketplace Review",
+      "assignee": "Priya Nair",
+      "enabled": true,
+      "conditionType": "marketplacePresent",
+      "threshold": 0,
+      "engagementTypes": [
+        "Private Offer",
+        "Free Trial",
+        "Hackathon",
+        "POC"
+      ]
+    }
+  ],
+  "updatedAt": "2026-06-24 17:35 UTC"
+}

@@ -9,7 +9,25 @@ public class DashboardSummary
     public List<DashboardDealRow> OpenDealsList { get; set; } = [];
     public List<DashboardTaskRow> Tasks { get; set; } = [];
     public List<DashboardReminderRow> Reminders { get; set; } = [];
+    public List<RecentActivityRow> RecentActivity { get; set; } = [];
     public List<string> AiRecommendations { get; set; } = [];
+}
+
+/// <summary>
+/// A single recent change/activity across engagements (aggregated from each deal's change history),
+/// with the related engagement so the Home widget can link straight to it.
+/// </summary>
+public class RecentActivityRow
+{
+    public string Id { get; set; } = "";
+    public string DealId { get; set; } = "";
+    public string DealName { get; set; } = "";
+    public string Customer { get; set; } = "";
+    public string Category { get; set; } = "";
+    public string Summary { get; set; } = "";
+    public string Details { get; set; } = "";
+    public string ChangedBy { get; set; } = "";
+    public string Timestamp { get; set; } = "";
 }
 
 public class DashboardDealRow
@@ -31,6 +49,8 @@ public class DashboardTaskRow
     public string Id { get; set; } = "";
     public string Task { get; set; } = "";
     public string Deal { get; set; } = "";
+    public string DealName { get; set; } = "";
+    public string Customer { get; set; } = "";
     public string DueDate { get; set; } = "";
     public string Status { get; set; } = "";
 }
@@ -40,6 +60,8 @@ public class DashboardReminderRow
     public string Id { get; set; } = "";
     public string Reminder { get; set; } = "";
     public string Deal { get; set; } = "";
+    public string DealName { get; set; } = "";
+    public string Customer { get; set; } = "";
     public string DateTime { get; set; } = "";
     public string Type { get; set; } = "";
 }

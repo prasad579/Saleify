@@ -1,0 +1,11 @@
+<span class="hint-wrap">
+  <button type="button" class="hint-btn" (click)="toggle($event)" aria-label="Where to customize this" title="Where to customize this">ⓘ</button>
+  @if (open()) {
+    <span class="hint-pop" (click)="$event.stopPropagation()">
+      <span class="hint-text">{{ text }}</span>
+      @if (link) {
+        <a [routerLink]="link" class="hint-link" (click)="close()">{{ linkLabel }} →</a>
+      }
+    </span>
+  }
+</span>

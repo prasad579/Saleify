@@ -13,11 +13,14 @@ import {
   actionNeedsDate,
   filterBySession,
   filterHistory,
+  formatReminderDate,
   formatSessionDate,
   getAllSummaryFields,
   meaningfulFields,
   newActionItem,
   newReminder,
+  reminderBadgeClass,
+  reminderStatus,
   sessionLabel,
   truncateNotes
 } from '@shared/utils/meeting-notes.util';
@@ -60,6 +63,9 @@ export class DealTrackingPanelComponent {
   readonly reminderTypes = REMINDER_TYPES;
 
   formatSessionDate = formatSessionDate;
+  formatReminderDate = formatReminderDate;
+  reminderStatus = reminderStatus;
+  reminderBadgeClass = reminderBadgeClass;
   sessionLabel = sessionLabel;
   truncateNotes = truncateNotes;
   getAllSummaryFields = getAllSummaryFields;

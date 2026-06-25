@@ -1,0 +1,73 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Approval Rules</h1>
+    <p class="page-subtitle">Decide which reviews an engagement requires. For example, a <strong>Private Offer</strong> whose discount exceeds the Finance threshold needs <strong>Finance Review</strong>. Change the thresholds, reviewers, and which engagement types each rule applies to — no code change needed.</p>
+  </div>
+  <button type="button" class="btn btn-outline" (click)="reset()">Reset to defaults</button>
+</div>
+
+@if (error) { <div class="alert error">{{ error }}</div> }
+@if (success) { <div class="alert success">{{ success }}</div> }
+
+@if (loading) {
+  <p>Loading approval rules…</p>
+} @else if (settings) {
+  <section class="card setting-card">
+    <h3>Review rules</h3>
+    <p class="hint">Each rule adds a reviewer step when its condition is met for an applicable engagement type. Turn a rule off to never require it.</p>
+
+    @for (rule of settings.rules; track rule.id) {
+      <div class="section-block" [class.disabled]="!rule.enabled">
+        <div class="section-head-row">
+          <input class="title-input" [(ngModel)]="rule.title" [attr.aria-label]="'Title for ' + rule.id" placeholder="Review name" />
+          <label class="switch-inline">
+            <input type="checkbox" [(ngModel)]="rule.enabled" /> Rule enabled
+          </label>
+        </div>
+
+        <div class="rule-grid">
+          <div class="form-field">
+            <label>Assigned reviewer</label>
+            <input [(ngModel)]="rule.assignee" placeholder="e.g. Sarah Lee" />
+          </div>
+
+          <div class="form-field">
+            <label>Condition</label>
+            <select [(ngModel)]="rule.conditionType">
+              @for (c of conditionTypes; track c.value) {
+                <option [value]="c.value">{{ c.label }}</option>
+              }
+            </select>
+          </div>
+
+          @if (needsThreshold(rule)) {
+            <div class="form-field">
+              <label>{{ thresholdLabel(rule) }}</label>
+              <input type="number" min="0" [(ngModel)]="rule.threshold" />
+            </div>
+          }
+        </div>
+
+        <div class="types-block">
+          <span class="types-label">Applies to engagement types</span>
+          <div class="types-chips">
+            @for (t of engagementTypes; track t) {
+              <label class="type-chip" [class.on]="appliesTo(rule, t)">
+                <input type="checkbox" [checked]="appliesTo(rule, t)" (change)="toggleType(rule, t)" />
+                {{ t }}
+              </label>
+            }
+          </div>
+          @if (!rule.engagementTypes.length) {
+            <small class="types-hint">No types selected — this rule applies to <strong>all</strong> engagement types.</small>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <div class="save-bar">
+    @if (settings.updatedAt) { <span class="updated">Last saved {{ settings.updatedAt }}</span> }
+    <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">{{ saving ? 'Saving…' : 'Save approval rules' }}</button>
+  </div>
+}

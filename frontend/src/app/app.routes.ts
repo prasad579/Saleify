@@ -17,6 +17,12 @@ import { DealPricingComponent } from '@features/deal-pricing/deal-pricing.compon
 import { DealOverviewComponent } from '@features/deal-overview/deal-overview.component';
 import { DealMeetingNotesComponent } from '@features/deal-meeting-notes/deal-meeting-notes.component';
 import { DealApprovalsComponent } from '@features/deal-approvals/deal-approvals.component';
+import { CampaignEventsComponent } from '@features/campaign-events/campaign-events.component';
+import { PlaybookSettingsComponent } from '@features/playbook-settings/playbook-settings.component';
+import { SnapshotSettingsComponent } from '@features/snapshot-settings/snapshot-settings.component';
+import { ApprovalSettingsComponent } from '@features/approval-settings/approval-settings.component';
+import { PeopleSettingsComponent } from '@features/people-settings/people-settings.component';
+import { SettingsHomeComponent } from '@features/settings/settings-home.component';
 import { authGuard, guestGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -37,6 +43,13 @@ export const routes: Routes = [
     children: [
       { path: 'home', component: HomeComponent },
       { path: 'deals', component: DealsListComponent },
+      { path: 'settings', component: SettingsHomeComponent },
+      { path: 'settings/campaign-events', component: CampaignEventsComponent },
+      { path: 'settings/playbooks', component: PlaybookSettingsComponent },
+      { path: 'settings/snapshot', component: SnapshotSettingsComponent },
+      { path: 'settings/approvals', component: ApprovalSettingsComponent },
+      { path: 'settings/people', component: PeopleSettingsComponent },
+      { path: 'campaign-events', redirectTo: 'settings/campaign-events', pathMatch: 'full' },
       { path: 'deals/new', component: DealCreateComponent },
       { path: 'deals/:id/edit', component: DealCreateComponent },
       { path: 'deals/:id/products', component: DealProductsComponent },

@@ -13,8 +13,18 @@ public class PricingService : IPricingService
         _ => 5m
     };
 
+    /// <summary>Offer types that carry no contract value (free trial / POC / pilot — time-boxed evaluations).</summary>
+    public static bool IsNoMoneyOffer(string? offerType) =>
+        !string.IsNullOrWhiteSpace(offerType) &&
+        (offerType.Contains("Free Trial", StringComparison.OrdinalIgnoreCase) ||
+         offerType.Contains("POC", StringComparison.OrdinalIgnoreCase) ||
+         offerType.Contains("Pilot", StringComparison.OrdinalIgnoreCase));
+
     public PricingConfig Calculate(PricingConfig input)
     {
+        if (IsNoMoneyOffer(input.OfferType))
+            return CalculateTrial(input);
+
         NormalizeDurationFields(input);
         SyncContractDates(input);
 
@@ -49,6 +59,38 @@ public class PricingService : IPricingService
         input.NetContractValue = input.NetPriceBeforeFees + input.MarketplaceFee;
         input.TotalPayable = input.NetContractValue;
         BuildInstallmentSchedule(input);
+        return input;
+    }
+
+    /// <summary>Free-trial / no-money offers: duration is in days, all monetary values are zero.</summary>
+    private static PricingConfig CalculateTrial(PricingConfig input)
+    {
+        var trialDays = input.TrialDays > 0 ? input.TrialDays : 14;
+        input.TrialDays = trialDays;
+
+        var start = ParseDate(input.ContractStart) ?? DateTime.UtcNow.Date;
+        var end = start.AddDays(trialDays - 1);
+        input.ContractStart = start.ToString("yyyy-MM-dd");
+        input.ContractEnd = end.ToString("yyyy-MM-dd");
+
+        input.DurationType = "days";
+        input.DurationValue = trialDays;
+        input.DurationDays = trialDays;
+        input.DurationMonths = Math.Max(1, (int)Math.Round(trialDays / 30.4375m));
+        input.PricingMethod = "Free Trial";
+        input.DiscountModel = "Same discount for entire contract";
+        input.DiscountPercent = 0;
+        input.YearlyDiscountPercents = [];
+
+        input.PublicContractValue = 0;
+        input.TotalDiscount = 0;
+        input.NetPriceBeforeFees = 0;
+        input.MarketplaceFee = 0;
+        input.NetContractValue = 0;
+        input.TotalPayable = 0;
+        input.FlexiblePaymentsEnabled = false;
+        input.YearlyBreakdown.Clear();
+        input.InstallmentSchedule.Clear();
         return input;
     }
 

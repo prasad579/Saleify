@@ -1,6 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '@environments/environment';
+import {
+  DashboardInsights,
+  EmailSummaryRequest,
+  EmailSummaryResponse,
+  EngagementSnapshot,
+  SnapshotRequest,
+  SnapshotSettings
+} from '@shared/data/snapshot.model';
+import { Person } from '@shared/data/lookups';
+import { ApprovalRulesSettings } from '@shared/data/approval-settings.model';
 
 export { dealContinuePath } from '@shared/utils/deal-api.util';
 
@@ -10,7 +20,26 @@ export class ApiService {
   private base = environment.apiUrl;
 
   getDashboard() { return this.http.get(`${this.base}/dashboard`); }
-  getDeals() { return this.http.get(`${this.base}/deals`); }
+  getDashboardInsights() { return this.http.get<DashboardInsights>(`${this.base}/dashboard/insights`); }
+
+  // Engagement Snapshot (executive summary)
+  generateSnapshot(request: SnapshotRequest) { return this.http.post<EngagementSnapshot>(`${this.base}/snapshot`, request); }
+  emailSnapshot(request: EmailSummaryRequest) { return this.http.post<EmailSummaryResponse>(`${this.base}/snapshot/email`, request); }
+  getSnapshotSettings() { return this.http.get<SnapshotSettings>(`${this.base}/snapshot/settings`); }
+  saveSnapshotSettings(settings: SnapshotSettings) { return this.http.put<SnapshotSettings>(`${this.base}/snapshot/settings`, settings); }
+  resetSnapshotSettings() { return this.http.post<SnapshotSettings>(`${this.base}/snapshot/settings/reset`, {}); }
+
+  // Approval rules settings (which reviews an engagement requires)
+  getApprovalRules() { return this.http.get<ApprovalRulesSettings>(`${this.base}/approval-rules`); }
+  saveApprovalRules(settings: ApprovalRulesSettings) { return this.http.put<ApprovalRulesSettings>(`${this.base}/approval-rules`, settings); }
+  resetApprovalRules() { return this.http.post<ApprovalRulesSettings>(`${this.base}/approval-rules/reset`, {}); }
+  getDeals(view?: 'active' | 'archived' | 'all') {
+    const q = view && view !== 'active' ? `?view=${view}` : '';
+    return this.http.get(`${this.base}/deals${q}`);
+  }
+  archiveDeal(id: string) { return this.http.post(`${this.base}/deals/${id}/archive`, {}); }
+  unarchiveDeal(id: string) { return this.http.post(`${this.base}/deals/${id}/unarchive`, {}); }
+  deleteDeal(id: string) { return this.http.delete(`${this.base}/deals/${id}`); }
   getDealStats() { return this.http.get(`${this.base}/deals/stats`); }
   getDeal(id: string) { return this.http.get(`${this.base}/deals/${id}`); }
   getLookups() { return this.http.get(`${this.base}/lookups`); }
@@ -25,6 +54,7 @@ export class ApiService {
   approvalAction(id: string, body: unknown) { return this.http.post(`${this.base}/deals/${id}/approvals/action`, body); }
   regenerateApprovalDocuments(id: string) { return this.http.post(`${this.base}/deals/${id}/approvals/regenerate-documents`, {}); }
   submitApprovals(id: string) { return this.http.post(`${this.base}/deals/${id}/approvals/submit`, {}); }
+  submitEngagement(id: string) { return this.http.post(`${this.base}/deals/${id}/submit-engagement`, {}); }
   unlockApprovals(id: string) { return this.http.post(`${this.base}/deals/${id}/approvals/unlock`, {}); }
   documentViewUrl(dealId: string, docId: string) {
     return `${this.base}/deals/${dealId}/approvals/documents/${docId}`;
@@ -42,6 +72,27 @@ export class ApiService {
     const query = q.toString();
     return this.http.get(`${this.base}/products${query ? '?' + query : ''}`);
   }
+
+  // Campaign / event tags
+  getCampaignEvents() { return this.http.get(`${this.base}/campaign-events`); }
+  getCampaignEvent(id: string) { return this.http.get(`${this.base}/campaign-events/${id}`); }
+  createCampaignEvent(ev: unknown) { return this.http.post(`${this.base}/campaign-events`, ev); }
+  updateCampaignEvent(id: string, ev: unknown) { return this.http.put(`${this.base}/campaign-events/${id}`, ev); }
+  deleteCampaignEvent(id: string) { return this.http.delete(`${this.base}/campaign-events/${id}`); }
+  toggleCampaignEventPause(id: string) { return this.http.post(`${this.base}/campaign-events/${id}/toggle-pause`, {}); }
+  getCampaignConversion(id: string) { return this.http.get(`${this.base}/campaign-events/${id}/conversion`); }
+
+  // People (engagement owners) — customizable list managed from Settings → People
+  getPeople() { return this.http.get<Person[]>(`${this.base}/people`); }
+  savePerson(person: Partial<Person>) { return this.http.put<Person>(`${this.base}/people`, person); }
+  togglePerson(id: string) { return this.http.post<Person>(`${this.base}/people/${id}/toggle`, {}); }
+  deletePerson(id: string) { return this.http.delete(`${this.base}/people/${id}`); }
+  resetPeople() { return this.http.post<Person[]>(`${this.base}/people/reset`, {}); }
+
+  // Engagement playbooks (configurable "what's next" guidance)
+  getPlaybooks() { return this.http.get(`${this.base}/engagement-playbooks`); }
+  savePlaybook(playbook: unknown) { return this.http.put(`${this.base}/engagement-playbooks`, playbook); }
+  resetPlaybooks() { return this.http.post(`${this.base}/engagement-playbooks/reset`, {}); }
 
   login(body: { email: string; password: string }) { return this.http.post(`${this.base}/auth/login`, body); }
   signup(body: { email: string; password: string; fullName: string }) { return this.http.post(`${this.base}/auth/signup`, body); }

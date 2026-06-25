@@ -10,6 +10,8 @@ public class ApprovalSummary
     public bool DocumentsLocked { get; set; }
     public bool AllowPostApprovalEdits { get; set; } = true;
     public string EulaStatus { get; set; } = "Draft";
+    public bool IsNoMoneyDeal { get; set; }
+    public string? ConsumptionNote { get; set; }
     public string PackageSummaryId { get; set; } = "";
     public string NextStep { get; set; } = "";
     public List<ApprovalRuleMatch> RuleMatches { get; set; } = [];

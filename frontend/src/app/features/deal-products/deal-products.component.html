@@ -1,13 +1,13 @@
 <h1 class="page-title">Select Products</h1>
-<p class="page-subtitle">Deal {{ dealId }} — choose products for this deal.</p>
+<p class="page-subtitle">{{ dealId }} — choose products for this engagement.@if (productsOptional) { <em> Products are optional for this engagement type.</em> }</p>
 
 <div class="page-nav">
-  <a [routerLink]="['/deals', dealId, 'edit']" class="back-link">← Back to Deal Details</a>
+  <a [routerLink]="backPath" class="back-link">← Back</a>
 </div>
 
 @if (error) { <div class="alert error">{{ error }}</div> }
-@if (loading) { <p>Loading deal…</p> } @else {
-<app-deal-stepper [activeStep]="2" />
+@if (loading) { <p>Loading engagement…</p> } @else {
+<app-deal-stepper [engagementType]="engagementType" activeKey="products" />
 
 <div class="product-grid">
   @for (p of products; track p.id) {
@@ -17,17 +17,17 @@
       <p><strong>${{ p.listPricePerYear | number }}/year</strong></p>
       <p>Marketplaces: {{ p.marketplaces?.join(', ') }}</p>
       <button class="btn" [class.btn-primary]="selected.includes(p.id)" [class.btn-outline]="!selected.includes(p.id)" (click)="toggle(p.id)">
-        {{ selected.includes(p.id) ? 'Selected' : 'Add to Deal' }}
+        {{ selected.includes(p.id) ? 'Selected' : 'Add to Engagement' }}
       </button>
     </article>
   }
 </div>
 
 <app-deal-flow-footer
-  [backLink]="'/deals/' + dealId + '/edit'"
+  [backLink]="backPath"
   backLabel="← Previous"
-  continueLabel="Continue to Pricing →"
+  continueLabel="Continue →"
   [saving]="saving"
-  [continueDisabled]="!selected.length"
+  [continueDisabled]="!selected.length && !productsOptional"
   (proceed)="continue()" />
 }

@@ -20,14 +20,14 @@
     <div class="copilot-card">
       <div class="robot">🤖</div>
       <strong>Need help?</strong>
-      <p>Ask Copilot about deals, pricing, or approvals.</p>
+      <p>Ask Copilot about engagements, pricing, or approvals.</p>
       <button class="btn btn-primary" routerLink="/home">Chat with Copilot →</button>
     </div>
   </aside>
 
   <div class="main">
     <header class="topbar">
-      <input class="search" placeholder="Search deals, customers, products..." />
+      <app-engagement-search placeholder="Search engagements, customers, tags…" />
       <div class="user">
         <span>🔔</span>
         <span>❓</span>
@@ -43,10 +43,15 @@
     <main class="content">
       @if (health.checked() && !health.online()) {
         <div class="api-offline-banner">
-          API offline — deal create/pricing need the backend. Run <code>cd MarketplaceCopilot.Api && dotnet run</code> or <code>start-demo.ps1</code>.
+          API offline — engagement create/pricing need the backend. Run <code>cd MarketplaceCopilot.Api && dotnet run</code> or <code>start-demo.ps1</code>.
         </div>
       }
+      <app-page-nav position="top" />
       <router-outlet />
+      <app-page-nav position="bottom" />
     </main>
   </div>
+
+  <app-engagement-snapshot />
+  <app-confirm-dialog />
 </div>

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "PER-1",
+    "name": "Srinivas K",
+    "email": "srinivas.k@saasify.ai",
+    "role": "Deal Desk",
+    "enabled": true,
+    "engagementTypes": [
+      "Private Offer"
+    ],
+    "source": "manual"
+  },
+  {
+    "id": "PER-2",
+    "name": "Indrasena",
+    "email": "priya.sharma@saasify.ai",
+    "role": "Sales Manager",
+    "enabled": true,
+    "engagementTypes": [
+      "Free Trial"
+    ],
+    "source": "manual"
+  },
+  {
+    "id": "PER-3",
+    "name": "Prasad",
+    "email": "prasad.yalla@saasify.ai",
+    "role": "Sales",
+    "enabled": true,
+    "engagementTypes": [
+      "Workshop"
+    ],
+    "source": "manual"
+  },
+  {
+    "id": "PER-4",
+    "name": "Nithin",
+    "email": "nithin.nalli@saasify.ai",
+    "role": "Partner",
+    "enabled": false,
+    "engagementTypes": [
+      "Hackathon"
+    ],
+    "source": "manual"
+  },
+  {
+    "id": "PER-5",
+    "name": "Akhil",
+    "email": "Akhil.Nemana@saasify.ai",
+    "role": "Solutions Engineer",
+    "enabled": true,
+    "engagementTypes": [
+      "POC"
+    ],
+    "source": "manual"
+  }
+]

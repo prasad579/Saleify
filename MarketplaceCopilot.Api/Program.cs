@@ -21,6 +21,7 @@ builder.Services.AddSingleton<IMeetingNotesService, MeetingNotesService>();
 builder.Services.AddSingleton<IApprovalDocumentService, ApprovalDocumentService>();
 builder.Services.AddSingleton<IApprovalService, ApprovalService>();
 builder.Services.AddSingleton<IDealService, DealService>();
+builder.Services.AddSingleton<ISnapshotService, SnapshotService>();
 
 var authSection = builder.Configuration.GetSection("Auth");
 var frontendUrl = authSection["FrontendUrl"] ?? "http://localhost:4200";
