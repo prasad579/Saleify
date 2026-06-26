@@ -43,6 +43,31 @@
   font-size: 14px;
 }
 
+.filter-builder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.fb-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.fb-eq { color: var(--muted); font-weight: 700; }
+.fb-select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 14px;
+  background: #fff;
+  min-width: 150px;
+
+  &:disabled { background: #f1f5f9; color: var(--muted); cursor: not-allowed; }
+}
+.fb-hint { font-size: 12px; color: var(--muted); font-style: italic; }
+
 .filter-chips {
   display: flex;
   align-items: center;
@@ -51,6 +76,7 @@
   margin-bottom: 14px;
 }
 .chips-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+.chips-and { font-size: 11px; color: var(--muted); font-style: italic; }
 .chip {
   display: inline-flex;
   align-items: center;

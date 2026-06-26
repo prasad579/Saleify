@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
 import { SnapshotLauncherService } from '@core/services/snapshot-launcher.service';
 import { SnapshotSettingsService } from '@core/services/snapshot-settings.service';
+import { ToastService } from '@core/services/toast.service';
 import { apiErrorMessage } from '@shared/utils/deal-api.util';
 import { CampaignEvent, eventStatus, MARKETPLACES } from '@shared/data/lookups';
 
@@ -25,6 +26,7 @@ interface ConversionFunnel {
 export class CampaignEventsComponent implements OnInit {
   private api = inject(ApiService);
   private launcher = inject(SnapshotLauncherService);
+  private toast = inject(ToastService);
   snapSettings = inject(SnapshotSettingsService);
 
   marketplaces = MARKETPLACES;
@@ -103,30 +105,30 @@ export class CampaignEventsComponent implements OnInit {
 
   save() {
     this.error = '';
-    this.success = '';
-    if (!this.form.name.trim()) { this.error = 'Event name is required.'; return; }
-    if (!this.form.startDate || !this.form.endDate) { this.error = 'Start and end dates are required.'; return; }
-    if (this.form.endDate < this.form.startDate) { this.error = 'End date must be on or after the start date.'; return; }
+    if (!this.form.name.trim()) { this.toast.error('Event name is required.'); return; }
+    if (!this.form.startDate || !this.form.endDate) { this.toast.error('Start and end dates are required.'); return; }
+    if (this.form.endDate < this.form.startDate) { this.toast.error('End date must be on or after the start date.'); return; }
 
-    const req$ = this.editId
+    const editing = !!this.editId;
+    const req$ = editing
       ? this.api.updateCampaignEvent(this.editId, this.form)
       : this.api.createCampaignEvent(this.form);
 
     req$.subscribe({
       next: () => {
-        this.success = this.editId ? 'Event updated.' : 'Event created.';
+        this.toast.success(editing ? 'Event updated.' : 'Event created.');
         this.showForm = false;
         this.editId = '';
         this.load();
       },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not save event.'); }
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not save event.')); }
     });
   }
 
   remove(ev: CampaignEvent) {
     this.api.deleteCampaignEvent(ev.id).subscribe({
-      next: () => { this.success = 'Event deleted.'; this.load(); },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not delete event.'); }
+      next: () => { this.toast.success('Event deleted.'); this.load(); },
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not delete event.')); }
     });
   }
 
@@ -134,11 +136,10 @@ export class CampaignEventsComponent implements OnInit {
     this.error = '';
     this.api.toggleCampaignEventPause(ev.id).subscribe({
       next: (updated: any) => {
-        this.success = updated?.paused ? `“${ev.name}” paused — hidden from the engagement tag dropdown.` : `“${ev.name}” resumed.`;
-        setTimeout(() => this.success = '', 3500);
+        this.toast.success(updated?.paused ? `“${ev.name}” paused — hidden from the engagement tag dropdown.` : `“${ev.name}” resumed.`);
         this.load();
       },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not update the tag.'); }
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not update the tag.')); }
     });
   }
 

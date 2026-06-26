@@ -1,15 +1,66 @@
+/* Inline field-level validation */
+.field-error {
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.field-error::before { content: '⚠'; font-size: 11px; }
+
+.form-field.has-error input,
+.form-field input.invalid,
+.form-field select.invalid {
+  border-color: var(--danger);
+  background: #fef2f2;
+}
+
+/* Locked (submitted) engagement banner + read-only form */
+.lock-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+.lock-icon { font-size: 22px; flex: 0 0 auto; }
+.lock-text { flex: 1; font-size: 13px; color: #92400e; line-height: 1.5; }
+.lock-text strong { color: #78350f; }
+.lock-banner .btn { flex: 0 0 auto; }
+
+.locked-form {
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
+}
+
 .page-nav { margin-bottom: 12px; }
 .back-link { color: var(--primary); font-weight: 600; font-size: 14px; text-decoration: none; }
 .back-link:hover { text-decoration: underline; }
 
 .layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1.7fr 1fr;
   gap: 16px;
+  align-items: start;
+}
+
+/* Right-hand column (playbook + workflow) follows you as you scroll the form. */
+.side-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 16px;
 }
 
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
+  .side-col { position: static; }
 }
 
 .actions {
@@ -17,8 +68,6 @@
   gap: 12px;
   justify-content: flex-end;
 }
-
-aside ol { line-height: 2; padding-left: 18px; }
 
 .money-input {
   display: flex;
@@ -173,21 +222,49 @@ input[type="date"] {
 .type-choice strong { display: block; font-size: 14px; }
 .type-choice p { color: var(--muted); font-size: 12px; margin-top: 2px; }
 
-.form-grid-head h3 { margin: 0; }
+.form-grid-head h3 { margin: 0; font-size: 17px; }
 .footnote { color: var(--muted); font-size: 12px; margin-top: 10px; }
 
-/* AI Playbook snapshot card */
+/* ---- Form beautification ---- */
+.form-grid { row-gap: 18px; column-gap: 18px; }
+
+/* Header reads as a clear section title with a divider. */
+.form-grid-head.full {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+  margin-bottom: 2px;
+}
+
+/* Clearer labels + comfortable inputs with a visible focus ring. */
+.form-field label { font-size: 13px; font-weight: 600; color: var(--text); }
+.form-field input,
+.form-field select,
+.form-field textarea {
+  padding: 11px 13px;
+  border-radius: 9px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+}
+.form-field input::placeholder,
+.form-field textarea::placeholder { color: #94a3b8; }
+
+/* AI Playbook card (right sidebar) */
 .playbook-card {
-  margin-bottom: 16px;
   border: 1px solid #c7d2fe;
-  background: linear-gradient(180deg, #f5f7ff 0%, #ffffff 60%);
+  background: linear-gradient(180deg, #f5f7ff 0%, #ffffff 55%);
 }
 .playbook-head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 .playbook-badge {
   background: var(--primary);
@@ -197,29 +274,30 @@ input[type="date"] {
   font-size: 12px;
   font-weight: 700;
 }
-.playbook-title { font-size: 15px; }
+.playbook-title { display: block; font-size: 14px; line-height: 1.4; margin-bottom: 6px; }
 .playbook-card.collapsed { background: #f5f7ff; }
 .playbook-toggle {
-  border: none;
-  background: transparent;
+  border: 1px solid #c7d2fe;
+  background: #fff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--primary);
-  padding: 2px 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
   line-height: 1;
+  white-space: nowrap;
+  transition: background 0.15s ease;
 }
-.playbook-edit { margin-left: auto; font-size: 13px; color: var(--primary); font-weight: 600; text-decoration: none; }
-.playbook-edit:hover { text-decoration: underline; }
-.playbook-cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-.playbook-cols h4 { font-size: 13px; margin-bottom: 8px; }
-.playbook-hint { color: var(--muted); font-weight: 400; }
-.playbook-cols ol { padding-left: 18px; line-height: 1.7; font-size: 13px; }
-.playbook-cols ul { list-style: none; padding: 0; line-height: 1.7; font-size: 13px; }
-.playbook-cols ul li { margin-bottom: 4px; }
+.playbook-toggle:hover { background: #eef2ff; }
+.playbook-collapsed-hint { color: var(--muted); font-size: 12px; margin: 4px 0 0; }
+.playbook-section { margin-top: 12px; }
+.playbook-section h4 { font-size: 13px; margin: 0 0 6px; }
+.playbook-hint { color: var(--muted); font-weight: 400; font-size: 11px; }
+.playbook-section ol { padding-left: 18px; line-height: 1.6; font-size: 13px; margin: 0; }
+.playbook-section ul { list-style: none; padding: 0; line-height: 1.5; font-size: 13px; margin: 0; }
+.playbook-section ul li { margin-bottom: 6px; padding-left: 18px; position: relative; }
+.playbook-section ul li::before { content: '💬'; position: absolute; left: 0; font-size: 11px; }
 .playbook-timeline {
   margin-top: 12px;
   padding-top: 10px;
@@ -227,9 +305,84 @@ input[type="date"] {
   font-size: 13px;
   color: var(--text);
 }
-@media (max-width: 720px) {
-  .playbook-cols { grid-template-columns: 1fr; }
+.playbook-edit {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
 }
+.playbook-edit:hover { text-decoration: underline; }
+
+/* Workflow card — vertical numbered stepper */
+.workflow-card { background: #fff; }
+.wf-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.wf-head h3 { margin: 0; font-size: 16px; }
+.wf-sub { color: var(--muted); font-size: 12px; margin: 0 0 14px; }
+.wf-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+/* Connector line behind the numbered circles */
+.wf-steps::before {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  background: #e0e7ff;
+}
+.wf-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  position: relative;
+}
+.wf-num {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 1;
+}
+.wf-label { font-size: 14px; font-weight: 500; }
+.wf-submit {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wf-submit-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #047857;
+}
+.wf-submit strong { font-size: 14px; color: #065f46; }
 
 /* Quick Capture / Full Details toggle */
 .mode-toggle-field { gap: 6px; }

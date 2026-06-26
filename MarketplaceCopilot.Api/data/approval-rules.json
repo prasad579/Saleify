@@ -3,7 +3,7 @@
     {
       "id": "finance",
       "title": "Finance Review",
-      "assignee": "Sarah Lee",
+      "assignee": "Akhil",
       "enabled": true,
       "conditionType": "discountGreaterThan",
       "threshold": 15,
@@ -17,7 +17,7 @@
     {
       "id": "legal",
       "title": "Legal Review",
-      "assignee": "Michael Chen",
+      "assignee": "Maruthi",
       "enabled": true,
       "conditionType": "durationMonthsGreaterThan",
       "threshold": 24,
@@ -31,7 +31,7 @@
     {
       "id": "marketplace",
       "title": "Marketplace Review",
-      "assignee": "Priya Nair",
+      "assignee": "Nithin",
       "enabled": true,
       "conditionType": "marketplacePresent",
       "threshold": 0,
@@ -43,5 +43,5 @@
       ]
     }
   ],
-  "updatedAt": "2026-06-24 17:35 UTC"
+  "updatedAt": "2026-06-25 14:44 UTC"
 }

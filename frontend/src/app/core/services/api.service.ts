@@ -11,6 +11,10 @@ import {
 } from '@shared/data/snapshot.model';
 import { Person } from '@shared/data/lookups';
 import { ApprovalRulesSettings } from '@shared/data/approval-settings.model';
+import { EngagementTypeSettings } from '@shared/data/engagement-types.model';
+import { HomeSettings } from '@shared/data/home-settings.model';
+import { AuditLogPage } from '@shared/data/audit.model';
+import { OfferRequest, CaptureResponseRequest } from '@shared/data/offer-request.model';
 
 export { dealContinuePath } from '@shared/utils/deal-api.util';
 
@@ -37,6 +41,7 @@ export class ApiService {
     const q = view && view !== 'active' ? `?view=${view}` : '';
     return this.http.get(`${this.base}/deals${q}`);
   }
+  unlockEngagementEdits(id: string) { return this.http.post(`${this.base}/deals/${id}/unlock-edits`, {}); }
   archiveDeal(id: string) { return this.http.post(`${this.base}/deals/${id}/archive`, {}); }
   unarchiveDeal(id: string) { return this.http.post(`${this.base}/deals/${id}/unarchive`, {}); }
   deleteDeal(id: string) { return this.http.delete(`${this.base}/deals/${id}`); }
@@ -88,6 +93,35 @@ export class ApiService {
   togglePerson(id: string) { return this.http.post<Person>(`${this.base}/people/${id}/toggle`, {}); }
   deletePerson(id: string) { return this.http.delete(`${this.base}/people/${id}`); }
   resetPeople() { return this.http.post<Person[]>(`${this.base}/people/reset`, {}); }
+
+  // Engagement types (configurable catalog + per-type applicable sections)
+  getEngagementTypes() { return this.http.get<EngagementTypeSettings>(`${this.base}/engagement-types`); }
+  saveEngagementTypes(settings: EngagementTypeSettings) { return this.http.put<EngagementTypeSettings>(`${this.base}/engagement-types`, settings); }
+  resetEngagementTypes() { return this.http.post<EngagementTypeSettings>(`${this.base}/engagement-types/reset`, {}); }
+
+  // Home / dashboard layout (which cards appear on the home page)
+  getHomeSettings() { return this.http.get<HomeSettings>(`${this.base}/home-settings`); }
+  saveHomeSettings(settings: HomeSettings) { return this.http.put<HomeSettings>(`${this.base}/home-settings`, settings); }
+  resetHomeSettings() { return this.http.post<HomeSettings>(`${this.base}/home-settings/reset`, {}); }
+
+  // Offer requests (engagements pushed to a destination + responses)
+  getOfferRequests() { return this.http.get<OfferRequest[]>(`${this.base}/offer-requests`); }
+  getOfferRequest(id: string) { return this.http.get<OfferRequest>(`${this.base}/offer-requests/${id}`); }
+  captureOfferResponse(id: string, body: CaptureResponseRequest) {
+    return this.http.post<OfferRequest>(`${this.base}/offer-requests/${id}/response`, body);
+  }
+
+  // Global audit log (who changed what, when, across the app)
+  getAuditLog(params?: { category?: string; entityId?: string; search?: string; page?: number; pageSize?: number }) {
+    const q = new URLSearchParams();
+    if (params?.category) q.set('category', params.category);
+    if (params?.entityId) q.set('entityId', params.entityId);
+    if (params?.search) q.set('search', params.search);
+    if (params?.page) q.set('page', String(params.page));
+    if (params?.pageSize) q.set('pageSize', String(params.pageSize));
+    const query = q.toString();
+    return this.http.get<AuditLogPage>(`${this.base}/audit${query ? '?' + query : ''}`);
+  }
 
   // Engagement playbooks (configurable "what's next" guidance)
   getPlaybooks() { return this.http.get(`${this.base}/engagement-playbooks`); }

@@ -11,6 +11,17 @@
 @if (error) { <div class="alert error">{{ error }}</div> }
 @if (success) { <div class="alert success">{{ success }}</div> }
 
+@if (locked) {
+  <div class="lock-banner">
+    <span class="lock-icon">🔒</span>
+    <div class="lock-text">
+      <strong>This engagement is locked.</strong>
+      It was submitted as an offer request, so its details are read-only to keep it in sync with what was pushed. Unlock to revise — your changes will then need to be re-submitted to reach the destination.
+    </div>
+    <button type="button" class="btn btn-primary" [disabled]="unlocking" (click)="unlock()">{{ unlocking ? 'Unlocking…' : 'Unlock to revise' }}</button>
+  </div>
+}
+
 <!-- Step 1: Select engagement type -->
 <section class="card step-card">
   <div class="step-head"><span class="step-badge">1</span><h3>What would you like to create?</h3></div>
@@ -22,49 +33,12 @@
       </button>
     }
   </div>
+  @if (fieldErrors['engagementType']) { <small class="field-error">{{ fieldErrors['engagementType'] }}</small> }
 </section>
-
-@if (typeChosen && playbook) {
-  <section class="card playbook-card" [class.collapsed]="playbookCollapsed">
-    <div class="playbook-head">
-      <button type="button" class="playbook-toggle" (click)="togglePlaybook()"
-        [attr.aria-expanded]="!playbookCollapsed" [attr.aria-label]="playbookCollapsed ? 'Show AI Playbook' : 'Hide AI Playbook'">
-        {{ playbookCollapsed ? '▸' : '▾' }}
-      </button>
-      <span class="playbook-badge">✨ AI Playbook</span>
-      <strong class="playbook-title">{{ playbook.headline }}</strong>
-      <app-settings-hint
-        text="This guidance is configurable per engagement type from Settings → Playbooks."
-        link="/settings/playbooks"
-        linkLabel="Open Playbooks" />
-      <a routerLink="/settings/playbooks" class="playbook-edit">Edit</a>
-    </div>
-
-    @if (!playbookCollapsed) {
-      <div class="playbook-cols">
-        <div>
-          <h4>What's next</h4>
-          <ol>
-            @for (s of playbook.nextSteps; track s) { <li>{{ s }}</li> }
-          </ol>
-        </div>
-        <div>
-          <h4>Talking points <span class="playbook-hint">— say this to the client</span></h4>
-          <ul>
-            @for (t of playbook.talkingPoints; track t) { <li>💬 {{ t }}</li> }
-          </ul>
-        </div>
-      </div>
-      @if (playbook.timeline) {
-        <div class="playbook-timeline">🕒 <strong>Timeline:</strong> {{ playbook.timeline }}</div>
-      }
-    }
-  </section>
-}
 
 @if (typeChosen) {
 <div class="layout">
-  <section class="card form-grid">
+  <section class="card form-grid" [class.locked-form]="locked">
     <div class="form-grid-head full">
       <span class="step-badge">2</span><h3>Engagement Details</h3>
       <span class="type-chip">{{ deal.engagementType }}</span>
@@ -82,10 +56,14 @@
       <small>{{ isQuick ? 'Capture the essentials now and complete the rest later.' : 'Fill everything and continue into the workflow.' }}</small>
     </div>
 
-    <div class="form-field">
+    <div class="form-field" [class.has-error]="fieldErrors['contactEmail']">
       <label>Work Email *</label>
-      <input type="email" [(ngModel)]="deal.contactEmail" (ngModelChange)="onWorkEmailChange()" placeholder="name@company.com" />
-      <small>Company &amp; contact are auto-filled from the work email.</small>
+      <input type="email" [(ngModel)]="deal.contactEmail" (ngModelChange)="onWorkEmailChange(); clearError('contactEmail')" placeholder="name@company.com" />
+      @if (fieldErrors['contactEmail']) {
+        <small class="field-error">{{ fieldErrors['contactEmail'] }}</small>
+      } @else {
+        <small>Company &amp; contact are auto-filled from the work email.</small>
+      }
     </div>
 
     <div class="form-field">
@@ -95,13 +73,17 @@
           link="/settings/people"
           linkLabel="Open People" />
       </label>
-      <select [(ngModel)]="deal.owner">
+      <select [(ngModel)]="deal.owner" (ngModelChange)="clearError('owner')" [class.invalid]="fieldErrors['owner']">
         <option value="">Select engagement owner</option>
         @for (o of eligibleOwners; track o.name) {
           <option [value]="o.name">{{ o.name }}{{ o.role ? ' — ' + o.role : '' }}</option>
         }
       </select>
-      <small>Only people enabled for {{ deal.engagementType || 'this engagement type' }} are listed.</small>
+      @if (fieldErrors['owner']) {
+        <small class="field-error">{{ fieldErrors['owner'] }}</small>
+      } @else {
+        <small>Only people enabled for {{ deal.engagementType || 'this engagement type' }} are listed.</small>
+      }
     </div>
 
     @if (existingCustomer) {
@@ -152,7 +134,9 @@
           </label>
         }
       </div>
-      @if (marketplaceLocked) {
+      @if (fieldErrors['marketplace']) {
+        <small class="field-error">{{ fieldErrors['marketplace'] }}</small>
+      } @else if (marketplaceLocked) {
         <small>Derived from the campaign / event tag <strong>{{ selectedEvent?.name }}</strong> ({{ selectedEvent?.marketplace }}). Change the tag to change the marketplace.</small>
       } @else {
         <small>{{ marketplaceRequired ? 'Select one or more marketplaces.' : 'Optional for this engagement type — no marketplace offer is created.' }}</small>
@@ -176,13 +160,14 @@
           link="/settings/campaign-events"
           linkLabel="Open Campaign Tags" />
       </label>
-      <select [(ngModel)]="deal.campaignEventId" (ngModelChange)="onEventChange()">
+      <select [(ngModel)]="deal.campaignEventId" (ngModelChange)="onEventChange(); clearError('campaignEventId')" [class.invalid]="fieldErrors['campaignEventId']">
         <option value="">{{ tagRequired ? 'Select a campaign or event' : 'No tag (not applicable)' }}</option>
         <option [value]="noEventTag.id">— {{ noEventTag.name }} —</option>
         @for (ev of selectableEvents; track ev.id) {
           <option [value]="ev.id">{{ ev.name }} ({{ ev.marketplace }}){{ ev.paused ? ' — paused' : '' }}</option>
         }
       </select>
+      @if (fieldErrors['campaignEventId']) { <small class="field-error">{{ fieldErrors['campaignEventId'] }}</small> }
 
       @if (selectedEvent; as ev) {
         <div class="event-card">
@@ -248,26 +233,73 @@
         backLabel="Cancel"
         [continueLabel]="isQuick ? 'Save Quick Capture →' : (isEdit ? 'Save & Continue →' : 'Create & Continue →')"
         [saving]="saving"
-        [continueDisabled]="loading"
+        [continueDisabled]="loading || locked"
         (proceed)="submit()" />
     </div>
   </section>
 
-  <aside class="card">
-    @if (isQuick) {
-      <h3>⚡ Quick Capture</h3>
-      <p class="footnote">Saving the essentials now. The full workflow for <strong>{{ deal.engagementType }}</strong> stays available when you come back to complete it.</p>
-      <ol>
-        @for (s of flowSteps; track s.key) { <li>{{ s.label }}</li> }
-      </ol>
-    } @else {
-      <h3>Workflow for {{ deal.engagementType }}</h3>
-      <ol>
-        @for (s of flowSteps; track s.key) { <li>{{ s.label }}</li> }
-      </ol>
-      <p class="footnote">Screens that don't apply to this engagement type are hidden.</p>
-      <p class="footnote"><strong>On submit:</strong> {{ config.submitLabel }}</p>
+  <aside class="side-col">
+    @if (playbook) {
+      <section class="card playbook-card" [class.collapsed]="playbookCollapsed">
+        <div class="playbook-head">
+          <span class="playbook-badge">✨ AI Playbook</span>
+          <button type="button" class="playbook-toggle" (click)="togglePlaybook()"
+            [attr.aria-expanded]="!playbookCollapsed">
+            {{ playbookCollapsed ? 'Show ▸' : 'Hide ▾' }}
+          </button>
+        </div>
+        <strong class="playbook-title">{{ playbook.headline }}</strong>
+
+        @if (!playbookCollapsed) {
+          <div class="playbook-section">
+            <h4>📋 What's next</h4>
+            <ol>
+              @for (s of playbook.nextSteps; track s) { <li>{{ s }}</li> }
+            </ol>
+          </div>
+          <div class="playbook-section">
+            <h4>💬 Talking points <span class="playbook-hint">— say this to the client</span></h4>
+            <ul>
+              @for (t of playbook.talkingPoints; track t) { <li>{{ t }}</li> }
+            </ul>
+          </div>
+          @if (playbook.timeline) {
+            <div class="playbook-timeline">🕒 <strong>Timeline:</strong> {{ playbook.timeline }}</div>
+          }
+          <a routerLink="/settings/playbooks" class="playbook-edit">Edit playbook →</a>
+        } @else {
+          <p class="playbook-collapsed-hint">Guidance hidden. Show it for next steps & talking points.</p>
+        }
+      </section>
     }
+
+    <section class="card workflow-card">
+      <div class="wf-head">
+        <h3>{{ isQuick ? '⚡ Quick Capture' : '🧭 Workflow' }}</h3>
+        <span class="type-chip">{{ deal.engagementType }}</span>
+      </div>
+      <p class="wf-sub">
+        {{ isQuick
+            ? 'Saving the essentials now — finish the rest anytime.'
+            : 'Steps for this engagement. Screens that don\'t apply are skipped.' }}
+      </p>
+
+      <ol class="wf-steps">
+        @for (s of flowSteps; track s.key; let i = $index) {
+          <li class="wf-step">
+            <span class="wf-num">{{ i + 1 }}</span>
+            <span class="wf-label">{{ s.label }}</span>
+          </li>
+        }
+      </ol>
+
+      @if (!isQuick) {
+        <div class="wf-submit">
+          <span class="wf-submit-tag">On submit</span>
+          <strong>{{ config.submitLabel }}</strong>
+        </div>
+      }
+    </section>
   </aside>
 </div>
 }

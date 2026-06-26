@@ -1,0 +1,110 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Offer Requests</h1>
+    <p class="page-subtitle">Every engagement pushed to SaaSify or another destination — with the exact JSON payload sent and the response captured back.</p>
+  </div>
+  <button type="button" class="btn btn-outline" (click)="load()">↻ Refresh</button>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card accent-indigo"><div class="value">{{ total }}</div><div class="label">Total Requests</div></div>
+  <div class="stat-card accent-amber"><div class="value">{{ awaitingCount }}</div><div class="label">Awaiting Response</div></div>
+  <div class="stat-card accent-green"><div class="value">{{ acceptedCount }}</div><div class="label">Accepted</div></div>
+  <div class="stat-card accent-red"><div class="value">{{ rejectedCount }}</div><div class="label">Rejected</div></div>
+</div>
+
+<section class="card section-card">
+  <div class="toolbar">
+    <label class="tb-field grow">
+      Search
+      <input type="search" [(ngModel)]="search" placeholder="Offer ID, engagement, customer, product…" />
+    </label>
+    <label class="tb-field">
+      Submitted from
+      <input type="date" [(ngModel)]="dateFrom" />
+    </label>
+    <label class="tb-field">
+      Submitted to
+      <input type="date" [(ngModel)]="dateTo" />
+    </label>
+  </div>
+
+  <div class="filter-builder">
+    <span class="fb-label">Add filter:</span>
+    <select class="fb-select" [(ngModel)]="newFilterField" (ngModelChange)="onFilterFieldChange()" aria-label="Filter field">
+      <option value="">Field…</option>
+      @for (f of filterFields; track f.key) { <option [value]="f.key">{{ f.label }}</option> }
+    </select>
+    <span class="fb-eq">=</span>
+    <select class="fb-select" [(ngModel)]="newFilterValue" [disabled]="!newFilterField" aria-label="Filter value">
+      <option value="">{{ newFilterField ? 'Select value…' : 'Pick a field first' }}</option>
+      @for (v of newFilterValueOptions; track v) { <option [value]="v">{{ v }}</option> }
+    </select>
+    <button type="button" class="btn btn-outline btn-sm" [disabled]="!newFilterField || !newFilterValue" (click)="addFilter()">+ Add filter</button>
+    @if (newFilterField && !newFilterValueOptions.length) {
+      <span class="fb-hint">No values available for this field.</span>
+    }
+  </div>
+
+  @if (hasFilters) {
+    <div class="filter-chips">
+      <span class="chips-label">Filtered by:</span>
+      @if (dateFrom) { <span class="chip static">From {{ dateFrom }}</span> }
+      @if (dateTo) { <span class="chip static">To {{ dateTo }}</span> }
+      @if (search.trim()) { <span class="chip static">“{{ search.trim() }}”</span> }
+      @for (f of filters; track f.field + '=' + f.value; let i = $index) {
+        <button type="button" class="chip" (click)="removeFilterRule(i)">{{ fieldLabel(f.field) }} = {{ f.value }} <span class="chip-x">✕</span></button>
+      }
+      @if (filters.length > 1) { <span class="chips-and">all conditions matched (AND)</span> }
+      <button type="button" class="chip-clear" (click)="clearAll()">Clear all</button>
+    </div>
+  }
+
+  @if (loading) {
+    <p class="muted">Loading offer requests…</p>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table or-table">
+        <thead>
+          <tr>
+            <th>Offer / Engagement</th>
+            <th>Customer</th>
+            <th>Type</th>
+            <th>Marketplace</th>
+            <th>Destination</th>
+            <th class="num">Value</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Response</th>
+            <th aria-label="Open"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of filtered; track o.id) {
+            <tr class="or-row" (click)="open(o)">
+              <td>
+                <strong>{{ o.engagementName }}</strong>
+                @if (o.changedSinceSubmission) { <span class="badge badge-orange changed-pill" title="Engagement edited after submission — re-submit to push changes">⚠ Changed</span> }
+                <div class="cell-sub">{{ o.id }} · <a [routerLink]="['/deals', o.dealId]" (click)="$event.stopPropagation()">{{ o.dealId }}</a></div>
+              </td>
+              <td>{{ o.customer || '—' }}</td>
+              <td>{{ o.engagementType }}</td>
+              <td>{{ o.marketplace || '—' }}</td>
+              <td>{{ o.destination }}</td>
+              <td class="num">${{ o.value | number }}</td>
+              <td class="nowrap">{{ formatCreatedDate(o.submittedAt) }}<div class="cell-sub">{{ o.submittedBy }}</div></td>
+              <td><span class="badge" [class]="statusBadge(o.status)">{{ o.status }}</span></td>
+              <td><span class="badge" [class]="responseBadge(o)">{{ o.responseReceived ? o.responseStatus : 'Awaiting' }}</span></td>
+              <td class="num"><span class="open-ind">View →</span></td>
+            </tr>
+          } @empty {
+            <tr><td [attr.colspan]="10" class="empty-row">
+              {{ all.length ? 'No offer requests match these filters.' : 'No engagements have been submitted yet. Submit an engagement to push it here.' }}
+            </td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="muted result-count">{{ filtered.length }} of {{ all.length }} offer request(s)</p>
+  }
+</section>

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { ToastService } from '@core/services/toast.service';
 import { apiErrorMessage } from '@shared/utils/deal-api.util';
 
 interface PlaybookEdit {
@@ -22,6 +23,7 @@ interface PlaybookEdit {
 })
 export class PlaybookSettingsComponent implements OnInit {
   private api = inject(ApiService);
+  private toast = inject(ToastService);
 
   playbooks: PlaybookEdit[] = [];
   loading = true;
@@ -57,7 +59,6 @@ export class PlaybookSettingsComponent implements OnInit {
 
   save(pb: PlaybookEdit) {
     this.error = '';
-    this.success = '';
     const payload = {
       engagementType: pb.engagementType,
       headline: pb.headline,
@@ -70,8 +71,9 @@ export class PlaybookSettingsComponent implements OnInit {
         pb.updatedAt = res?.updatedAt;
         pb.savedFlash = true;
         setTimeout(() => pb.savedFlash = false, 2500);
+        this.toast.success(`“${pb.engagementType}” playbook saved.`);
       },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not save playbook.'); }
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not save playbook.')); }
     });
   }
 
@@ -80,10 +82,9 @@ export class PlaybookSettingsComponent implements OnInit {
     this.api.resetPlaybooks().subscribe({
       next: (data: any) => {
         this.playbooks = (Array.isArray(data) ? data : []).map((p: any) => this.toEdit(p));
-        this.success = 'Playbooks reset to defaults.';
-        setTimeout(() => this.success = '', 3000);
+        this.toast.success('Playbooks reset to defaults.');
       },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not reset playbooks.'); }
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not reset playbooks.')); }
     });
   }
 }

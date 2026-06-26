@@ -1,5 +1,6 @@
 using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Entities;
+using MarketplaceCopilot.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketplaceCopilot.Api.Controllers;
@@ -10,7 +11,7 @@ namespace MarketplaceCopilot.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/approval-rules")]
-public class ApprovalRulesController(DataStore store) : ControllerBase
+public class ApprovalRulesController(DataStore store, IAuditService audit) : ControllerBase
 {
     [HttpGet]
     public ActionResult<ApprovalRulesSettings> Get() => store.ApprovalRulesSettings;
@@ -20,6 +21,10 @@ public class ApprovalRulesController(DataStore store) : ControllerBase
     {
         if (request is null) return BadRequest(new { message = "Settings payload is required." });
         store.ApplyApprovalRules(request);
+        var enabled = store.ApprovalRulesSettings.Rules.Count(r => r.Enabled);
+        audit.Log("Settings", "Approval rules saved",
+            $"{enabled} of {store.ApprovalRulesSettings.Rules.Count} review rules enabled.",
+            "Approval Rules", "approval-rules");
         return Ok(store.ApprovalRulesSettings);
     }
 
@@ -27,6 +32,8 @@ public class ApprovalRulesController(DataStore store) : ControllerBase
     public ActionResult<ApprovalRulesSettings> Reset()
     {
         store.ResetApprovalRules();
+        audit.Log("Settings", "Approval rules reset", "Restored the built-in approval rules.",
+            "Approval Rules", "approval-rules");
         return Ok(store.ApprovalRulesSettings);
     }
 }

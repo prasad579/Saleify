@@ -1,12 +1,13 @@
 using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Entities;
+using MarketplaceCopilot.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketplaceCopilot.Api.Controllers;
 
 [ApiController]
 [Route("api/engagement-playbooks")]
-public class EngagementPlaybooksController(DataStore store) : ControllerBase
+public class EngagementPlaybooksController(DataStore store, IAuditService audit) : ControllerBase
 {
     [HttpGet]
     public ActionResult<IEnumerable<EngagementPlaybook>> GetAll() => store.Playbooks;
@@ -33,6 +34,8 @@ public class EngagementPlaybooksController(DataStore store) : ControllerBase
         else store.Playbooks.Add(request);
 
         store.SavePlaybooks();
+        audit.Log("Settings", "Playbook saved", $"Updated the “{request.EngagementType}” engagement playbook.",
+            "Engagement Playbooks", request.EngagementType);
         return Ok(request);
     }
 
@@ -40,6 +43,8 @@ public class EngagementPlaybooksController(DataStore store) : ControllerBase
     public ActionResult<IEnumerable<EngagementPlaybook>> Reset()
     {
         store.ResetPlaybooks();
+        audit.Log("Settings", "Playbooks reset", "Restored the built-in engagement playbooks.",
+            "Engagement Playbooks", "engagement-playbooks");
         return Ok(store.Playbooks);
     }
 

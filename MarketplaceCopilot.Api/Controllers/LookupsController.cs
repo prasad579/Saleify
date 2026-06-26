@@ -1,11 +1,12 @@
 namespace MarketplaceCopilot.Api.Controllers;
 
+using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-public class LookupsController : ControllerBase
+public class LookupsController(DataStore store) : ControllerBase
 {
     [HttpGet]
     public ActionResult<LookupData> Get() => Ok(new LookupData
@@ -43,7 +44,8 @@ public class LookupsController : ControllerBase
         ],
         DealTypes = ["New Deal", "Renewal"],
         Marketplaces = ["AWS", "Azure", "GCP"],
-        EngagementTypes = ["Private Offer", "Free Trial", "Workshop", "Hackathon", "POC", "Summit/Event Lead", "Internal Sales Activity", "External Source Lead"],
+        // Only types enabled in Settings → Engagement Types are offered when creating an engagement.
+        EngagementTypes = store.EngagementTypeSettings.Types.Where(t => t.Enabled).Select(t => t.Type).ToList(),
         DealOwners = ["Srinivas K", "Priya Sharma", "Arjun Mehta", "Neha Gupta"],
         OfferTypes = ["Free Trial", "Direct Private Offer", "Reseller Private Offer", "Renewal"],
         Priorities = ["High", "Medium", "Low"]

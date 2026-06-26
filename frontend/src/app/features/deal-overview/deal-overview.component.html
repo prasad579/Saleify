@@ -5,7 +5,10 @@
 } @else {
   <div class="header-row">
     <div>
-      <h1 class="page-title">{{ deal.name || deal.customer }}</h1>
+      <h1 class="page-title">
+        {{ deal.name || deal.customer }}
+        @if (deal.locked) { <span class="badge badge-gray lock-pill">🔒 Submitted — locked</span> }
+      </h1>
       <p class="page-subtitle">{{ deal.id }} · {{ deal.customer }} · {{ deal.marketplace }}</p>
     </div>
     <div class="header-actions">
@@ -33,6 +36,17 @@
     </div>
   }
 
+  @if (deal.changedSinceSubmission) {
+    <div class="changed-banner">
+      ⚠ This engagement was <strong>edited after it was submitted</strong> as an offer request, so the pushed offer is now out of date.
+      <a routerLink="/offer-requests" class="changed-link">Review the offer request</a> and re-submit to push the changes.
+    </div>
+  } @else if (deal.locked) {
+    <div class="locked-info-banner">
+      🔒 This engagement has been <strong>submitted as an offer request</strong>; its details are locked. Open <a routerLink="/deals/{{ deal.id }}/edit">edit</a> and choose <strong>Unlock to revise</strong> if you need to change it.
+    </div>
+  }
+
   <div class="meta-grid card">
     <div><span>Stage</span><strong>{{ deal.stage }}</strong></div>
     <div><span>Status</span><strong>{{ deal.marketplaceStatus }}</strong></div>
@@ -49,13 +63,53 @@
         [session]="lastSession()"
         [showActions]="true" />
 
-      <section class="card quick-links">
-        <h3>Engagement workflow</h3>
-        <div class="link-grid">
-          @for (l of workflowLinks; track l.label) {
-            <a [routerLink]="l.path" class="link-card">{{ l.label }}</a>
-          }
+      <section class="card progress-card">
+        <div class="progress-head">
+          <div>
+            <h3>Engagement progress</h3>
+            <p class="progress-sub">
+              @if (allComplete) { All sections complete — ready to continue. }
+              @else { Complete each section to move this engagement forward. }
+            </p>
+          </div>
+          <div class="progress-ring" [class.complete]="allComplete">
+            <span class="pct">{{ percentComplete }}%</span>
+          </div>
         </div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" [class.complete]="allComplete" [style.width.%]="percentComplete"></div>
+        </div>
+        <p class="progress-count">{{ completedCount }} of {{ totalSteps }} sections complete</p>
+
+        <ol class="step-list">
+          @for (s of steps; track s.key) {
+            <li class="step-item" [class.done]="s.done" [class.current]="s.current">
+              <a [routerLink]="s.path" class="step-link">
+                <span class="step-marker">
+                  @if (s.done) { <span class="marker done">✓</span> }
+                  @else if (s.current) { <span class="marker current"></span> }
+                  @else { <span class="marker pending"></span> }
+                </span>
+                <span class="step-text">
+                  <span class="step-label">{{ s.label }}</span>
+                  <span class="step-hint">{{ s.hint }}</span>
+                </span>
+                <span class="step-status">
+                  @if (s.done) { <span class="status-pill done">Done</span> }
+                  @else if (s.current) { <span class="status-pill current">Next up →</span> }
+                  @else { <span class="status-pill pending">Pending</span> }
+                </span>
+              </a>
+            </li>
+          }
+        </ol>
+
+        @if (!deal.archived) {
+          <a [routerLink]="continuePath(deal)" class="btn btn-primary continue-btn">
+            {{ allComplete ? 'Review & continue →' : 'Continue where you left off →' }}
+          </a>
+        }
       </section>
     </section>
 

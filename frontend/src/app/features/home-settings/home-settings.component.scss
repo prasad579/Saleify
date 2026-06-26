@@ -1,0 +1,55 @@
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.setting-card { margin-bottom: 16px; }
+.setting-card h3 { margin: 0 0 4px; }
+.hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s ease, border-color 0.15s ease;
+
+  &:hover { border-color: var(--primary); }
+  &.disabled { opacity: 0.6; background: var(--bg); }
+
+  input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; }
+}
+
+.card-text { flex: 1; }
+.card-text strong { font-size: 15px; }
+.card-text p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+
+.state-pill {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: var(--muted);
+
+  &.on { background: #dcfce7; color: #15803d; }
+}
+
+.save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 8px;
+  .updated { color: var(--muted); font-size: 12px; }
+}

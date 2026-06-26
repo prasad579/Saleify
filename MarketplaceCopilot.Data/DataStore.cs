@@ -19,6 +19,10 @@ public class DataStore
     private readonly string _snapshotSettingsFilePath;
     private readonly string _approvalRulesFilePath;
     private readonly string _peopleFilePath;
+    private readonly string _engagementTypesFilePath;
+    private readonly string _homeSettingsFilePath;
+    private readonly string _offerRequestsFilePath;
+    private readonly string _auditLogFilePath;
 
     public List<Deal> Deals { get; private set; } = [];
     public List<CampaignEvent> CampaignEvents { get; private set; } = [];
@@ -26,6 +30,13 @@ public class DataStore
     public SnapshotSettings SnapshotSettings { get; private set; } = new();
     public ApprovalRulesSettings ApprovalRulesSettings { get; private set; } = new();
     public List<Person> People { get; private set; } = [];
+    public EngagementTypeSettings EngagementTypeSettings { get; private set; } = new();
+    public HomeSettings HomeSettings { get; private set; } = new();
+    public List<OfferRequest> OfferRequests { get; private set; } = [];
+    public List<AuditEntry> AuditLog { get; private set; } = [];
+
+    /// <summary>Keep the audit log bounded so the JSON file and memory footprint stay reasonable.</summary>
+    private const int MaxAuditEntries = 2000;
 
     public List<Product> Products { get; } =
     [
@@ -73,12 +84,50 @@ public class DataStore
         _snapshotSettingsFilePath = Path.Combine(dataDir, "snapshot-settings.json");
         _approvalRulesFilePath = Path.Combine(dataDir, "approval-rules.json");
         _peopleFilePath = Path.Combine(dataDir, "people.json");
+        _engagementTypesFilePath = Path.Combine(dataDir, "engagement-types.json");
+        _homeSettingsFilePath = Path.Combine(dataDir, "home-settings.json");
+        _offerRequestsFilePath = Path.Combine(dataDir, "offer-requests.json");
+        _auditLogFilePath = Path.Combine(dataDir, "audit-log.json");
         LoadDeals();
         LoadCampaignEvents();
         LoadPlaybooks();
         LoadSnapshotSettings();
         LoadApprovalRules();
         LoadPeople();
+        LoadEngagementTypes();
+        LoadHomeSettings();
+        LoadOfferRequests();
+        LoadAuditLog();
+    }
+
+    public string NextOfferRequestId()
+    {
+        var max = OfferRequests
+            .Select(o => int.TryParse(o.Id.Replace("OFR-", "", StringComparison.OrdinalIgnoreCase), out var n) ? n : 1000)
+            .DefaultIfEmpty(1000)
+            .Max();
+        return $"OFR-{max + 1}";
+    }
+
+    public void SaveOfferRequests() =>
+        File.WriteAllText(_offerRequestsFilePath, JsonSerializer.Serialize(OfferRequests, JsonOptions));
+
+    private void LoadOfferRequests()
+    {
+        if (!File.Exists(_offerRequestsFilePath))
+        {
+            OfferRequests = [];
+            return;
+        }
+        try
+        {
+            var loaded = JsonSerializer.Deserialize<List<OfferRequest>>(File.ReadAllText(_offerRequestsFilePath), JsonOptions);
+            OfferRequests = loaded ?? [];
+        }
+        catch
+        {
+            OfferRequests = [];
+        }
     }
 
     public string NextPersonId()
@@ -279,6 +328,192 @@ public class DataStore
         new() { Id = "PER-3", Name = "Arjun Mehta", Email = "arjun.mehta@saasify.ai", Role = "Sales", Enabled = true },
         new() { Id = "PER-4", Name = "Neha Gupta", Email = "neha.gupta@saasify.ai", Role = "Partner", Enabled = true }
     ];
+
+    // ---------------- Engagement type settings ----------------
+
+    public void SaveEngagementTypes()
+    {
+        EngagementTypeSettings.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm") + " UTC";
+        File.WriteAllText(_engagementTypesFilePath, JsonSerializer.Serialize(EngagementTypeSettings, JsonOptions));
+    }
+
+    public void ResetEngagementTypes()
+    {
+        EngagementTypeSettings = CreateSeedEngagementTypes();
+        SaveEngagementTypes();
+    }
+
+    /// <summary>Apply incoming engagement-type settings (normalised onto the canonical catalog) and persist.</summary>
+    public void ApplyEngagementTypes(EngagementTypeSettings incoming)
+    {
+        EngagementTypeSettings = MergeEngagementTypes(incoming);
+        SaveEngagementTypes();
+    }
+
+    private void LoadEngagementTypes()
+    {
+        if (!File.Exists(_engagementTypesFilePath))
+        {
+            EngagementTypeSettings = CreateSeedEngagementTypes();
+            SaveEngagementTypes();
+            return;
+        }
+        try
+        {
+            var loaded = JsonSerializer.Deserialize<EngagementTypeSettings>(File.ReadAllText(_engagementTypesFilePath), JsonOptions);
+            EngagementTypeSettings = loaded is null ? CreateSeedEngagementTypes() : MergeEngagementTypes(loaded);
+        }
+        catch
+        {
+            EngagementTypeSettings = CreateSeedEngagementTypes();
+            SaveEngagementTypes();
+        }
+    }
+
+    /// <summary>
+    /// Merge saved engagement types onto the canonical seed so types added in code always appear,
+    /// while keeping the user's enabled flag, section visibilities, labels, and requirements.
+    /// </summary>
+    private static EngagementTypeSettings MergeEngagementTypes(EngagementTypeSettings loaded)
+    {
+        var merged = CreateSeedEngagementTypes();
+        foreach (var t in merged.Types)
+        {
+            var lt = loaded.Types?.FirstOrDefault(x => string.Equals(x.Type, t.Type, StringComparison.OrdinalIgnoreCase));
+            if (lt is null) continue;
+            t.Enabled = lt.Enabled;
+            if (!string.IsNullOrWhiteSpace(lt.Blurb)) t.Blurb = lt.Blurb;
+            if (!string.IsNullOrWhiteSpace(lt.Products)) t.Products = lt.Products;
+            if (!string.IsNullOrWhiteSpace(lt.Pricing)) t.Pricing = lt.Pricing;
+            if (!string.IsNullOrWhiteSpace(lt.MeetingNotes)) t.MeetingNotes = lt.MeetingNotes;
+            if (!string.IsNullOrWhiteSpace(lt.Approvals)) t.Approvals = lt.Approvals;
+            if (!string.IsNullOrWhiteSpace(lt.SubmitLabel)) t.SubmitLabel = lt.SubmitLabel;
+            if (!string.IsNullOrWhiteSpace(lt.SubmitAction)) t.SubmitAction = lt.SubmitAction;
+            t.TagRequired = lt.TagRequired;
+            t.MarketplaceRequired = lt.MarketplaceRequired;
+        }
+        return merged;
+    }
+
+    /// <summary>Built-in engagement catalog — mirrors the frontend default flow configuration.</summary>
+    private static EngagementTypeSettings CreateSeedEngagementTypes() => new()
+    {
+        Types =
+        [
+            new() { Type = "Private Offer",           Blurb = "Marketplace private offer with full pricing & approvals", Enabled = true, Products = "yes",      Pricing = "yes",      MeetingNotes = "yes", Approvals = "yes",      SubmitLabel = "Submit to SaaSify",    SubmitAction = "submit",        TagRequired = false, MarketplaceRequired = true },
+            new() { Type = "Free Trial",              Blurb = "Time-boxed trial — no charge until consumption limit",    Enabled = true, Products = "yes",      Pricing = "optional", MeetingNotes = "yes", Approvals = "no",       SubmitLabel = "Submit to SaaSify",    SubmitAction = "submit",        TagRequired = true,  MarketplaceRequired = true },
+            new() { Type = "Workshop",                Blurb = "Customer enablement workshop",                            Enabled = true, Products = "optional", Pricing = "no",       MeetingNotes = "yes", Approvals = "no",       SubmitLabel = "Mark Completed",       SubmitAction = "complete",      TagRequired = true,  MarketplaceRequired = true },
+            new() { Type = "Hackathon",               Blurb = "Hands-on hackathon engagement",                           Enabled = true, Products = "yes",      Pricing = "optional", MeetingNotes = "yes", Approvals = "optional", SubmitLabel = "Mark Completed",       SubmitAction = "complete",      TagRequired = true,  MarketplaceRequired = true },
+            new() { Type = "POC",                     Blurb = "Proof of concept / pilot",                                Enabled = true, Products = "yes",      Pricing = "optional", MeetingNotes = "yes", Approvals = "optional", SubmitLabel = "Mark Completed",       SubmitAction = "complete",      TagRequired = true,  MarketplaceRequired = true },
+            new() { Type = "Summit/Event Lead",       Blurb = "Lead captured at a summit or event",                      Enabled = true, Products = "no",       Pricing = "no",       MeetingNotes = "yes", Approvals = "no",       SubmitLabel = "Save & Convert Later", SubmitAction = "convert-later", TagRequired = true,  MarketplaceRequired = true },
+            new() { Type = "Internal Sales Activity", Blurb = "Internal sales activity (no marketplace offer)",          Enabled = true, Products = "no",       Pricing = "no",       MeetingNotes = "yes", Approvals = "no",       SubmitLabel = "Save & Convert Later", SubmitAction = "convert-later", TagRequired = false, MarketplaceRequired = false },
+            new() { Type = "External Source Lead",    Blurb = "Lead from an external source",                            Enabled = true, Products = "no",       Pricing = "no",       MeetingNotes = "yes", Approvals = "no",       SubmitLabel = "Save & Convert Later", SubmitAction = "convert-later", TagRequired = false, MarketplaceRequired = false }
+        ]
+    };
+
+    // ---------------- Home / dashboard settings ----------------
+
+    public void SaveHomeSettings()
+    {
+        HomeSettings.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm") + " UTC";
+        File.WriteAllText(_homeSettingsFilePath, JsonSerializer.Serialize(HomeSettings, JsonOptions));
+    }
+
+    public void ResetHomeSettings()
+    {
+        HomeSettings = CreateSeedHomeSettings();
+        SaveHomeSettings();
+    }
+
+    /// <summary>Apply incoming home settings (normalised onto the canonical card list) and persist.</summary>
+    public void ApplyHomeSettings(HomeSettings incoming)
+    {
+        HomeSettings = MergeHomeSettings(incoming);
+        SaveHomeSettings();
+    }
+
+    private void LoadHomeSettings()
+    {
+        if (!File.Exists(_homeSettingsFilePath))
+        {
+            HomeSettings = CreateSeedHomeSettings();
+            SaveHomeSettings();
+            return;
+        }
+        try
+        {
+            var loaded = JsonSerializer.Deserialize<HomeSettings>(File.ReadAllText(_homeSettingsFilePath), JsonOptions);
+            HomeSettings = loaded is null ? CreateSeedHomeSettings() : MergeHomeSettings(loaded);
+        }
+        catch
+        {
+            HomeSettings = CreateSeedHomeSettings();
+            SaveHomeSettings();
+        }
+    }
+
+    /// <summary>
+    /// Merge saved cards onto the canonical seed so cards added in code always appear, while
+    /// keeping the user's enabled flags (and any custom label).
+    /// </summary>
+    private static HomeSettings MergeHomeSettings(HomeSettings loaded)
+    {
+        var merged = CreateSeedHomeSettings();
+        foreach (var card in merged.Cards)
+        {
+            var lc = loaded.Cards?.FirstOrDefault(c => c.Key == card.Key);
+            if (lc is null) continue;
+            card.Enabled = lc.Enabled;
+            if (!string.IsNullOrWhiteSpace(lc.Label)) card.Label = lc.Label;
+        }
+        return merged;
+    }
+
+    private static HomeSettings CreateSeedHomeSettings() => new()
+    {
+        Cards =
+        [
+            new() { Key = "stats",          Label = "Summary Stats",      Description = "Top KPI tiles — open engagements, approvals pending, offers submitted, pipeline value.", Enabled = true },
+            new() { Key = "insights",       Label = "Engagement Insights", Description = "Active events, engagements, follow-ups, and pending approvals, with leadership snapshot.", Enabled = true },
+            new() { Key = "tags",           Label = "Campaign / Event Tags", Description = "Quick tiles for each campaign / event tag and its engagement count.", Enabled = true },
+            new() { Key = "openEngagements", Label = "My Open Engagements", Description = "Table of your open engagements with sorting and quick continue.", Enabled = true },
+            new() { Key = "recentActivity", Label = "Recent Activity",    Description = "Latest changes across your engagements.", Enabled = true },
+            new() { Key = "tasks",          Label = "My Tasks",           Description = "Your action items, list or grouped by engagement.", Enabled = true },
+            new() { Key = "reminders",      Label = "Today's Reminders",  Description = "Upcoming and overdue reminders.", Enabled = true }
+        ]
+    };
+
+    // ---------------- Global audit log ----------------
+
+    /// <summary>Append an audit entry (newest first) and persist, trimming to the most recent entries.</summary>
+    public void AppendAudit(AuditEntry entry)
+    {
+        AuditLog.Insert(0, entry);
+        if (AuditLog.Count > MaxAuditEntries)
+            AuditLog.RemoveRange(MaxAuditEntries, AuditLog.Count - MaxAuditEntries);
+        SaveAuditLog();
+    }
+
+    public void SaveAuditLog() =>
+        File.WriteAllText(_auditLogFilePath, JsonSerializer.Serialize(AuditLog, JsonOptions));
+
+    private void LoadAuditLog()
+    {
+        if (!File.Exists(_auditLogFilePath))
+        {
+            AuditLog = [];
+            return;
+        }
+        try
+        {
+            var loaded = JsonSerializer.Deserialize<List<AuditEntry>>(File.ReadAllText(_auditLogFilePath), JsonOptions);
+            AuditLog = loaded ?? [];
+        }
+        catch
+        {
+            AuditLog = [];
+        }
+    }
 
     private void LoadSnapshotSettings()
     {

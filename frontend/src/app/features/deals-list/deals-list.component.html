@@ -39,11 +39,38 @@
     </div>
   </div>
 
+  <div class="filter-builder">
+    <span class="fb-label">Add filter:</span>
+    <select class="fb-select" [(ngModel)]="newFilterField" (ngModelChange)="onFilterFieldChange()" aria-label="Filter field">
+      <option value="">Field…</option>
+      @for (f of filterFields; track f.key) {
+        <option [value]="f.key">{{ f.label }}</option>
+      }
+    </select>
+    <span class="fb-eq">=</span>
+    <select class="fb-select" [(ngModel)]="newFilterValue" [disabled]="!newFilterField" aria-label="Filter value">
+      <option value="">{{ newFilterField ? 'Select value…' : 'Pick a field first' }}</option>
+      @for (v of newFilterValueOptions; track v) {
+        <option [value]="v">{{ v }}</option>
+      }
+    </select>
+    <button type="button" class="btn btn-outline btn-sm" [disabled]="!newFilterField || !newFilterValue" (click)="addFilter()">+ Add filter</button>
+    @if (newFilterField && !newFilterValueOptions.length) {
+      <span class="fb-hint">No values available for this field.</span>
+    }
+  </div>
+
   @if (hasFilters) {
     <div class="filter-chips">
       <span class="chips-label">Filtered by:</span>
-      @for (f of activeFilters; track f.key) {
-        <button type="button" class="chip" (click)="removeFilter(f.key)">{{ f.label }} <span class="chip-x">✕</span></button>
+      @if (fScope === 'open') {
+        <button type="button" class="chip" (click)="removeScope()">Open only <span class="chip-x">✕</span></button>
+      }
+      @for (f of filters; track f.field + '=' + f.value; let i = $index) {
+        <button type="button" class="chip" (click)="removeFilterRule(i)">{{ fieldLabel(f.field) }} = {{ f.value }} <span class="chip-x">✕</span></button>
+      }
+      @if (filters.length > 1) {
+        <span class="chips-and">all conditions matched (AND)</span>
       }
       <button type="button" class="chip-clear" (click)="clearAll()">Clear all</button>
     </div>

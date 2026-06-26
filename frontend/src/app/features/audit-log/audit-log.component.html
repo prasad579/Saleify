@@ -1,0 +1,73 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Audit Log</h1>
+    <p class="page-subtitle">A complete, application-wide record of every change — engagements, pricing, approvals, and settings — showing <strong>who</strong> made each change, <strong>when</strong>, and <strong>what</strong> changed.</p>
+  </div>
+</div>
+
+@if (error) { <div class="alert error">{{ error }}</div> }
+
+<section class="card">
+  <div class="filters">
+    <div class="form-field">
+      <label>Category</label>
+      <select [(ngModel)]="category" (ngModelChange)="onFilterChange()">
+        <option value="all">All categories</option>
+        @for (c of categories; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-field grow">
+      <label>Search</label>
+      <input [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Search action, detail, entity, or user…" />
+    </div>
+  </div>
+
+  @if (loading) {
+    <p class="muted">Loading audit log…</p>
+  } @else if (page && page.entries.length) {
+    <div class="table-wrap">
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th class="col-time">When</th>
+            <th class="col-user">User</th>
+            <th class="col-cat">Category</th>
+            <th class="col-action">Action</th>
+            <th class="col-entity">Entity</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of page.entries; track e.id) {
+            <tr>
+              <td class="col-time">{{ e.timestamp }}</td>
+              <td class="col-user">{{ e.user }}</td>
+              <td><span class="badge" [class]="badgeClass(e.category)">{{ e.category }}</span></td>
+              <td class="col-action">{{ e.action }}</td>
+              <td class="col-entity">
+                @if (dealLink(e); as link) {
+                  <a [routerLink]="link">{{ e.entity || e.entityId }}</a>
+                } @else {
+                  {{ e.entity || '—' }}
+                }
+              </td>
+              <td class="col-details">{{ e.details || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pager">
+      <span class="muted">Showing {{ rangeStart }}–{{ rangeEnd }} of {{ page.total }}</span>
+      <div class="pager-btns">
+        <button type="button" class="btn btn-outline" [disabled]="currentPage === 1" (click)="prevPage()">← Prev</button>
+        <button type="button" class="btn btn-outline" [disabled]="!hasNext" (click)="nextPage()">Next →</button>
+      </div>
+    </div>
+  } @else {
+    <p class="muted">No audit entries match these filters yet. As people create engagements, change pricing, run approvals, or update settings, those actions will appear here.</p>
+  }
+</section>

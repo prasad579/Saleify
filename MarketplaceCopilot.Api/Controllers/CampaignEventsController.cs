@@ -1,12 +1,13 @@
 using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Entities;
+using MarketplaceCopilot.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketplaceCopilot.Api.Controllers;
 
 [ApiController]
 [Route("api/campaign-events")]
-public class CampaignEventsController(DataStore store) : ControllerBase
+public class CampaignEventsController(DataStore store, IAuditService audit) : ControllerBase
 {
     /// <summary>Engagement types used for the conversion funnel, in funnel order.</summary>
     private static readonly string[] EngagementOrder =
@@ -43,6 +44,9 @@ public class CampaignEventsController(DataStore store) : ControllerBase
         };
         store.CampaignEvents.Insert(0, ev);
         store.SaveCampaignEvents();
+        audit.Log("Settings", "Campaign / event tag created",
+            $"{ev.Name}{(string.IsNullOrWhiteSpace(ev.Marketplace) ? "" : $" ({ev.Marketplace})")}, {ev.StartDate} → {ev.EndDate}.",
+            "Campaign / Event Tags", ev.Id);
         return Ok(ev);
     }
 
@@ -59,6 +63,7 @@ public class CampaignEventsController(DataStore store) : ControllerBase
         ev.Description = request.Description?.Trim() ?? ev.Description;
         ev.Paused = request.Paused;
         store.SaveCampaignEvents();
+        audit.Log("Settings", "Campaign / event tag updated", $"{ev.Name} updated.", "Campaign / Event Tags", ev.Id);
         return ev;
     }
 
@@ -70,6 +75,8 @@ public class CampaignEventsController(DataStore store) : ControllerBase
         if (ev is null) return NotFound();
         ev.Paused = !ev.Paused;
         store.SaveCampaignEvents();
+        audit.Log("Settings", ev.Paused ? "Campaign / event tag paused" : "Campaign / event tag resumed", ev.Name,
+            "Campaign / Event Tags", ev.Id);
         return ev;
     }
 
@@ -80,6 +87,7 @@ public class CampaignEventsController(DataStore store) : ControllerBase
         if (ev is null) return NotFound();
         store.CampaignEvents.Remove(ev);
         store.SaveCampaignEvents();
+        audit.Log("Settings", "Campaign / event tag deleted", ev.Name, "Campaign / Event Tags", ev.Id);
         return Ok(new { success = true });
     }
 

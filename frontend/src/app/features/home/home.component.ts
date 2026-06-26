@@ -5,6 +5,7 @@ import { ApiService, dealContinuePath } from '@core/services/api.service';
 import { AuthService } from '@core/services/auth.service';
 import { SnapshotLauncherService } from '@core/services/snapshot-launcher.service';
 import { SnapshotSettingsService } from '@core/services/snapshot-settings.service';
+import { HomeSettingsService } from '@core/services/home-settings.service';
 import { DashboardInsights } from '@shared/data/snapshot.model';
 import { CampaignEvent, eventStatus } from '@shared/data/lookups';
 import { formatReminderDate, reminderBadgeClass, reminderStatus } from '@shared/utils/meeting-notes.util';
@@ -28,6 +29,7 @@ export class HomeComponent implements OnInit {
   private router = inject(Router);
   private launcher = inject(SnapshotLauncherService);
   snapSettings = inject(SnapshotSettingsService);
+  homeSettings = inject(HomeSettingsService);
   auth = inject(AuthService);
   data: any = null;
   insights: DashboardInsights | null = null;

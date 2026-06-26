@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using MarketplaceCopilot.Api;
 using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Services;
 using MarketplaceCopilot.Services.Contracts;
@@ -13,7 +14,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<DataStore>();
 builder.Services.AddSingleton<UserStore>();
 
+// Resolve the acting user from the current request (X-Acting-User header) for audit attribution.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IActingUserAccessor, HttpActingUserAccessor>();
+
 // Service layer (registered against their contracts)
+builder.Services.AddSingleton<IAuditService, AuditService>();
 builder.Services.AddSingleton<IAiService, AiService>();
 builder.Services.AddSingleton<IPricingService, PricingService>();
 builder.Services.AddSingleton<IDealHistoryService, DealHistoryService>();
@@ -21,6 +27,7 @@ builder.Services.AddSingleton<IMeetingNotesService, MeetingNotesService>();
 builder.Services.AddSingleton<IApprovalDocumentService, ApprovalDocumentService>();
 builder.Services.AddSingleton<IApprovalService, ApprovalService>();
 builder.Services.AddSingleton<IDealService, DealService>();
+builder.Services.AddSingleton<IOfferRequestService, OfferRequestService>();
 builder.Services.AddSingleton<ISnapshotService, SnapshotService>();
 
 var authSection = builder.Configuration.GetSection("Auth");

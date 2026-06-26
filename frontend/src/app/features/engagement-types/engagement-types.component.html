@@ -1,0 +1,71 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Engagement Types</h1>
+    <p class="page-subtitle">Choose which engagement types are offered and which sections each one uses. For example, turn <strong>Approvals</strong> off for a <strong>Free Trial</strong> so it skips review entirely, or disable a type to remove it from the create screen — no code change needed.</p>
+  </div>
+  <button type="button" class="btn btn-outline" (click)="reset()">Reset to defaults</button>
+</div>
+
+@if (error) { <div class="alert error">{{ error }}</div> }
+
+@if (loading) {
+  <p>Loading engagement types…</p>
+} @else if (settings) {
+  <section class="card setting-card">
+    <h3>Engagement catalog</h3>
+    <p class="hint">{{ enabledCount() }} of {{ settings.types.length }} types enabled. <strong>Engagement Details</strong> always applies; the sections below are per type. “Not applicable” hides that section from the flow (e.g. approvals not required).</p>
+
+    @for (t of settings.types; track t.type) {
+      <div class="section-block" [class.disabled]="!t.enabled">
+        <div class="section-head-row">
+          <div class="type-name">
+            <strong>{{ t.type }}</strong>
+            <input [(ngModel)]="t.blurb" class="blurb-input" [attr.aria-label]="'Description for ' + t.type" placeholder="Short description shown on the create screen" />
+          </div>
+          <label class="switch-inline">
+            <input type="checkbox" [(ngModel)]="t.enabled" /> Offered
+          </label>
+        </div>
+
+        <div class="sections-grid">
+          @for (s of sections; track s.key) {
+            <div class="form-field">
+              <label>{{ s.label }}</label>
+              <select [ngModel]="sectionValue(t, s.key)" (ngModelChange)="setSectionValue(t, s.key, $event)">
+                @for (v of visibilities; track v.value) {
+                  <option [value]="v.value">{{ v.label }}</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        <div class="meta-grid">
+          <div class="form-field">
+            <label>Final action</label>
+            <select [(ngModel)]="t.submitAction">
+              @for (a of submitActions; track a.value) {
+                <option [value]="a.value">{{ a.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-field">
+            <label>Submit button label</label>
+            <input [(ngModel)]="t.submitLabel" placeholder="e.g. Submit to SaaSify" />
+          </div>
+          <label class="check-inline">
+            <input type="checkbox" [(ngModel)]="t.tagRequired" /> Campaign / event tag required
+          </label>
+          <label class="check-inline">
+            <input type="checkbox" [(ngModel)]="t.marketplaceRequired" /> Marketplace required
+          </label>
+        </div>
+      </div>
+    }
+  </section>
+
+  <div class="save-bar">
+    @if (settings.updatedAt) { <span class="updated">Last saved {{ settings.updatedAt }}</span> }
+    <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">{{ saving ? 'Saving…' : 'Save engagement types' }}</button>
+  </div>
+}

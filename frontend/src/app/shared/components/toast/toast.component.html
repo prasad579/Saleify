@@ -1,0 +1,11 @@
+@if (svc.toasts().length) {
+  <div class="toast-stack" role="status" aria-live="polite">
+    @for (t of svc.toasts(); track t.id) {
+      <div class="toast" [class]="'toast-' + t.type">
+        <span class="toast-icon">{{ icon(t.type) }}</span>
+        <span class="toast-msg">{{ t.message }}</span>
+        <button type="button" class="toast-close" (click)="svc.dismiss(t.id)" aria-label="Dismiss">✕</button>
+      </div>
+    }
+  </div>
+}

@@ -42,12 +42,24 @@ export class DealsListComponent implements OnInit {
   toast = '';
 
   search = '';
-  // Structured filters set via query params (used by Home card redirections).
-  fOwner = '';
-  fStage = '';
-  fStatus = '';
-  fTag = '';
   fScope = ''; // 'open' = exclude closed/abandoned
+
+  /** Active column filters, AND-combined. Seeded from query params (Home cards) + built in-page. */
+  filters: { field: string; value: string }[] = [];
+
+  /** Filter builder state: pick a field, then a value from the options for that field. */
+  newFilterField = '';
+  newFilterValue = '';
+
+  /** Columns that can be filtered, with the deal property each maps to. */
+  readonly filterFields: { key: string; label: string }[] = [
+    { key: 'marketplace', label: 'Marketplace' },
+    { key: 'engagementType', label: 'Engagement Type' },
+    { key: 'campaignEventName', label: 'Tag' },
+    { key: 'stage', label: 'Stage' },
+    { key: 'marketplaceStatus', label: 'Status' },
+    { key: 'owner', label: 'Owner' }
+  ];
 
   private readonly openStatuses = ['Draft', 'In Review', 'Waiting for Info', 'Lead', 'Quick Capture'];
 
@@ -88,44 +100,78 @@ export class DealsListComponent implements OnInit {
     // Pick up search + structured filters from query params (top-bar search, Home cards).
     this.route.queryParamMap.subscribe(params => {
       this.search = params.get('q') ?? '';
-      this.fOwner = params.get('owner') ?? '';
-      this.fStage = params.get('stage') ?? '';
-      this.fStatus = params.get('status') ?? '';
-      this.fTag = params.get('tag') ?? '';
       this.fScope = params.get('scope') ?? '';
+      // Seed the filter list from the param shorthands used by Home cards / nav.
+      const seedMap: Record<string, string> = {
+        owner: 'owner', stage: 'stage', status: 'marketplaceStatus', tag: 'campaignEventName', marketplace: 'marketplace'
+      };
+      const seeded: { field: string; value: string }[] = [];
+      for (const [param, field] of Object.entries(seedMap)) {
+        const v = params.get(param);
+        if (v) seeded.push({ field, value: v });
+      }
+      this.filters = seeded;
       this.page = 1;
     });
   }
 
-  /** Active filters for the chip row. */
-  get activeFilters(): { key: string; label: string }[] {
-    const chips: { key: string; label: string }[] = [];
-    if (this.fScope === 'open') chips.push({ key: 'scope', label: 'Open only' });
-    if (this.fOwner) chips.push({ key: 'owner', label: `Owner: ${this.fOwner}` });
-    if (this.fStage) chips.push({ key: 'stage', label: `Stage: ${this.fStage}` });
-    if (this.fStatus) chips.push({ key: 'status', label: `Status: ${this.fStatus}` });
-    if (this.fTag) chips.push({ key: 'tag', label: `Tag: ${this.fTag}` });
-    return chips;
+  fieldLabel(key: string): string {
+    return this.filterFields.find(f => f.key === key)?.label ?? key;
+  }
+
+  /** Distinct, non-empty values present in the data for a field — the selectable options. */
+  valueOptionsFor(field: string): string[] {
+    if (!field) return [];
+    const vals = new Set<string>();
+    for (const d of this.allDeals) {
+      const v = (d[field] ?? '').toString().trim();
+      if (v) vals.add(v);
+    }
+    return [...vals].sort((a, b) => a.localeCompare(b));
+  }
+
+  get newFilterValueOptions(): string[] {
+    return this.valueOptionsFor(this.newFilterField);
+  }
+
+  onFilterFieldChange() { this.newFilterValue = ''; }
+
+  addFilter() {
+    const field = this.newFilterField;
+    const value = this.newFilterValue;
+    if (!field || !value) return;
+    if (!this.filters.some(f => f.field === field && f.value === value)) {
+      this.filters = [...this.filters, { field, value }];
+    }
+    this.newFilterValue = '';
+    this.page = 1;
+  }
+
+  removeFilterRule(index: number) {
+    this.filters = this.filters.filter((_, i) => i !== index);
+    this.page = 1;
+  }
+
+  removeScope() {
+    this.fScope = '';
+    this.page = 1;
   }
 
   get hasFilters(): boolean {
-    return !!(this.fOwner || this.fStage || this.fStatus || this.fTag || this.fScope);
-  }
-
-  removeFilter(key: string) {
-    const qp: any = { owner: this.fOwner, stage: this.fStage, status: this.fStatus, tag: this.fTag, scope: this.fScope, q: this.search };
-    qp[key] = null;
-    this.router.navigate(['/deals'], { queryParams: this.cleanParams(qp) });
+    return this.filters.length > 0 || this.fScope === 'open';
   }
 
   clearAll() {
+    this.filters = [];
+    this.fScope = '';
+    this.search = '';
+    this.page = 1;
     this.router.navigate(['/deals'], { queryParams: {} });
   }
 
-  private cleanParams(qp: any) {
-    const out: any = {};
-    Object.keys(qp).forEach(k => { if (qp[k]) out[k] = qp[k]; });
-    return out;
+  /** First filter value for a field (used to build the snapshot request). */
+  private filterValueOf(field: string): string | undefined {
+    return this.filters.find(f => f.field === field)?.value;
   }
 
   get filteredDeals(): any[] {
@@ -133,10 +179,11 @@ export class DealsListComponent implements OnInit {
     let list = this.allDeals;
 
     if (this.fScope === 'open') list = list.filter(d => this.openStatuses.includes(d.marketplaceStatus));
-    if (this.fOwner) list = list.filter(d => (d.owner || '').toLowerCase() === this.fOwner.toLowerCase());
-    if (this.fStage) list = list.filter(d => (d.stage || '').toLowerCase() === this.fStage.toLowerCase());
-    if (this.fStatus) list = list.filter(d => (d.marketplaceStatus || '').toLowerCase() === this.fStatus.toLowerCase());
-    if (this.fTag) list = list.filter(d => (d.campaignEventName || '').toLowerCase() === this.fTag.toLowerCase());
+    // Every filter must match (AND).
+    for (const f of this.filters) {
+      const val = f.value.toLowerCase();
+      list = list.filter(d => (d[f.field] ?? '').toString().toLowerCase() === val);
+    }
 
     if (q) {
       list = list.filter(d =>
@@ -237,10 +284,10 @@ export class DealsListComponent implements OnInit {
   private buildSnapshotRequest(): SnapshotRequest {
     return {
       scope: 'filtered',
-      owner: this.fOwner || undefined,
-      stage: this.fStage || undefined,
-      status: this.fStatus || undefined,
-      tag: this.fTag || undefined,
+      owner: this.filterValueOf('owner'),
+      stage: this.filterValueOf('stage'),
+      status: this.filterValueOf('marketplaceStatus'),
+      tag: this.filterValueOf('campaignEventName'),
       search: this.search.trim() || undefined,
       openOnly: this.fScope === 'open'
     };

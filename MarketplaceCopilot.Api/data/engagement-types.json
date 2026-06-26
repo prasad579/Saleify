@@ -1,0 +1,109 @@
+{
+  "types": [
+    {
+      "type": "Private Offer",
+      "blurb": "Marketplace private offer with full pricing \u0026 approvals",
+      "enabled": true,
+      "products": "yes",
+      "pricing": "yes",
+      "meetingNotes": "yes",
+      "approvals": "yes",
+      "submitLabel": "Submit to SaaSify",
+      "submitAction": "submit",
+      "tagRequired": false,
+      "marketplaceRequired": true
+    },
+    {
+      "type": "Free Trial",
+      "blurb": "Time-boxed trial \u2014 no charge until consumption limit",
+      "enabled": true,
+      "products": "yes",
+      "pricing": "optional",
+      "meetingNotes": "yes",
+      "approvals": "no",
+      "submitLabel": "Submit to SaaSify",
+      "submitAction": "submit",
+      "tagRequired": true,
+      "marketplaceRequired": true
+    },
+    {
+      "type": "Workshop",
+      "blurb": "Customer enablement workshop",
+      "enabled": true,
+      "products": "optional",
+      "pricing": "no",
+      "meetingNotes": "yes",
+      "approvals": "no",
+      "submitLabel": "Mark Completed",
+      "submitAction": "complete",
+      "tagRequired": true,
+      "marketplaceRequired": true
+    },
+    {
+      "type": "Hackathon",
+      "blurb": "Hands-on hackathon engagement",
+      "enabled": true,
+      "products": "yes",
+      "pricing": "optional",
+      "meetingNotes": "yes",
+      "approvals": "optional",
+      "submitLabel": "Mark Completed",
+      "submitAction": "complete",
+      "tagRequired": true,
+      "marketplaceRequired": true
+    },
+    {
+      "type": "POC",
+      "blurb": "Proof of concept / pilot",
+      "enabled": true,
+      "products": "yes",
+      "pricing": "optional",
+      "meetingNotes": "yes",
+      "approvals": "optional",
+      "submitLabel": "Mark Completed",
+      "submitAction": "complete",
+      "tagRequired": true,
+      "marketplaceRequired": true
+    },
+    {
+      "type": "Summit/Event Lead",
+      "blurb": "Lead captured at a summit or event",
+      "enabled": true,
+      "products": "no",
+      "pricing": "no",
+      "meetingNotes": "yes",
+      "approvals": "no",
+      "submitLabel": "Save \u0026 Convert Later",
+      "submitAction": "convert-later",
+      "tagRequired": true,
+      "marketplaceRequired": true
+    },
+    {
+      "type": "Internal Sales Activity",
+      "blurb": "Internal sales activity (no marketplace offer)",
+      "enabled": false,
+      "products": "no",
+      "pricing": "no",
+      "meetingNotes": "yes",
+      "approvals": "no",
+      "submitLabel": "Save \u0026 Convert Later",
+      "submitAction": "convert-later",
+      "tagRequired": false,
+      "marketplaceRequired": false
+    },
+    {
+      "type": "External Source Lead",
+      "blurb": "Lead from an external source",
+      "enabled": false,
+      "products": "no",
+      "pricing": "no",
+      "meetingNotes": "yes",
+      "approvals": "no",
+      "submitLabel": "Save \u0026 Convert Later",
+      "submitAction": "convert-later",
+      "tagRequired": false,
+      "marketplaceRequired": false
+    }
+  ],
+  "updatedAt": "2026-06-25 17:11 UTC"
+}

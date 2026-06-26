@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
+import { ToastService } from '@core/services/toast.service';
 import {
   ApprovalConditionType,
   ApprovalRuleSetting,
@@ -17,6 +18,7 @@ import { apiErrorMessage } from '@shared/utils/deal-api.util';
 })
 export class ApprovalSettingsComponent implements OnInit {
   private api = inject(ApiService);
+  private toast = inject(ToastService);
 
   settings: ApprovalRulesSettings | null = null;
   loading = true;
@@ -53,10 +55,9 @@ export class ApprovalSettingsComponent implements OnInit {
       next: s => {
         this.settings = s;
         this.saving = false;
-        this.success = 'Approval rules saved. New and re-evaluated engagements will use them immediately.';
-        setTimeout(() => this.success = '', 3500);
+        this.toast.success('Approval rules saved. New and re-evaluated engagements will use them immediately.');
       },
-      error: e => { this.saving = false; this.error = apiErrorMessage(e, 'Could not save approval rules.'); }
+      error: e => { this.saving = false; this.toast.error(apiErrorMessage(e, 'Could not save approval rules.')); }
     });
   }
 
@@ -65,10 +66,9 @@ export class ApprovalSettingsComponent implements OnInit {
     this.api.resetApprovalRules().subscribe({
       next: s => {
         this.settings = s;
-        this.success = 'Approval rules reset to defaults.';
-        setTimeout(() => this.success = '', 3500);
+        this.toast.success('Approval rules reset to defaults.');
       },
-      error: e => { this.error = apiErrorMessage(e, 'Could not reset approval rules.'); }
+      error: e => { this.toast.error(apiErrorMessage(e, 'Could not reset approval rules.')); }
     });
   }
 

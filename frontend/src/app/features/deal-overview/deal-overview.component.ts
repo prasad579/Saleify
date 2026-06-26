@@ -19,7 +19,16 @@ import {
   normalizeSessions
 } from '@shared/utils/meeting-notes.util';
 import { normalizeDealDetail } from '@shared/utils/deal-api.util';
-import { stepperSteps } from '@shared/utils/engagement.util';
+import { ScreenKey, stepperSteps } from '@shared/utils/engagement.util';
+
+interface ProgressStep {
+  key: ScreenKey;
+  label: string;
+  hint: string;
+  done: boolean;
+  current: boolean;
+  path: any[];
+}
 
 @Component({
   selector: 'app-deal-overview',
@@ -45,6 +54,13 @@ export class DealOverviewComponent implements OnInit {
   reminders: ReminderRow[] = [];
   changeHistory: ChangeHistoryRow[] = [];
 
+  // Workflow completion (computed once after load).
+  steps: ProgressStep[] = [];
+  completedCount = 0;
+  totalSteps = 0;
+  percentComplete = 0;
+  allComplete = false;
+
   ngOnInit() {
     this.dealId = this.route.snapshot.paramMap.get('id') || '';
     this.api.getDeal(this.dealId).subscribe({
@@ -56,10 +72,61 @@ export class DealOverviewComponent implements OnInit {
         this.actionItems = normalizeActionItems(saved?.actionItems || []);
         this.reminders = normalizeReminders(saved?.reminders || []);
         this.changeHistory = normalizeHistory(this.deal?.changeHistory || []);
+        this.computeProgress();
         this.loading = false;
       },
       error: () => this.loading = false
     });
+  }
+
+  private static readonly STEP_HINTS: Record<ScreenKey, string> = {
+    'details': 'Customer, contact, marketplace & tag',
+    'products': 'Choose the products in the offer',
+    'pricing': 'Set discount, duration & payment terms',
+    'meeting-notes': 'Capture notes, action items & reminders',
+    'approvals': 'Run reviews & generate documents'
+  };
+
+  /** Build the per-section progress list, marking what's complete and which step is current. */
+  private computeProgress() {
+    const d = this.deal;
+    const steps = stepperSteps(d?.engagementType || 'Private Offer').map(s => ({
+      key: s.key,
+      label: s.label,
+      hint: DealOverviewComponent.STEP_HINTS[s.key] ?? '',
+      done: this.isStepComplete(s.key),
+      current: false,
+      path: s.key === 'details' ? ['/deals', this.dealId, 'edit'] : ['/deals', this.dealId, s.key]
+    } as ProgressStep));
+
+    // The current step is the first one that isn't done yet.
+    const next = steps.find(s => !s.done);
+    if (next) next.current = true;
+
+    this.steps = steps;
+    this.totalSteps = steps.length;
+    this.completedCount = steps.filter(s => s.done).length;
+    this.percentComplete = this.totalSteps ? Math.round((this.completedCount * 100) / this.totalSteps) : 0;
+    this.allComplete = this.totalSteps > 0 && this.completedCount === this.totalSteps;
+  }
+
+  private isStepComplete(key: ScreenKey): boolean {
+    const d = this.deal;
+    if (!d) return false;
+    switch (key) {
+      case 'details':
+        return !!(d.engagementType && d.contactEmail && d.owner && !d.quickCapture);
+      case 'products':
+        return (d.productIds?.length || 0) > 0;
+      case 'pricing':
+        return !!(d.pricing && d.pricing.netContractValue > 0);
+      case 'meeting-notes':
+        return (d.meetingNotes?.sessions?.length || 0) > 0 || !!d.meetingNotes?.rawNotes;
+      case 'approvals':
+        return ['In Review', 'Published', 'Completed'].includes(d.marketplaceStatus) || !!d.approvals?.documentsLocked;
+      default:
+        return false;
+    }
   }
 
   lastSession() {
@@ -107,13 +174,5 @@ export class DealOverviewComponent implements OnInit {
     });
     if (!ok) return;
     this.api.deleteDeal(this.dealId).subscribe(() => this.router.navigate(['/deals']));
-  }
-
-  /** Workflow links limited to the screens that apply to this engagement type. */
-  get workflowLinks(): { label: string; path: any[] }[] {
-    return stepperSteps(this.deal?.engagementType || 'Private Offer').map(s => ({
-      label: s.label,
-      path: s.key === 'details' ? ['/deals', this.dealId, 'edit'] : ['/deals', this.dealId, s.key]
-    }));
   }
 }

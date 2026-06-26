@@ -1,0 +1,152 @@
+<div class="page-nav">
+  <a routerLink="/offer-requests" class="back-link">← Back to Offer Requests</a>
+</div>
+
+@if (loading) {
+  <p class="muted">Loading offer request…</p>
+} @else if (error) {
+  <div class="alert error">{{ error }}</div>
+} @else if (offer) {
+  <div class="detail-header">
+    <div>
+      <div class="title-row">
+        <h1 class="page-title">{{ offer.engagementName }}</h1>
+        <span class="badge" [class]="statusBadge(offer.status)">{{ offer.status }}</span>
+        <span class="badge" [class]="responseBadge(offer)">{{ offer.responseReceived ? 'Response: ' + offer.responseStatus : 'Awaiting response' }}</span>
+      </div>
+      <p class="page-subtitle">
+        {{ offer.id }} · pushed to <strong>{{ offer.destination }}</strong>
+        @if (offer.marketplace) { · {{ offer.marketplace }} }
+        · {{ formatCreatedDate(offer.submittedAt) }} by {{ offer.submittedBy }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <a [routerLink]="['/deals', offer.dealId]" class="btn btn-outline">Open engagement →</a>
+      <button type="button" class="btn btn-primary" (click)="openResponse()">{{ offer.responseReceived ? 'Edit response' : 'Capture response' }}</button>
+    </div>
+  </div>
+
+  @if (offer.changedSinceSubmission) {
+    <div class="changed-banner">
+      ⚠ The engagement has been <strong>edited since this was pushed</strong>, so this payload is out of date.
+      @if (offer.lastChangeSummary) { <span class="change-summary">{{ offer.lastChangeSummary }}</span> }
+      Re-submit the engagement to push the latest version.
+    </div>
+  }
+
+  <div class="detail-grid">
+    <div class="detail-main">
+      <!-- Summary -->
+      <section class="card">
+        <h3 class="card-title">Offer summary</h3>
+        <div class="field-grid">
+          <div class="field"><span class="f-label">Engagement</span><a [routerLink]="['/deals', offer.dealId]" class="f-link">{{ offer.dealId }}</a></div>
+          <div class="field"><span class="f-label">Customer</span><span>{{ offer.customer || '—' }}</span></div>
+          <div class="field"><span class="f-label">Type</span><span>{{ offer.engagementType }}</span></div>
+          <div class="field"><span class="f-label">Marketplace</span><span>{{ offer.marketplace || '—' }}</span></div>
+          <div class="field"><span class="f-label">Destination</span><span>{{ offer.destination }}</span></div>
+          <div class="field"><span class="f-label">Value</span><span class="f-value">${{ offer.value | number }}</span></div>
+          <div class="field"><span class="f-label">Submitted</span><span>{{ formatCreatedDate(offer.submittedAt) }}</span></div>
+          <div class="field"><span class="f-label">Submitted by</span><span>{{ offer.submittedBy }}</span></div>
+        </div>
+
+        @if (offer.products.length) {
+          <div class="products">
+            <span class="f-label">Products</span>
+            <div class="product-chips">
+              @for (p of offer.products; track p) { <span class="chip">{{ p }}</span> }
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- JSON payloads -->
+      <section class="card">
+        <div class="json-head">
+          <div class="json-tabs">
+            <button type="button" class="json-tab" [class.active]="jsonTab === 'request'" (click)="jsonTab = 'request'">Request JSON</button>
+            <button type="button" class="json-tab" [class.active]="jsonTab === 'response'" (click)="jsonTab = 'response'" [disabled]="!offer.responseReceived">
+              Response JSON{{ offer.responseReceived ? '' : ' (none yet)' }}
+            </button>
+          </div>
+          <div class="json-actions">
+            <button type="button" class="btn btn-outline btn-sm" (click)="copyJson()">⧉ Copy</button>
+            <button type="button" class="btn btn-outline btn-sm" (click)="downloadJson()">⬇ Download</button>
+          </div>
+        </div>
+        <pre class="json-view">{{ currentJson || 'No JSON available.' }}</pre>
+      </section>
+    </div>
+
+    <!-- Response side panel -->
+    <aside class="detail-side">
+      <section class="card response-card">
+        <h3 class="card-title">Destination response</h3>
+        @if (offer.responseReceived) {
+          <div class="resp-status">
+            <span class="badge" [class]="responseBadge(offer)">{{ offer.responseStatus }}</span>
+          </div>
+          <div class="field-grid one">
+            @if (offer.responseReference) {
+              <div class="field"><span class="f-label">Reference</span><span class="f-value">{{ offer.responseReference }}</span></div>
+            }
+            <div class="field"><span class="f-label">Captured</span><span>{{ formatCreatedDate(offer.responseAt) }}</span></div>
+            <div class="field"><span class="f-label">Captured by</span><span>{{ offer.responseBy }}</span></div>
+          </div>
+          @if (offer.responseNotes) {
+            <div class="resp-notes-block">
+              <span class="f-label">Notes</span>
+              <p>{{ offer.responseNotes }}</p>
+            </div>
+          }
+          <button type="button" class="btn btn-outline btn-sm full" (click)="openResponse()">Edit response</button>
+        } @else {
+          <p class="muted">No response captured yet.</p>
+          <p class="muted-sm">Record what {{ offer.destination }} returned — acceptance, rejection, or a change request — to keep this offer's status in sync.</p>
+          <button type="button" class="btn btn-primary full" (click)="openResponse()">Capture response</button>
+        }
+      </section>
+    </aside>
+  </div>
+}
+
+@if (showResponse && offer) {
+  <div class="modal-backdrop" (click)="closeResponse()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <header class="modal-head">
+        <div>
+          <h2>Capture Response</h2>
+          <p class="modal-sub">{{ offer.engagementName }} · {{ offer.id }}</p>
+        </div>
+        <button type="button" class="modal-close" (click)="closeResponse()" aria-label="Close">✕</button>
+      </header>
+
+      <div class="modal-body">
+        <div class="form-field">
+          <label>Response status</label>
+          <select [(ngModel)]="respForm.status">
+            @for (s of responseStatuses; track s) { <option [value]="s">{{ s }}</option> }
+          </select>
+          <small>“Accepted” marks the engagement Published; “Rejected” marks it Rejected.</small>
+        </div>
+        <div class="form-field">
+          <label>Reference ID <span class="optional">(optional)</span></label>
+          <input [(ngModel)]="respForm.reference" placeholder="e.g. marketplace offer / case id" />
+        </div>
+        <div class="form-field">
+          <label>Notes <span class="optional">(optional)</span></label>
+          <textarea rows="3" [(ngModel)]="respForm.notes" placeholder="Any message returned by the destination…"></textarea>
+        </div>
+        <div class="form-field">
+          <label>Raw response JSON <span class="optional">(optional)</span></label>
+          <textarea rows="4" class="mono" [(ngModel)]="respForm.json" placeholder="Paste the raw JSON response — leave blank to auto-generate."></textarea>
+        </div>
+      </div>
+
+      <footer class="modal-foot">
+        <button type="button" class="btn btn-outline" (click)="closeResponse()">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="savingResponse" (click)="saveResponse()">{{ savingResponse ? 'Saving…' : 'Save response' }}</button>
+      </footer>
+    </div>
+  </div>
+}

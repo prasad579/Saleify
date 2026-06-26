@@ -4,7 +4,7 @@ using MarketplaceCopilot.Services.Contracts;
 
 namespace MarketplaceCopilot.Services;
 
-public class ApprovalService(IDealHistoryService history, IApprovalDocumentService documents, DataStore store) : IApprovalService
+public class ApprovalService(IDealHistoryService history, IApprovalDocumentService documents, DataStore store, IAuditService audit) : IApprovalService
 {
     private const string DefaultUser = "Srinivas K";
 
@@ -119,6 +119,7 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
                     AddComment(step, user, comment, "approval");
                 LogAudit(deal, "Approval", $"{step.Title} approved", comment, user, step.Title);
                 history.Log(deal, "Approvals", $"{step.Title} approved.", comment);
+                audit.LogDeal(deal, "Approvals", $"{step.Title} approved", comment, user);
                 break;
             case "reject":
                 if (string.IsNullOrEmpty(comment))
@@ -128,6 +129,7 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
                 AddComment(step, user, comment, "rejection");
                 LogAudit(deal, "Approval", $"{step.Title} rejected", comment, user, step.Title);
                 history.Log(deal, "Approvals", $"{step.Title} rejected.", comment);
+                audit.LogDeal(deal, "Approvals", $"{step.Title} rejected", comment, user);
                 break;
             case "request-changes":
                 if (string.IsNullOrEmpty(comment))
@@ -137,6 +139,7 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
                 AddComment(step, user, comment, "changes");
                 LogAudit(deal, "Approval", "Changes requested", comment, user, step.Title);
                 history.Log(deal, "Approvals", $"{step.Title} — changes requested.", comment);
+                audit.LogDeal(deal, "Approvals", $"{step.Title} — changes requested", comment, user);
                 break;
             case "mark-ready":
                 if (step.Status != "Changes Requested")
@@ -145,6 +148,7 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
                 AddComment(step, user, comment.Length > 0 ? comment : "Marked ready for re-review.", "response");
                 LogAudit(deal, "Approval", "Marked ready for re-review", comment, user, step.Title);
                 history.Log(deal, "Approvals", $"{step.Title} marked ready for re-review.", comment);
+                audit.LogDeal(deal, "Approvals", $"{step.Title} marked ready for re-review", comment, user);
                 break;
             default:
                 return new ApprovalActionResult { Success = false, Message = "Unknown action." };

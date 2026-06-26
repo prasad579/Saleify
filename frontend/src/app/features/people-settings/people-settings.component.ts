@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
 import { ConfirmDialogService } from '@core/services/confirm-dialog.service';
+import { ToastService } from '@core/services/toast.service';
 import { apiErrorMessage } from '@shared/utils/deal-api.util';
 import { Person } from '@shared/data/lookups';
 import { ENGAGEMENT_CONFIGS } from '@shared/utils/engagement.util';
@@ -25,6 +26,7 @@ interface PersonForm {
 export class PeopleSettingsComponent implements OnInit {
   private api = inject(ApiService);
   private confirm = inject(ConfirmDialogService);
+  private toast = inject(ToastService);
 
   people: Person[] = [];
   engagementTypes = ENGAGEMENT_CONFIGS.map(c => c.type);
@@ -112,8 +114,7 @@ export class PeopleSettingsComponent implements OnInit {
 
   save() {
     this.error = '';
-    this.success = '';
-    if (!this.form.name.trim()) { this.error = 'Name is required.'; return; }
+    if (!this.form.name.trim()) { this.toast.error('Name is required.'); return; }
 
     const payload: Partial<Person> = {
       id: this.editId || undefined,
@@ -125,14 +126,14 @@ export class PeopleSettingsComponent implements OnInit {
       source: this.form.source || 'manual'
     };
 
+    const editing = !!this.editId;
     this.api.savePerson(payload).subscribe({
       next: () => {
-        this.success = this.editId ? 'Person updated.' : 'Person added.';
-        setTimeout(() => this.success = '', 3000);
+        this.toast.success(editing ? 'Person updated.' : 'Person added.');
         this.closeModal();
         this.load();
       },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not save person.'); }
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not save person.')); }
     });
   }
 
@@ -141,10 +142,9 @@ export class PeopleSettingsComponent implements OnInit {
     this.api.togglePerson(p.id).subscribe({
       next: (updated) => {
         p.enabled = updated.enabled;
-        this.success = `${p.name} ${p.enabled ? 'enabled' : 'disabled'} for engagements.`;
-        setTimeout(() => this.success = '', 3000);
+        this.toast.success(`${p.name} ${p.enabled ? 'enabled' : 'disabled'} for engagements.`);
       },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not update the person.'); }
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not update the person.')); }
     });
   }
 
@@ -158,8 +158,8 @@ export class PeopleSettingsComponent implements OnInit {
     if (!ok) return;
     this.error = '';
     this.api.deletePerson(p.id).subscribe({
-      next: () => { this.success = `${p.name} deleted.`; setTimeout(() => this.success = '', 3000); this.load(); },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not delete person.'); }
+      next: () => { this.toast.success(`${p.name} deleted.`); this.load(); },
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not delete person.')); }
     });
   }
 
@@ -175,10 +175,9 @@ export class PeopleSettingsComponent implements OnInit {
     this.api.resetPeople().subscribe({
       next: (data) => {
         this.people = Array.isArray(data) ? data : [];
-        this.success = 'People reset to defaults.';
-        setTimeout(() => this.success = '', 3000);
+        this.toast.success('People reset to defaults.');
       },
-      error: (err) => { this.error = apiErrorMessage(err, 'Could not reset people.'); }
+      error: (err) => { this.toast.error(apiErrorMessage(err, 'Could not reset people.')); }
     });
   }
 }

@@ -22,6 +22,11 @@ import { PlaybookSettingsComponent } from '@features/playbook-settings/playbook-
 import { SnapshotSettingsComponent } from '@features/snapshot-settings/snapshot-settings.component';
 import { ApprovalSettingsComponent } from '@features/approval-settings/approval-settings.component';
 import { PeopleSettingsComponent } from '@features/people-settings/people-settings.component';
+import { EngagementTypesComponent } from '@features/engagement-types/engagement-types.component';
+import { HomeSettingsComponent } from '@features/home-settings/home-settings.component';
+import { AuditLogComponent } from '@features/audit-log/audit-log.component';
+import { OfferRequestsComponent } from '@features/offer-requests/offer-requests.component';
+import { OfferRequestDetailComponent } from '@features/offer-request-detail/offer-request-detail.component';
 import { SettingsHomeComponent } from '@features/settings/settings-home.component';
 import { authGuard, guestGuard } from '@core/guards/auth.guard';
 
@@ -48,7 +53,12 @@ export const routes: Routes = [
       { path: 'settings/playbooks', component: PlaybookSettingsComponent },
       { path: 'settings/snapshot', component: SnapshotSettingsComponent },
       { path: 'settings/approvals', component: ApprovalSettingsComponent },
+      { path: 'settings/engagement-types', component: EngagementTypesComponent },
+      { path: 'settings/home', component: HomeSettingsComponent },
       { path: 'settings/people', component: PeopleSettingsComponent },
+      { path: 'offer-requests', component: OfferRequestsComponent },
+      { path: 'offer-requests/:id', component: OfferRequestDetailComponent },
+      { path: 'audit-log', component: AuditLogComponent },
       { path: 'campaign-events', redirectTo: 'settings/campaign-events', pathMatch: 'full' },
       { path: 'deals/new', component: DealCreateComponent },
       { path: 'deals/:id/edit', component: DealCreateComponent },

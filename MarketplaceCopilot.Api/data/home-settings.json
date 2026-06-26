@@ -1,0 +1,47 @@
+{
+  "cards": [
+    {
+      "key": "stats",
+      "label": "Summary Stats",
+      "description": "Top KPI tiles \u2014 open engagements, approvals pending, offers submitted, pipeline value.",
+      "enabled": true
+    },
+    {
+      "key": "insights",
+      "label": "Engagement Insights",
+      "description": "Active events, engagements, follow-ups, and pending approvals, with leadership snapshot.",
+      "enabled": true
+    },
+    {
+      "key": "tags",
+      "label": "Campaign / Event Tags",
+      "description": "Quick tiles for each campaign / event tag and its engagement count.",
+      "enabled": true
+    },
+    {
+      "key": "openEngagements",
+      "label": "My Open Engagements",
+      "description": "Table of your open engagements with sorting and quick continue.",
+      "enabled": true
+    },
+    {
+      "key": "recentActivity",
+      "label": "Recent Activity",
+      "description": "Latest changes across your engagements.",
+      "enabled": true
+    },
+    {
+      "key": "tasks",
+      "label": "My Tasks",
+      "description": "Your action items, list or grouped by engagement.",
+      "enabled": true
+    },
+    {
+      "key": "reminders",
+      "label": "Today\u0027s Reminders",
+      "description": "Upcoming and overdue reminders.",
+      "enabled": false
+    }
+  ],
+  "updatedAt": "2026-06-26 01:07 UTC"
+}

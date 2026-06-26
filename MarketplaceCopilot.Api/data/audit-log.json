@@ -1,0 +1,312 @@
+[
+  {
+    "id": "46c1fa35",
+    "timestamp": "2026-06-26 03:16:13 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement details updated",
+    "details": "Deal details updated.",
+    "entity": "DL-1010 \u2014 Free Trial \u2014 Tier",
+    "entityId": "DL-1010"
+  },
+  {
+    "id": "436c1c91",
+    "timestamp": "2026-06-26 02:59:23 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement details updated",
+    "details": "Deal details updated.",
+    "entity": "DL-1010 \u2014 Free Trial \u2014 Tier",
+    "entityId": "DL-1010"
+  },
+  {
+    "id": "91ad7a5b",
+    "timestamp": "2026-06-26 02:58:32 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement created",
+    "details": "Free Trial for Tier on AWS, owner Indrasena.",
+    "entity": "DL-1010 \u2014 Free Trial \u2014 Tier",
+    "entityId": "DL-1010"
+  },
+  {
+    "id": "e8da7c61",
+    "timestamp": "2026-06-26 02:32:17 UTC",
+    "user": "Prasad Yalla",
+    "category": "Offer Request",
+    "action": "Engagement changed after submission",
+    "details": "OFR-1004 is now out of date \u2014 Engagement details edited \u2014 Deal details updated. Re-submit to push the changes.",
+    "entity": "DL-1001 \u2014 Workshop - Ato",
+    "entityId": "DL-1001"
+  },
+  {
+    "id": "159e616e",
+    "timestamp": "2026-06-26 02:32:17 UTC",
+    "user": "Prasad Yalla",
+    "category": "Engagement",
+    "action": "Engagement details updated",
+    "details": "Deal details updated.",
+    "entity": "DL-1001 \u2014 Workshop - Ato",
+    "entityId": "DL-1001"
+  },
+  {
+    "id": "3e93cf9c",
+    "timestamp": "2026-06-26 02:32:17 UTC",
+    "user": "Prasad Yalla",
+    "category": "Offer Request",
+    "action": "Engagement changed after submission",
+    "details": "OFR-1004 is now out of date \u2014 Engagement details edited \u2014 Name: Workshop \u2014 Ato \u2192 Workshop - Ato Re-submit to push the changes.",
+    "entity": "DL-1001 \u2014 Workshop - Ato",
+    "entityId": "DL-1001"
+  },
+  {
+    "id": "e1d016be",
+    "timestamp": "2026-06-26 02:32:17 UTC",
+    "user": "Prasad Yalla",
+    "category": "Engagement",
+    "action": "Engagement details updated",
+    "details": "Name: Workshop \u2014 Ato \u2192 Workshop - Ato",
+    "entity": "DL-1001 \u2014 Workshop - Ato",
+    "entityId": "DL-1001"
+  },
+  {
+    "id": "1e9c45f2",
+    "timestamp": "2026-06-26 01:57:50 UTC",
+    "user": "Prasad Yalla",
+    "category": "Offer Request",
+    "action": "Response captured \u2014 Accepted",
+    "details": "Ref AWS-OFFER-9931. Buyer accepted in marketplace.",
+    "entity": "DL-1001 \u2014 Workshop \u2014 Ato",
+    "entityId": "DL-1001"
+  },
+  {
+    "id": "e41a5f8c",
+    "timestamp": "2026-06-26 01:57:49 UTC",
+    "user": "System",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1004.",
+    "entity": "DL-1001 \u2014 Workshop \u2014 Ato",
+    "entityId": "DL-1001"
+  },
+  {
+    "id": "b42a968b",
+    "timestamp": "2026-06-26 01:57:49 UTC",
+    "user": "System",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1003.",
+    "entity": "DL-1002 \u2014 Free Trial \u2014 Andrey",
+    "entityId": "DL-1002"
+  },
+  {
+    "id": "219655a2",
+    "timestamp": "2026-06-26 01:57:49 UTC",
+    "user": "System",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1002.",
+    "entity": "DL-1004 \u2014 Private Offer for Trem on SaaSify product",
+    "entityId": "DL-1004"
+  },
+  {
+    "id": "cec7b96c",
+    "timestamp": "2026-06-26 01:57:49 UTC",
+    "user": "System",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1001.",
+    "entity": "DL-1009 \u2014 Private offer for Mare-SaaSify",
+    "entityId": "DL-1009"
+  },
+  {
+    "id": "7d1039ce",
+    "timestamp": "2026-06-26 01:07:59 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Home dashboard saved",
+    "details": "6 of 7 home cards enabled.",
+    "entity": "Home Dashboard",
+    "entityId": "home-settings"
+  },
+  {
+    "id": "66332a44",
+    "timestamp": "2026-06-26 01:02:57 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Home dashboard saved",
+    "details": "7 of 7 home cards enabled.",
+    "entity": "Home Dashboard",
+    "entityId": "home-settings"
+  },
+  {
+    "id": "0578a0fa",
+    "timestamp": "2026-06-25 17:45:18 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Home dashboard reset",
+    "details": "Restored the default home layout.",
+    "entity": "Home Dashboard",
+    "entityId": "home-settings"
+  },
+  {
+    "id": "47964583",
+    "timestamp": "2026-06-25 17:45:18 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Home dashboard saved",
+    "details": "5 of 7 home cards enabled.",
+    "entity": "Home Dashboard",
+    "entityId": "home-settings"
+  },
+  {
+    "id": "9ec02575",
+    "timestamp": "2026-06-25 17:11:24 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "6 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "6eaa289c",
+    "timestamp": "2026-06-25 17:11:07 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "8 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "0da907c0",
+    "timestamp": "2026-06-25 17:07:07 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Engagement types reset",
+    "details": "Restored the built-in engagement catalog.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "83c931b6",
+    "timestamp": "2026-06-25 17:07:07 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "7 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "cbfd4085",
+    "timestamp": "2026-06-25 17:06:26 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Engagement types reset",
+    "details": "Restored the built-in engagement catalog.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "9b1dc898",
+    "timestamp": "2026-06-25 17:00:56 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "6 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "cfe15414",
+    "timestamp": "2026-06-25 17:00:56 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "5 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "38f19d4e",
+    "timestamp": "2026-06-25 16:44:26 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "6 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "fd493a46",
+    "timestamp": "2026-06-25 16:44:23 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "7 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "7527a2db",
+    "timestamp": "2026-06-25 16:44:07 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "7 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "66354b19",
+    "timestamp": "2026-06-25 16:44:06 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "7 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "aa52ac5b",
+    "timestamp": "2026-06-25 16:09:59 UTC",
+    "user": "Prasad Yalla",
+    "category": "Engagement",
+    "action": "Engagement restored",
+    "details": "Returned to active views.",
+    "entity": "DL-1003 \u2014 Summit/Event Lead \u2014 Ten",
+    "entityId": "DL-1003"
+  },
+  {
+    "id": "44835ada",
+    "timestamp": "2026-06-25 16:09:59 UTC",
+    "user": "Prasad Yalla",
+    "category": "Engagement",
+    "action": "Engagement archived",
+    "details": "Hidden from active views; restorable.",
+    "entity": "DL-1003 \u2014 Summit/Event Lead \u2014 Ten",
+    "entityId": "DL-1003"
+  },
+  {
+    "id": "2f086890",
+    "timestamp": "2026-06-25 16:06:02 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "8 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  },
+  {
+    "id": "d4d36769",
+    "timestamp": "2026-06-25 16:06:02 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Engagement types saved",
+    "details": "7 of 8 engagement types enabled.",
+    "entity": "Engagement Types",
+    "entityId": "engagement-types"
+  }
+]

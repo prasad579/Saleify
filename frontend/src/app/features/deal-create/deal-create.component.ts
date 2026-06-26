@@ -3,13 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiService } from '@core/services/api.service';
 import { ApiHealthService } from '@core/services/api-health.service';
+import { EngagementConfigService } from '@core/services/engagement-config.service';
+import { ToastService } from '@core/services/toast.service';
 import { apiErrorMessage, extractCreatedDealId, isCreateDealSuccess, normalizeDealDetail } from '@shared/utils/deal-api.util';
 import {
   COUNTRIES, SAAS_INDUSTRIES, DEAL_TYPES, MARKETPLACES,
   DEAL_OWNERS, PRIORITIES, CampaignEvent, Person, eventStatus,
   MARKETPLACE_ACCOUNTS, MarketplaceAccountField, NO_EVENT_TAG
 } from '@shared/data/lookups';
-import { ENGAGEMENT_CONFIGS, EngagementTypeConfig, ScreenKey, getEngagementConfig, nextScreenPath, stepperSteps } from '@shared/utils/engagement.util';
+import { EngagementTypeConfig, ScreenKey, enabledEngagementConfigs, getEngagementConfig, nextScreenPath, stepperSteps } from '@shared/utils/engagement.util';
 import { DealFlowFooterComponent } from '@shared/components/deal-flow-footer/deal-flow-footer.component';
 import { SettingsHintComponent } from '@shared/components/settings-hint/settings-hint.component';
 
@@ -32,6 +34,8 @@ export class DealCreateComponent implements OnInit {
   private api = inject(ApiService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private engagementCfg = inject(EngagementConfigService);
+  private toast = inject(ToastService);
   health = inject(ApiHealthService);
 
   countries = COUNTRIES;
@@ -40,7 +44,7 @@ export class DealCreateComponent implements OnInit {
   marketplaces = MARKETPLACES;
   owners = DEAL_OWNERS;
   priorities = PRIORITIES;
-  engagementConfigs = ENGAGEMENT_CONFIGS;
+  engagementConfigs = enabledEngagementConfigs();
 
   events: CampaignEvent[] = [];
   playbooks: any[] = [];
@@ -77,6 +81,9 @@ export class DealCreateComponent implements OnInit {
   loading = false;
   error = '';
   success = '';
+  /** True when editing an engagement that was submitted as an offer request (details locked). */
+  locked = false;
+  unlocking = false;
 
   /** 'quick' = minimal fields, save & finish later; 'full' = all fields + continue workflow. */
   mode: 'quick' | 'full' = 'full';
@@ -171,14 +178,17 @@ export class DealCreateComponent implements OnInit {
     this.selectedMarketplaces = this.selectedMarketplaces.includes(m)
       ? this.selectedMarketplaces.filter(x => x !== m)
       : [...this.selectedMarketplaces, m];
+    this.clearError('marketplace');
   }
 
   toggleAllMarketplaces(): void {
     this.selectedMarketplaces = this.allMarketplacesSelected ? [] : [...this.marketplaces];
+    this.clearError('marketplace');
   }
 
   selectEngagementType(type: string): void {
     this.deal.engagementType = type;
+    this.clearError('engagementType');
     // Drop the owner if they aren't eligible to own this engagement type.
     if (this.deal.owner && !this.eligibleOwners.some(o => o.name === this.deal.owner)) {
       this.deal.owner = '';
@@ -307,6 +317,16 @@ export class DealCreateComponent implements OnInit {
     this.health.check();
     try { this.playbookCollapsed = localStorage.getItem('playbookCollapsed') === '1'; } catch { /* ignore */ }
 
+    // Refresh the engagement catalog from settings so disabling/enabling a type in
+    // Settings → Engagement Types is reflected here without a full page reload.
+    this.engagementCfg.load().then(() => {
+      this.engagementConfigs = enabledEngagementConfigs();
+      // If the previously-selected type was disabled, drop it.
+      if (this.deal.engagementType && !this.engagementConfigs.some(c => c.type === this.deal.engagementType)) {
+        this.deal.engagementType = '';
+      }
+    });
+
     this.api.getLookups().subscribe({
       next: (data: any) => {
         if (data.countries?.length) this.countries = data.countries;
@@ -373,6 +393,7 @@ export class DealCreateComponent implements OnInit {
           expectedCloseDate: d.expectedCloseDate?.slice(0, 10) || '',
           description: d.description || ''
         };
+        this.locked = !!d.locked;
         this.userNamed = !!this.deal.name;
         this.mode = d.quickCapture ? 'quick' : 'full';
         this.companyAutoFilled = false;
@@ -396,22 +417,53 @@ export class DealCreateComponent implements OnInit {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   }
 
-  validate(): string | null {
-    if (!this.deal.engagementType) return 'Select what you want to create first.';
-    if (!this.deal.contactEmail.trim()) return 'Work email is required.';
-    if (!this.emailValid(this.deal.contactEmail)) return 'Work email must be a valid email address.';
-    if (this.marketplaceRequired && this.selectedMarketplaces.length === 0) return 'At least one marketplace is required.';
-    if (this.tagRequired && !this.deal.campaignEventId) return 'Campaign / event tag is required for this engagement type.';
-    if (!this.deal.owner) return 'Engagement owner is required.';
-    return null;
+  /** Per-field validation messages, shown inline next to each field. */
+  fieldErrors: Record<string, string> = {};
+
+  /** Validate every field, populating fieldErrors. Returns true when the form is valid. */
+  validateFields(): boolean {
+    const e: Record<string, string> = {};
+    if (!this.deal.engagementType) e['engagementType'] = 'Select what you want to create first.';
+    if (!this.deal.contactEmail.trim()) e['contactEmail'] = 'Work email is required.';
+    else if (!this.emailValid(this.deal.contactEmail)) e['contactEmail'] = 'Enter a valid email address (name@company.com).';
+    if (!this.deal.owner) e['owner'] = 'Select an engagement owner.';
+    if (this.marketplaceRequired && this.selectedMarketplaces.length === 0) e['marketplace'] = 'Select at least one marketplace.';
+    if (this.tagRequired && !this.deal.campaignEventId) e['campaignEventId'] = 'A campaign / event tag is required for this engagement type.';
+    this.fieldErrors = e;
+    return Object.keys(e).length === 0;
+  }
+
+  /** Clear the inline error for a field once the user starts fixing it. */
+  clearError(field: string) {
+    if (this.fieldErrors[field]) {
+      const { [field]: _removed, ...rest } = this.fieldErrors;
+      this.fieldErrors = rest;
+    }
+  }
+
+  /** Unlock a submitted engagement so its details can be revised. */
+  unlock() {
+    if (!this.editId) return;
+    this.unlocking = true;
+    this.api.unlockEngagementEdits(this.editId).subscribe({
+      next: (r: any) => {
+        this.unlocking = false;
+        this.locked = false;
+        this.toast.success(r?.message || 'Engagement unlocked. Edit and re-submit to push the changes.');
+      },
+      error: (e) => { this.unlocking = false; this.toast.error(apiErrorMessage(e, 'Could not unlock the engagement.')); }
+    });
   }
 
   submit() {
     this.error = '';
     this.success = '';
-    const validationError = this.validate();
-    if (validationError) {
-      this.error = validationError;
+    if (this.locked) {
+      this.toast.error('This engagement is locked. Unlock it to revise.');
+      return;
+    }
+    if (!this.validateFields()) {
+      this.toast.error('Please fix the highlighted fields.');
       return;
     }
 
@@ -436,12 +488,12 @@ export class DealCreateComponent implements OnInit {
       this.api.updateDeal(this.editId, { ...payload, id: this.editId }).subscribe({
         next: () => {
           this.saving = false;
-          this.success = this.isQuick ? 'Quick capture saved.' : 'Engagement updated.';
+          this.toast.success(this.isQuick ? 'Quick capture saved.' : 'Engagement updated.');
           this.afterSave(this.editId);
         },
         error: (err) => {
           this.saving = false;
-          this.error = apiErrorMessage(err, 'Could not update engagement.');
+          this.toast.error(apiErrorMessage(err, 'Could not update engagement.'));
         }
       });
       return;
@@ -452,15 +504,15 @@ export class DealCreateComponent implements OnInit {
         this.saving = false;
         const id = extractCreatedDealId(res);
         if (!isCreateDealSuccess(res, id)) {
-          this.error = res?.message || 'Engagement was not created. Please try again.';
+          this.toast.error(res?.message || 'Engagement was not created. Please try again.');
           return;
         }
-        this.success = res?.message || `Engagement ${id} ${this.isQuick ? 'captured' : 'created'}!`;
+        this.toast.success(res?.message || `Engagement ${id} ${this.isQuick ? 'captured' : 'created'}!`);
         this.afterSave(id!);
       },
       error: (err) => {
         this.saving = false;
-        this.error = apiErrorMessage(err, 'Could not save engagement.');
+        this.toast.error(apiErrorMessage(err, 'Could not save engagement.'));
       }
     });
   }

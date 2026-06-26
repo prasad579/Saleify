@@ -18,6 +18,18 @@ interface SettingsCard {
 export class SettingsHomeComponent {
   cards: SettingsCard[] = [
     {
+      path: '/settings/home',
+      icon: '🏠',
+      title: 'Home Dashboard',
+      description: 'Choose which cards appear on the home page — stats, insights, tags, open engagements, recent activity, tasks, and reminders.'
+    },
+    {
+      path: '/settings/engagement-types',
+      icon: '🧭',
+      title: 'Engagement Types',
+      description: 'Enable or disable engagement types and choose which sections (products, pricing, meeting notes, approvals) apply to each — e.g. turn approvals off for a Free Trial.'
+    },
+    {
       path: '/settings/campaign-events',
       icon: '🎟️',
       title: 'Campaign / Event Tags',
@@ -46,6 +58,12 @@ export class SettingsHomeComponent {
       icon: '✅',
       title: 'Approval Rules',
       description: 'Decide which reviews an engagement requires — discount/duration thresholds, reviewers, and which engagement types each rule applies to.'
+    },
+    {
+      path: '/audit-log',
+      icon: '📜',
+      title: 'Audit Log',
+      description: 'See every change made across the application — who changed what, when, and the details — for engagements, pricing, approvals, and settings.'
     }
   ];
 }

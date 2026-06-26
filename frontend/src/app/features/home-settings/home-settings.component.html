@@ -1,0 +1,32 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Home Dashboard</h1>
+    <p class="page-subtitle">Choose which cards appear on your home page. Turn off the ones you don't need for a cleaner, faster dashboard.</p>
+  </div>
+  <button type="button" class="btn btn-outline" (click)="reset()">Reset to defaults</button>
+</div>
+
+@if (loading) {
+  <p>Loading home settings…</p>
+} @else if (settings) {
+  <section class="card setting-card">
+    <h3>Home cards</h3>
+    <p class="hint">{{ enabledCount() }} of {{ settings.cards.length }} cards enabled.</p>
+
+    @for (card of settings.cards; track card.key) {
+      <label class="card-row" [class.disabled]="!card.enabled">
+        <input type="checkbox" [(ngModel)]="card.enabled" />
+        <div class="card-text">
+          <strong>{{ card.label }}</strong>
+          <p>{{ card.description }}</p>
+        </div>
+        <span class="state-pill" [class.on]="card.enabled">{{ card.enabled ? 'Shown' : 'Hidden' }}</span>
+      </label>
+    }
+  </section>
+
+  <div class="save-bar">
+    @if (settings.updatedAt) { <span class="updated">Last saved {{ settings.updatedAt }}</span> }
+    <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">{{ saving ? 'Saving…' : 'Save home dashboard' }}</button>
+  </div>
+}

@@ -14,7 +14,9 @@ public class DealsController(
     IPricingService pricingService,
     IDealHistoryService history,
     IMeetingNotesService meetingNotes,
-    IApprovalService approvals) : ControllerBase
+    IApprovalService approvals,
+    IAuditService audit,
+    IOfferRequestService offerRequests) : ControllerBase
 {
     /// <summary>
     /// List engagements. By default only active (non-archived) engagements are returned;
@@ -79,6 +81,7 @@ public class DealsController(
         deal.LastUpdated = "Just now";
         history.Log(deal, "Engagement", $"Engagement {deal.Id} archived.",
             "Hidden from dashboards and lists, along with its tasks and reminders. Can be restored.");
+        audit.LogDeal(deal, "Engagement", "Engagement archived", "Hidden from active views; restorable.");
         store.SaveDeals();
         return new { success = true, message = $"{DealLabel(deal)} archived. You can restore it from the Archived view." };
     }
@@ -94,6 +97,7 @@ public class DealsController(
         deal.ArchivedAt = "";
         deal.LastUpdated = "Just now";
         history.Log(deal, "Engagement", $"Engagement {deal.Id} restored.", "Returned to active views with its tasks and reminders.");
+        audit.LogDeal(deal, "Engagement", "Engagement restored", "Returned to active views.");
         store.SaveDeals();
         return new { success = true, message = $"{DealLabel(deal)} restored." };
     }
@@ -106,8 +110,30 @@ public class DealsController(
         if (deal is null) return NotFound();
 
         store.Deals.Remove(deal);
+        audit.LogDeal(deal, "Engagement", "Engagement permanently deleted", "Engagement and all attached data removed. Cannot be undone.");
         store.SaveDeals();
         return new { success = true, message = $"{DealLabel(deal)} permanently deleted." };
+    }
+
+    /// <summary>
+    /// Unlock a submitted engagement so its details can be revised. Revising marks the offer request
+    /// out of date until the engagement is re-submitted.
+    /// </summary>
+    [HttpPost("{id}/unlock-edits")]
+    public ActionResult<object> UnlockEdits(string id)
+    {
+        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        if (deal is null) return NotFound();
+        if (!deal.Locked) return new { success = true, message = "Engagement is already editable." };
+
+        deal.Locked = false;
+        deal.LastUpdated = "Just now";
+        history.Log(deal, "Engagement", "Engagement unlocked for revision.",
+            "Details were locked after submission. Re-submit after editing to push changes to the destination.");
+        audit.LogDeal(deal, "Engagement", "Engagement unlocked for revision",
+            "Was locked after submission as an offer request. Edits now allowed; re-submit to push changes.");
+        store.SaveDeals();
+        return new { success = true, message = $"{DealLabel(deal)} unlocked. Edit and then re-submit to push the changes." };
     }
 
     private static string DealLabel(Deal d) => string.IsNullOrWhiteSpace(d.Name) ? d.Id : d.Name;
@@ -159,6 +185,10 @@ public class DealsController(
         };
 
         history.LogCreated(deal);
+        audit.LogDeal(deal, "Engagement", "Engagement created",
+            $"{deal.EngagementType} for {(string.IsNullOrWhiteSpace(deal.Customer) ? "—" : deal.Customer)}" +
+            (string.IsNullOrWhiteSpace(deal.Marketplace) ? "" : $" on {deal.Marketplace}") +
+            $", owner {deal.Owner}.");
         store.Deals.Insert(0, deal);
         store.SaveDeals();
 
@@ -170,6 +200,9 @@ public class DealsController(
         });
     }
 
+    private const string LockedMessage =
+        "This engagement has been submitted as an offer request and is locked. Unlock it to revise — your changes will then need to be re-submitted.";
+
     [HttpPut("{id}")]
     public ActionResult<Deal> Update(string id, [FromBody] Deal updated)
     {
@@ -177,6 +210,7 @@ public class DealsController(
         if (index < 0) return NotFound();
 
         var existing = store.Deals[index];
+        if (existing.Locked) return BadRequest(new { success = false, message = LockedMessage });
         var before = CloneDeal(existing);
         updated.Id = id;
         // Keep marketplace consistent with the tagged campaign / event (auto-fill + lock).
@@ -186,16 +220,23 @@ public class DealsController(
         updated.MeetingNotes = existing.MeetingNotes;
         updated.Approvals = existing.Approvals;
         updated.CreatedAt = existing.CreatedAt;
-        // Preserve workflow progress across an edit (the form doesn't post these).
+        // Preserve workflow progress + lock state across an edit (the form doesn't post these).
         updated.Pricing = existing.Pricing;
         updated.ProductIds = existing.ProductIds;
         updated.StepNumber = existing.StepNumber;
         updated.MarketplaceStatus = existing.MarketplaceStatus;
         updated.Stage = existing.Stage;
+        updated.Locked = existing.Locked;
+        updated.ChangedSinceSubmission = existing.ChangedSinceSubmission;
         // Completing a quick-capture engagement promotes it out of the Quick Capture stage.
         if (!updated.QuickCapture && existing.Stage == "Quick Capture")
             updated.Stage = "Draft";
         history.LogDealUpdated(before, updated);
+        var changeDetail = updated.ChangeHistory.FirstOrDefault()?.Details ?? "Deal details updated.";
+        // Reuse the field-level diff the history service just recorded as the audit detail.
+        audit.LogDeal(updated, "Engagement", "Engagement details updated", changeDetail);
+        // If already submitted (post-unlock edit), flag the offer request as out of date.
+        offerRequests.MarkEngagementChanged(updated, $"Engagement details edited — {changeDetail}");
         store.Deals[index] = updated;
         store.SaveDeals();
         return updated;
@@ -206,6 +247,7 @@ public class DealsController(
     {
         var deal = store.Deals.FirstOrDefault(d => d.Id == id);
         if (deal is null) return NotFound();
+        if (deal.Locked) return BadRequest(new { success = false, message = LockedMessage });
 
         deal.ProductIds = productIds;
         var listPrice = dealService.GetListPriceFromProducts(deal);
@@ -221,6 +263,9 @@ public class DealsController(
         deal.Stage = "Product Selection";
         deal.LastUpdated = "Just now";
         history.LogProducts(deal, productIds.Count);
+        audit.LogDeal(deal, "Products", "Products selected",
+            $"{productIds.Count} product(s) selected" + (productIds.Count > 0 ? $": {string.Join(", ", productIds)}." : "."));
+        offerRequests.MarkEngagementChanged(deal, $"Products changed — {productIds.Count} selected.");
         approvals.HandleProductsChange(deal);
         store.SaveDeals();
         return dealService.ToDetail(deal);
@@ -251,6 +296,7 @@ public class DealsController(
     {
         var deal = store.Deals.FirstOrDefault(d => d.Id == id);
         if (deal is null) return NotFound();
+        if (deal.Locked) return BadRequest(new { success = false, message = LockedMessage });
 
         if (pricing.PublicPricePerYear <= 0)
             pricing.PublicPricePerYear = dealService.GetListPriceFromProducts(deal);
@@ -264,6 +310,9 @@ public class DealsController(
         deal.Stage = "Pricing";
         deal.LastUpdated = "Just now";
         history.LogPricing(deal);
+        audit.LogDeal(deal, "Pricing", "Pricing configured",
+            $"Net ${deal.Pricing?.NetContractValue:N0}, {deal.Pricing?.DiscountPercent}% discount, {deal.Pricing?.DurationValue} {deal.Pricing?.DurationType}.");
+        offerRequests.MarkEngagementChanged(deal, $"Pricing changed — net ${deal.Pricing?.NetContractValue:N0}, {deal.Pricing?.DiscountPercent}% discount.");
         approvals.HandlePricingChange(deal);
         store.SaveDeals();
         return dealService.ToDetail(deal);
@@ -280,6 +329,8 @@ public class DealsController(
             sessionsAdded,
             deal.MeetingNotes?.ActionItems?.Count ?? 0,
             deal.MeetingNotes?.Reminders?.Count ?? 0);
+        audit.LogDeal(deal, "Meeting Notes", sessionsAdded > 0 ? "Meeting summary added" : "Meeting notes updated",
+            $"{deal.MeetingNotes?.ActionItems?.Count ?? 0} action item(s), {deal.MeetingNotes?.Reminders?.Count ?? 0} reminder(s).");
 
         deal.StepNumber = 4;
         deal.Stage = "Meeting Notes";
@@ -344,6 +395,7 @@ public class DealsController(
         deal.Stage = "Approval";
         deal.LastUpdated = "Just now";
         history.Log(deal, "Approvals", "Deal entered approval workflow.", approvals.BuildSummary(deal).NextStep);
+        audit.LogDeal(deal, "Approvals", "Entered approval workflow", $"Next step: {approvals.BuildSummary(deal).NextStep}.");
         store.SaveDeals();
         return new { deal = dealService.ToDetail(deal), approvals = approvals.BuildSummary(deal) };
     }
@@ -360,7 +412,9 @@ public class DealsController(
         deal.MarketplaceStatus = "In Review";
         deal.LastUpdated = "Just now";
         history.Log(deal, "Approvals", "Deal submitted for offer request.", "All approvals complete.");
+        audit.LogDeal(deal, "Approvals", "Submitted for offer request", "All approvals complete — status set to In Review.");
         store.SaveDeals();
+        offerRequests.Record(deal);
         return new { success = true, message = "Deal submitted. Proceed to offer request summary.", deal = dealService.ToDetail(deal) };
     }
 
@@ -379,7 +433,9 @@ public class DealsController(
         deal.MarketplaceStatus = status;
         deal.LastUpdated = "Just now";
         history.Log(deal, "Engagement", $"Engagement submitted — {message}", $"Status set to {status}.");
+        audit.LogDeal(deal, "Engagement", "Engagement submitted", $"{message} Status set to {status}.");
         store.SaveDeals();
+        offerRequests.Record(deal);
         return new { success = true, message, status, deal = dealService.ToDetail(deal) };
     }
 

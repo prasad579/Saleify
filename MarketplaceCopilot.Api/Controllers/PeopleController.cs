@@ -1,12 +1,13 @@
 using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Entities;
+using MarketplaceCopilot.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketplaceCopilot.Api.Controllers;
 
 [ApiController]
 [Route("api/people")]
-public class PeopleController(DataStore store) : ControllerBase
+public class PeopleController(DataStore store, IAuditService audit) : ControllerBase
 {
     [HttpGet]
     public ActionResult<IEnumerable<Person>> GetAll() => store.People;
@@ -24,7 +25,8 @@ public class PeopleController(DataStore store) : ControllerBase
         request.EngagementTypes = (request.EngagementTypes ?? []).Select(t => t.Trim()).Where(t => t.Length > 0).ToList();
         request.Source = string.IsNullOrWhiteSpace(request.Source) ? "manual" : request.Source;
 
-        if (string.IsNullOrWhiteSpace(request.Id))
+        var isNew = string.IsNullOrWhiteSpace(request.Id);
+        if (isNew)
         {
             request.Id = store.NextPersonId();
             store.People.Add(request);
@@ -37,6 +39,9 @@ public class PeopleController(DataStore store) : ControllerBase
         }
 
         store.SavePeople();
+        audit.Log("Settings", isNew ? "Person added" : "Person updated",
+            $"{request.Name} ({(string.IsNullOrWhiteSpace(request.Role) ? "no role" : request.Role)}).",
+            "People", request.Id);
         return Ok(request);
     }
 
@@ -47,6 +52,7 @@ public class PeopleController(DataStore store) : ControllerBase
         if (person is null) return NotFound();
         person.Enabled = !person.Enabled;
         store.SavePeople();
+        audit.Log("Settings", person.Enabled ? "Person enabled" : "Person disabled", person.Name, "People", person.Id);
         return person;
     }
 
@@ -57,6 +63,7 @@ public class PeopleController(DataStore store) : ControllerBase
         if (person is null) return NotFound();
         store.People.Remove(person);
         store.SavePeople();
+        audit.Log("Settings", "Person removed", person.Name, "People", person.Id);
         return Ok(new { success = true });
     }
 
@@ -64,6 +71,7 @@ public class PeopleController(DataStore store) : ControllerBase
     public ActionResult<IEnumerable<Person>> Reset()
     {
         store.ResetPeople();
+        audit.Log("Settings", "People reset", "Restored the built-in people list.", "People", "people");
         return Ok(store.People);
     }
 }

@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '@core/services/api.service';
 import { SnapshotSettingsService } from '@core/services/snapshot-settings.service';
+import { ToastService } from '@core/services/toast.service';
 import { SnapshotSettings } from '@shared/data/snapshot.model';
 import { apiErrorMessage } from '@shared/utils/deal-api.util';
 
@@ -15,12 +16,12 @@ import { apiErrorMessage } from '@shared/utils/deal-api.util';
 export class SnapshotSettingsComponent implements OnInit {
   private api = inject(ApiService);
   private settingsService = inject(SnapshotSettingsService);
+  private toast = inject(ToastService);
 
   settings: SnapshotSettings | null = null;
   loading = true;
   saving = false;
   error = '';
-  success = '';
 
   ngOnInit() { this.load(); }
 
@@ -35,17 +36,15 @@ export class SnapshotSettingsComponent implements OnInit {
   save() {
     if (!this.settings) return;
     this.error = '';
-    this.success = '';
     this.saving = true;
     this.api.saveSnapshotSettings(this.settings).subscribe({
       next: s => {
         this.settings = s;
         this.settingsService.refresh(); // update button visibility app-wide
         this.saving = false;
-        this.success = 'Settings saved. Snapshots and emails will use them immediately.';
-        setTimeout(() => this.success = '', 3500);
+        this.toast.success('Settings saved. Snapshots and emails will use them immediately.');
       },
-      error: e => { this.saving = false; this.error = apiErrorMessage(e, 'Could not save settings.'); }
+      error: e => { this.saving = false; this.toast.error(apiErrorMessage(e, 'Could not save settings.')); }
     });
   }
 
@@ -55,10 +54,9 @@ export class SnapshotSettingsComponent implements OnInit {
       next: s => {
         this.settings = s;
         this.settingsService.refresh();
-        this.success = 'Settings reset to defaults.';
-        setTimeout(() => this.success = '', 3500);
+        this.toast.success('Settings reset to defaults.');
       },
-      error: e => { this.error = apiErrorMessage(e, 'Could not reset settings.'); }
+      error: e => { this.toast.error(apiErrorMessage(e, 'Could not reset settings.')); }
     });
   }
 }

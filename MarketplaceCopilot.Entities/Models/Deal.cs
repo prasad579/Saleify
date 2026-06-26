@@ -33,6 +33,17 @@ public class Deal
     /// <summary>Soft-hidden from active views; restorable. Tasks/reminders are preserved while archived.</summary>
     public bool Archived { get; set; }
     public string ArchivedAt { get; set; } = "";
+    /// <summary>
+    /// True once the engagement has been submitted as an offer request — details (info, products,
+    /// pricing) are locked from editing so they can't silently diverge from what was pushed.
+    /// Cleared by an explicit "unlock to revise" action.
+    /// </summary>
+    public bool Locked { get; set; }
+    /// <summary>
+    /// True when the engagement has been edited after submission, so the offer request no longer
+    /// matches the engagement until it is re-submitted. Surfaced as a banner on the engagement.
+    /// </summary>
+    public bool ChangedSinceSubmission { get; set; }
     public List<string> ProductIds { get; set; } = [];
     public PricingConfig? Pricing { get; set; }
     public MeetingNotesData? MeetingNotes { get; set; }

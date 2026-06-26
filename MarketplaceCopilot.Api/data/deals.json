@@ -1,5 +1,68 @@
 [
   {
+    "id": "DL-1010",
+    "name": "Free Trial \u2014 Tier",
+    "customer": "Tier",
+    "contactName": "Saanvi",
+    "contactEmail": "saanvi@tier.com",
+    "phone": "",
+    "priority": "",
+    "location": "",
+    "industry": "",
+    "marketplace": "AWS",
+    "dealType": "New Deal",
+    "engagementType": "Free Trial",
+    "quickCapture": true,
+    "campaignEventId": "EVT-101",
+    "campaignEventName": "Workshop on ACE Co-sell July 2026",
+    "billingAccountId": "",
+    "billingAccountIds": {},
+    "expectedValue": 0,
+    "expectedCloseDate": "",
+    "description": "",
+    "stage": "Quick Capture",
+    "stepNumber": 1,
+    "totalSteps": 5,
+    "marketplaceStatus": "Draft",
+    "owner": "Indrasena",
+    "lastUpdated": "Just now",
+    "createdAt": "2026-06-26",
+    "archived": false,
+    "archivedAt": "",
+    "locked": false,
+    "changedSinceSubmission": false,
+    "productIds": [],
+    "pricing": null,
+    "meetingNotes": null,
+    "changeHistory": [
+      {
+        "id": "5c42fbd2",
+        "timestamp": "2026-06-26 03:16:13 UTC",
+        "category": "Deal",
+        "summary": "Deal DL-1010 information updated.",
+        "details": "Deal details updated.",
+        "changedBy": "Srinivas K"
+      },
+      {
+        "id": "4cef876f",
+        "timestamp": "2026-06-26 02:59:23 UTC",
+        "category": "Deal",
+        "summary": "Deal DL-1010 information updated.",
+        "details": "Deal details updated.",
+        "changedBy": "Srinivas K"
+      },
+      {
+        "id": "ad8137d3",
+        "timestamp": "2026-06-26 02:58:32 UTC",
+        "category": "Deal",
+        "summary": "Deal DL-1010 created for Tier.",
+        "details": "Marketplace: AWS",
+        "changedBy": "Srinivas K"
+      }
+    ],
+    "approvals": null
+  },
+  {
     "id": "DL-1009",
     "name": "Private offer for Mare-SaaSify",
     "customer": "Mare",
@@ -31,6 +94,8 @@
     "createdAt": "2026-06-24",
     "archived": false,
     "archivedAt": "",
+    "locked": true,
+    "changedSinceSubmission": false,
     "productIds": [
       "prod-1"
     ],
@@ -449,6 +514,8 @@
     "createdAt": "2026-06-24",
     "archived": false,
     "archivedAt": "",
+    "locked": false,
+    "changedSinceSubmission": false,
     "productIds": [
       "prod-1"
     ],
@@ -982,6 +1049,8 @@
     "createdAt": "2026-06-24",
     "archived": false,
     "archivedAt": "",
+    "locked": false,
+    "changedSinceSubmission": false,
     "productIds": [],
     "pricing": null,
     "meetingNotes": null,
@@ -1027,6 +1096,8 @@
     "createdAt": "2026-06-23",
     "archived": false,
     "archivedAt": "",
+    "locked": false,
+    "changedSinceSubmission": false,
     "productIds": [],
     "pricing": null,
     "meetingNotes": null,
@@ -1072,6 +1143,8 @@
     "createdAt": "2026-06-21",
     "archived": false,
     "archivedAt": "",
+    "locked": false,
+    "changedSinceSubmission": false,
     "productIds": [
       "prod-1"
     ],
@@ -1219,6 +1292,8 @@
     "createdAt": "2026-06-21",
     "archived": false,
     "archivedAt": "",
+    "locked": true,
+    "changedSinceSubmission": false,
     "productIds": [
       "prod-1"
     ],
@@ -1711,6 +1786,8 @@
     "createdAt": "2026-06-21",
     "archived": false,
     "archivedAt": "",
+    "locked": false,
+    "changedSinceSubmission": false,
     "productIds": [],
     "pricing": null,
     "meetingNotes": {
@@ -1797,6 +1874,22 @@
     },
     "changeHistory": [
       {
+        "id": "0b170905",
+        "timestamp": "2026-06-25 16:09:59 UTC",
+        "category": "Engagement",
+        "summary": "Engagement DL-1003 restored.",
+        "details": "Returned to active views with its tasks and reminders.",
+        "changedBy": "Srinivas K"
+      },
+      {
+        "id": "06bc32e0",
+        "timestamp": "2026-06-25 16:09:59 UTC",
+        "category": "Engagement",
+        "summary": "Engagement DL-1003 archived.",
+        "details": "Hidden from dashboards and lists, along with its tasks and reminders. Can be restored.",
+        "changedBy": "Srinivas K"
+      },
+      {
         "id": "0820309c",
         "timestamp": "2026-06-21 07:06:51 UTC",
         "category": "Engagement",
@@ -1861,6 +1954,8 @@
     "createdAt": "2026-06-21",
     "archived": false,
     "archivedAt": "",
+    "locked": true,
+    "changedSinceSubmission": false,
     "productIds": [
       "prod-1"
     ],
@@ -2112,7 +2207,7 @@
   },
   {
     "id": "DL-1001",
-    "name": "Workshop \u2014 Ato",
+    "name": "Workshop - Ato",
     "customer": "Ato",
     "contactName": "Anderson",
     "contactEmail": "anderson@ato.com",
@@ -2130,16 +2225,18 @@
     "billingAccountIds": {},
     "expectedValue": 315251.91,
     "expectedCloseDate": "",
-    "description": "",
+    "description": "Revised after unlock at test time.",
     "stage": "Meeting Notes",
     "stepNumber": 4,
     "totalSteps": 5,
-    "marketplaceStatus": "Completed",
+    "marketplaceStatus": "Published",
     "owner": "Neha Gupta",
     "lastUpdated": "Just now",
     "createdAt": "2026-06-21",
     "archived": false,
     "archivedAt": "",
+    "locked": false,
+    "changedSinceSubmission": true,
     "productIds": [
       "prod-1"
     ],
@@ -2310,6 +2407,22 @@
       ]
     },
     "changeHistory": [
+      {
+        "id": "22d9c9f1",
+        "timestamp": "2026-06-26 02:32:17 UTC",
+        "category": "Deal",
+        "summary": "Deal DL-1001 information updated.",
+        "details": "Deal details updated.",
+        "changedBy": "Srinivas K"
+      },
+      {
+        "id": "d7d83ac3",
+        "timestamp": "2026-06-26 02:32:17 UTC",
+        "category": "Deal",
+        "summary": "Deal DL-1001 information updated.",
+        "details": "Name: Workshop \u2014 Ato \u2192 Workshop - Ato",
+        "changedBy": "Srinivas K"
+      },
       {
         "id": "7ee78f86",
         "timestamp": "2026-06-21 06:54:09 UTC",

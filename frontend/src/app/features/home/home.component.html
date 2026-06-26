@@ -15,23 +15,31 @@
 </div>
 
 @if (data) {
+  @if (homeSettings.enabled('stats')) {
   <div class="stat-grid">
-    <button type="button" class="stat-card clickable" (click)="goMyEngagements()">
+    <button type="button" class="stat-card clickable accent-indigo" (click)="goMyEngagements()">
+      <span class="stat-icon">💼</span>
       <div class="value">{{ data.openDeals }}</div><div class="label">My Open Engagements</div>
       <span class="stat-go">View →</span>
     </button>
-    <button type="button" class="stat-card clickable" (click)="goApprovals()">
+    <button type="button" class="stat-card clickable accent-amber" (click)="goApprovals()">
+      <span class="stat-icon">✅</span>
       <div class="value">{{ data.pendingApprovals }}</div><div class="label">Approval Pending</div>
       <span class="stat-go">View →</span>
     </button>
-    <button type="button" class="stat-card clickable" (click)="goOffers()">
+    <button type="button" class="stat-card clickable accent-blue" (click)="goOffers()">
+      <span class="stat-icon">📤</span>
       <div class="value">{{ data.offersSubmitted }}</div><div class="label">Offers Submitted</div>
       <span class="stat-go">View →</span>
     </button>
-    <div class="stat-card"><div class="value">{{ data.pipelineValue }}</div><div class="label">Pipeline Value</div></div>
+    <div class="stat-card accent-green">
+      <span class="stat-icon">📈</span>
+      <div class="value">{{ data.pipelineValue }}</div><div class="label">Pipeline Value</div>
+    </div>
   </div>
+  }
 
-  @if (insights) {
+  @if (insights && homeSettings.enabled('insights')) {
     <section class="card section-card insights-card">
       <div class="section-toolbar">
         <h3>📊 Engagement Insights</h3>
@@ -53,7 +61,7 @@
     </section>
   }
 
-  @if (events.length) {
+  @if (events.length && homeSettings.enabled('tags')) {
     <section class="card section-card">
       <div class="section-toolbar">
         <h3>🎟️ Campaign / Event Tags</h3>
@@ -77,6 +85,7 @@
   }
 
   <div class="grid-2">
+    @if (homeSettings.enabled('openEngagements')) {
     <section class="card section-card">
       <div class="section-toolbar">
         <h3>My Open Engagements</h3>
@@ -118,7 +127,9 @@
         </div>
       }
     </section>
+    }
 
+    @if (homeSettings.enabled('recentActivity')) {
     <section class="card section-card activity-card">
       <div class="section-toolbar">
         <h3>🕒 Recent Activity</h3>
@@ -149,6 +160,7 @@
         <p class="empty-row">No recent activity yet.</p>
       }
     </section>
+    }
 
     <!-- AI Assistant — hidden for now (kept for easy restore)
     <section class="card ai-card">
@@ -167,6 +179,7 @@
   </div>
 
   <div class="grid-2">
+    @if (homeSettings.enabled('tasks')) {
     <section class="card section-card tasks-card">
       <div class="section-toolbar">
         <h3>✅ My Tasks <span class="count-pill">{{ tasksCount }}</span></h3>
@@ -233,7 +246,9 @@
         </div>
       }
     </section>
+    }
 
+    @if (homeSettings.enabled('reminders')) {
     <section class="card section-card">
       <h3>Today's Reminders</h3>
       <table class="data-table">
@@ -266,5 +281,6 @@
         </div>
       }
     </section>
+    }
   </div>
 }

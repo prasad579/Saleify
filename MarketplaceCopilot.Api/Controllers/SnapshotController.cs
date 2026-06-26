@@ -7,7 +7,7 @@ namespace MarketplaceCopilot.Api.Controllers;
 
 [ApiController]
 [Route("api/snapshot")]
-public class SnapshotController(ISnapshotService snapshots, DataStore store) : ControllerBase
+public class SnapshotController(ISnapshotService snapshots, DataStore store, IAuditService audit) : ControllerBase
 {
     /// <summary>Generate an Engagement Snapshot for the requested scope.</summary>
     [HttpPost]
@@ -29,6 +29,8 @@ public class SnapshotController(ISnapshotService snapshots, DataStore store) : C
     {
         if (request is null) return BadRequest(new { message = "Settings payload is required." });
         store.ApplySnapshotSettings(request);
+        audit.Log("Settings", "Snapshot & email settings saved",
+            "Updated snapshot/email buttons, sections, and fields.", "Snapshot & Email", "snapshot");
         return Ok(store.SnapshotSettings);
     }
 
@@ -37,6 +39,8 @@ public class SnapshotController(ISnapshotService snapshots, DataStore store) : C
     public ActionResult<SnapshotSettings> ResetSettings()
     {
         store.ResetSnapshotSettings();
+        audit.Log("Settings", "Snapshot & email settings reset", "Restored the built-in snapshot/email settings.",
+            "Snapshot & Email", "snapshot");
         return Ok(store.SnapshotSettings);
     }
 }
