@@ -11,6 +11,8 @@ public class AppUser
     public string? PasswordHash { get; set; }
     public string Token { get; set; } = "";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    /// <summary>Organization name — shown in the Customer Portal header, set for Customer-role users.</summary>
+    public string Company { get; set; } = "";
 }
 
 public class OAuthCallbackResult

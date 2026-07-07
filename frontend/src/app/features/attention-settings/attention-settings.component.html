@@ -1,0 +1,52 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Alerts &amp; Reminders</h1>
+    <p class="page-subtitle">Control the home <strong>“needs attention”</strong> alert and the <strong>“upcoming”</strong> card — what shows, how far ahead to look, and which items count.</p>
+  </div>
+  <button type="button" class="btn btn-outline" (click)="reset()">Reset to defaults</button>
+</div>
+
+@if (loading) {
+  <p>Loading alert settings…</p>
+} @else if (settings) {
+  <section class="card setting-card">
+    <h3>What to show</h3>
+    <label class="toggle-row">
+      <input type="checkbox" [(ngModel)]="settings.alertEnabled" />
+      <div class="toggle-text">
+        <strong>“Needs attention today” alert</strong>
+        <p>The eye-catching banner at the top of Home for <em>overdue</em> and <em>due-today</em> items.</p>
+      </div>
+    </label>
+    <label class="toggle-row">
+      <input type="checkbox" [(ngModel)]="settings.upcomingEnabled" />
+      <div class="toggle-text">
+        <strong>“Upcoming” card</strong>
+        <p>A calmer card listing items due within the look-ahead window below.</p>
+      </div>
+    </label>
+  </section>
+
+  <section class="card setting-card">
+    <h3>Look-ahead window</h3>
+    <p class="hint">How many days ahead the “Upcoming” card looks.</p>
+    <div class="window-field">
+      <select [(ngModel)]="settings.upcomingWindowDays">
+        @for (w of windowOptions; track w) { <option [value]="w">{{ w }} days</option> }
+      </select>
+    </div>
+  </section>
+
+  <section class="card setting-card">
+    <h3>Which items count</h3>
+    <p class="hint">Applies to both the alert and the upcoming card.</p>
+    <label class="check-row"><input type="checkbox" [(ngModel)]="settings.includeTasks" /> ✅ Action items (by due date)</label>
+    <label class="check-row"><input type="checkbox" [(ngModel)]="settings.includeReminders" /> ⏰ Reminders (by remind-on date)</label>
+    <label class="check-row"><input type="checkbox" [(ngModel)]="settings.includeEngagements" /> 💼 Engagements (by target close date)</label>
+  </section>
+
+  <div class="save-bar">
+    @if (settings.updatedAt) { <span class="updated">Last saved {{ settings.updatedAt }}</span> }
+    <button type="button" class="btn btn-primary" [disabled]="saving" (click)="save()">{{ saving ? 'Saving…' : 'Save alert settings' }}</button>
+  </div>
+}

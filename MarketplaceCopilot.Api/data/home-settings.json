@@ -40,8 +40,8 @@
       "key": "reminders",
       "label": "Today\u0027s Reminders",
       "description": "Upcoming and overdue reminders.",
-      "enabled": false
+      "enabled": true
     }
   ],
-  "updatedAt": "2026-06-26 01:07 UTC"
+  "updatedAt": "2026-06-26 04:18 UTC"
 }

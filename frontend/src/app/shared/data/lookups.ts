@@ -127,3 +127,28 @@ export function eventStatus(startDate: string, endDate: string): 'Upcoming' | 'A
   if (end && today > end) return 'Completed';
   return 'Active';
 }
+
+// ---- Customer Portal: New Engagement Request lookups ----
+
+export interface RequestTypeOption {
+  key: string;
+  label: string;
+  icon: string;
+  description: string;
+}
+
+export const ENGAGEMENT_REQUEST_TYPES: RequestTypeOption[] = [
+  { key: 'Private Offer', label: 'Private Offer', icon: '🏷️', description: 'Request a custom pricing offer for your preferred SaaSify products on marketplace.' },
+  { key: 'Free Trial', label: 'Free Trial', icon: '🚀', description: 'Start a free trial of our products to explore features and capabilities.' },
+  { key: 'POC', label: 'Proof of Concept (POC)', icon: '🎯', description: 'Request a POC to validate our solution for your specific use case and requirements.' }
+];
+
+export const REQUEST_DURATIONS = ['1 Month', '3 Months', '6 Months', '1 Year', '2 Years', '3+ Years'];
+
+export const ESTIMATED_USER_RANGES = ['1–10', '11–50', '51–200', '201–500', '500+'];
+
+export const BUDGET_RANGES = ['Under $10,000', '$10,000 – $50,000', '$50,000 – $150,000', '$150,000 – $500,000', '$500,000+'];
+
+export const CONTACT_PREFERENCES = ['Email', 'Phone'];
+
+export const CONTACT_TIME_SLOTS = ['Morning (9am – 12pm)', 'Afternoon (12pm – 4pm)', 'Evening (4pm – 7pm)'];

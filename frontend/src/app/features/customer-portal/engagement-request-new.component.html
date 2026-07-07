@@ -1,0 +1,191 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">New Engagement Request</h1>
+    <p class="page-subtitle">Tell us about your requirements and we'll get back to you with the best solution.</p>
+  </div>
+  <div class="help-card">
+    <div class="help-title">🎧 Need help?</div>
+    <p>Our team is here to assist you.</p>
+    <a href="mailto:support@saasify.ai" class="link">Contact Support →</a>
+  </div>
+</div>
+
+<div class="wizard-stepper">
+  <div class="wz-step" [class.active]="step === 'details'" [class.done]="step === 'review'">
+    <span class="wz-dot">1</span>
+    <div><strong>Request Details</strong><small>Tell us what you need</small></div>
+  </div>
+  <div class="wz-step">
+    <span class="wz-dot">2</span>
+    <div><strong>Company Information</strong><small>Your organization details</small></div>
+  </div>
+  <div class="wz-step">
+    <span class="wz-dot">3</span>
+    <div><strong>Requirements</strong><small>Share your requirements</small></div>
+  </div>
+  <div class="wz-step" [class.active]="step === 'review'">
+    <span class="wz-dot">4</span>
+    <div><strong>Review &amp; Submit</strong><small>Review and send request</small></div>
+  </div>
+</div>
+
+@if (error) { <p class="error">{{ error }}</p> }
+
+@if (step === 'details') {
+  <section class="card section-card">
+    <h3>1. Select Request Type</h3>
+    <p class="hint">What would you like to request today?</p>
+    <div class="request-type-grid">
+      @for (t of requestTypes; track t.key) {
+        <button type="button" class="request-type-card" [class.selected]="form.requestType === t.key" (click)="form.requestType = t.key">
+          <span class="rt-icon">{{ t.icon }}</span>
+          <strong>{{ t.label }}</strong>
+          <p>{{ t.description }}</p>
+          @if (form.requestType === t.key) { <span class="rt-check">✓</span> }
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="card section-card">
+    <h3>2. Select Marketplace &amp; Products</h3>
+    <div class="form-grid">
+      <label class="form-field">
+        Marketplace
+        <select [(ngModel)]="form.marketplace" (ngModelChange)="onMarketplaceChange()">
+          @for (m of marketplaces; track m) { <option [value]="m">{{ m }}</option> }
+        </select>
+      </label>
+      <label class="form-field">
+        Products of Interest
+        <select [(ngModel)]="productChoice" (ngModelChange)="addProduct()">
+          <option value="">Select a product…</option>
+          @for (p of selectableProducts; track p.id) { <option [value]="p.id">{{ p.name }}</option> }
+        </select>
+      </label>
+    </div>
+    @if (form.productIds.length) {
+      <div class="chip-row">
+        @for (id of form.productIds; track id) {
+          <span class="chip">{{ productName(id) }} <button type="button" (click)="removeProduct(id)">✕</button></span>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="card section-card">
+    <h3>3. Tell us about your requirements</h3>
+    <div class="form-grid">
+      <label class="form-field">
+        Expected Start Date
+        <input type="date" [(ngModel)]="form.expectedStartDate" />
+        <small>When do you plan to start using the solution?</small>
+      </label>
+      <label class="form-field">
+        Expected Duration
+        <select [(ngModel)]="form.expectedDuration">
+          <option value="">Select duration</option>
+          @for (d of durations; track d) { <option [value]="d">{{ d }}</option> }
+        </select>
+        <small>Select the duration you are looking for</small>
+      </label>
+      <label class="form-field">
+        Estimated Users
+        <select [(ngModel)]="form.estimatedUsers">
+          <option value="">Select range</option>
+          @for (u of userRanges; track u) { <option [value]="u">{{ u }}</option> }
+        </select>
+        <small>Approximate number of users</small>
+      </label>
+    </div>
+
+    <label class="form-field full">
+      Business Need / Use Case
+      <textarea rows="4" maxlength="500" [(ngModel)]="form.businessNeed" placeholder="Please describe your business need, use case and goals"></textarea>
+      <small class="char-count">{{ form.businessNeed.length }}/500</small>
+    </label>
+
+    <div class="form-grid">
+      <label class="form-field">
+        Budget Range (Optional)
+        <select [(ngModel)]="form.budgetRange">
+          <option value="">Select budget range</option>
+          @for (b of budgetRanges; track b) { <option [value]="b">{{ b }}</option> }
+        </select>
+        <small>Helps us tailor the right solution for you</small>
+      </label>
+      <label class="form-field">
+        Any Other Requirements (Optional)
+        <input type="text" [(ngModel)]="form.otherRequirements" placeholder="Share any specific requirements or preferences" />
+        <small>Integrations, Compliance, Support, etc.</small>
+      </label>
+    </div>
+  </section>
+
+  <section class="card section-card">
+    <h3>4. Additional Information <span class="optional">(Optional)</span></h3>
+    <div class="form-grid">
+      <label class="form-field">
+        Contact Preference
+        <select [(ngModel)]="form.contactPreference">
+          @for (c of contactPreferences; track c) { <option [value]="c">{{ c }}</option> }
+        </select>
+      </label>
+      <label class="form-field">
+        Preferred Time to Contact
+        <select [(ngModel)]="form.preferredTimeToContact">
+          <option value="">Select time slot</option>
+          @for (s of timeSlots; track s) { <option [value]="s">{{ s }}</option> }
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <section class="card section-card">
+    <h3>5. Attachments <span class="optional">(Optional)</span></h3>
+    <label class="dropzone">
+      <input type="file" multiple (change)="onFilesSelected($event)" hidden />
+      <span class="dz-icon">⬆️</span>
+      <span>Drag and drop files here or <strong>Browse Files</strong></span>
+      <small>PDF, DOC, DOCX, PPT, XLS, XLSX (Max 10MB each)</small>
+    </label>
+    @if (attachmentNames.length) {
+      <div class="chip-row">
+        @for (name of attachmentNames; track name) {
+          <span class="chip">{{ name }} <button type="button" (click)="removeAttachment(name)">✕</button></span>
+        }
+      </div>
+    }
+  </section>
+
+  <div class="wizard-actions">
+    <button type="button" class="btn btn-outline" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="goToReview()">Review &amp; Continue →</button>
+  </div>
+}
+
+@if (step === 'review') {
+  <section class="card section-card">
+    <h3>Review your request</h3>
+
+    <div class="review-grid">
+      <div><span class="rl">Request Type</span><strong>{{ form.requestType }}</strong></div>
+      <div><span class="rl">Marketplace</span><strong>{{ form.marketplace }}</strong></div>
+      <div class="full"><span class="rl">Products of Interest</span><strong>{{ form.productIds.length ? selectedProductNames : '—' }}</strong></div>
+      <div><span class="rl">Expected Start Date</span><strong>{{ form.expectedStartDate || '—' }}</strong></div>
+      <div><span class="rl">Expected Duration</span><strong>{{ form.expectedDuration || '—' }}</strong></div>
+      <div><span class="rl">Estimated Users</span><strong>{{ form.estimatedUsers || '—' }}</strong></div>
+      <div class="full"><span class="rl">Business Need / Use Case</span><strong>{{ form.businessNeed || '—' }}</strong></div>
+      <div><span class="rl">Budget Range</span><strong>{{ form.budgetRange || '—' }}</strong></div>
+      <div><span class="rl">Other Requirements</span><strong>{{ form.otherRequirements || '—' }}</strong></div>
+      <div><span class="rl">Contact Preference</span><strong>{{ form.contactPreference || '—' }}</strong></div>
+      <div><span class="rl">Preferred Time to Contact</span><strong>{{ form.preferredTimeToContact || '—' }}</strong></div>
+      <div class="full"><span class="rl">Attachments</span><strong>{{ attachmentNames.length ? attachmentNames.join(', ') : '—' }}</strong></div>
+    </div>
+  </section>
+
+  <div class="wizard-actions">
+    <button type="button" class="btn btn-outline" (click)="backToDetails()" [disabled]="saving">← Back</button>
+    <button type="button" class="btn btn-primary" (click)="submit()" [disabled]="saving">{{ saving ? 'Submitting…' : 'Submit Request' }}</button>
+  </div>
+}

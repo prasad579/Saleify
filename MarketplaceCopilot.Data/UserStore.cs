@@ -36,6 +36,37 @@ public class UserStore
             demo.Token = CreateToken();
     }
 
+    /// <summary>Seed the Customer Portal demo account so "Try Customer Demo Login" always resolves to the Customer role.</summary>
+    public void EnsureCustomerDemoSeeded()
+    {
+        const string customerEmail = "customer@acme.com";
+        var customer = FindByEmail(customerEmail);
+        if (customer is null)
+        {
+            customer = new AppUser
+            {
+                Id = "customer001",
+                Name = "John Ramesh",
+                Email = customerEmail,
+                Company = "Acme Corporation",
+                Provider = "local",
+                PasswordHash = HashPassword("customer123"),
+                Status = "approved",
+                Role = "Customer"
+            };
+            customer.Token = CreateToken();
+            Users.Add(customer);
+            return;
+        }
+
+        customer.Status = "approved";
+        customer.Role = "Customer";
+        customer.Company = string.IsNullOrWhiteSpace(customer.Company) ? "Acme Corporation" : customer.Company;
+        customer.PasswordHash = HashPassword("customer123");
+        if (string.IsNullOrWhiteSpace(customer.Token))
+            customer.Token = CreateToken();
+    }
+
     public AppUser? FindByEmail(string email) =>
         Users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
 

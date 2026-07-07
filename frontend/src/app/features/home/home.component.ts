@@ -6,6 +6,7 @@ import { AuthService } from '@core/services/auth.service';
 import { SnapshotLauncherService } from '@core/services/snapshot-launcher.service';
 import { SnapshotSettingsService } from '@core/services/snapshot-settings.service';
 import { HomeSettingsService } from '@core/services/home-settings.service';
+import { AttentionSettingsService } from '@core/services/attention-settings.service';
 import { DashboardInsights } from '@shared/data/snapshot.model';
 import { CampaignEvent, eventStatus } from '@shared/data/lookups';
 import { formatReminderDate, reminderBadgeClass, reminderStatus } from '@shared/utils/meeting-notes.util';
@@ -30,6 +31,7 @@ export class HomeComponent implements OnInit {
   private launcher = inject(SnapshotLauncherService);
   snapSettings = inject(SnapshotSettingsService);
   homeSettings = inject(HomeSettingsService);
+  attentionSettings = inject(AttentionSettingsService);
   auth = inject(AuthService);
   data: any = null;
   insights: DashboardInsights | null = null;
@@ -53,6 +55,74 @@ export class HomeComponent implements OnInit {
   formatReminderDate = formatReminderDate;
   reminderStatus = reminderStatus;
   reminderBadgeClass = reminderBadgeClass;
+
+  // ---- "Needs attention today" alert (overdue + due-today items) ----
+  private readonly todayStr = new Date().toISOString().slice(0, 10);
+  private static readonly DISMISS_KEY = 'mc_home_alert_dismissed';
+  alertDismissed = this.readDismissed();
+
+  private readDismissed(): boolean {
+    try { return localStorage.getItem(HomeComponent.DISMISS_KEY) === this.todayStr; } catch { return false; }
+  }
+
+  dismissAlert() {
+    this.alertDismissed = true;
+    try { localStorage.setItem(HomeComponent.DISMISS_KEY, this.todayStr); } catch { /* ignore */ }
+  }
+
+  /**
+   * Every dated item (tasks, reminders, engagement close dates) mapped to a uniform row, honoring
+   * the source toggles from Settings → Alerts & Reminders. Days < 0 = overdue, 0 = today.
+   */
+  private get datedItems(): { icon: string; kind: string; text: string; context: string; link: any[]; tone: string; label: string; days: number }[] {
+    const s = this.attentionSettings.settings();
+    const items: any[] = [];
+    if (s.includeTasks) {
+      for (const t of (this.data?.tasks || [])) {
+        if (t.status === 'Done') continue;
+        const st = reminderStatus(t.dueDate);
+        if (st.days === null) continue;
+        items.push({ icon: '✅', kind: 'Task', text: t.task, context: t.customer || t.dealName || t.deal,
+          link: ['/deals', t.deal, 'meeting-notes'], tone: st.tone, label: st.label, days: st.days });
+      }
+    }
+    if (s.includeReminders) {
+      for (const r of (this.data?.reminders || [])) {
+        const st = reminderStatus(r.dateTime);
+        if (st.days === null) continue;
+        items.push({ icon: '⏰', kind: 'Reminder', text: r.reminder, context: r.customer || r.dealName || r.deal,
+          link: ['/deals', r.deal, 'meeting-notes'], tone: st.tone, label: st.label, days: st.days });
+      }
+    }
+    if (s.includeEngagements) {
+      for (const d of (this.deals || [])) {
+        if (d.archived) continue;
+        const st = reminderStatus(d.expectedCloseDate);
+        if (st.days === null) continue;
+        items.push({ icon: '💼', kind: 'Engagement', text: d.name || d.customer, context: 'Target close ' + formatReminderDate(d.expectedCloseDate),
+          link: ['/deals', d.id], tone: st.tone, label: st.label, days: st.days });
+      }
+    }
+    return items;
+  }
+
+  /** Urgent: overdue + due today (the top alert). Overdue first. */
+  get attentionList() {
+    return this.datedItems.filter(i => i.days <= 0).sort((a, b) => a.days - b.days);
+  }
+
+  /** Upcoming: due within the configured look-ahead window (not today/overdue). Soonest first. */
+  get upcomingList() {
+    const window = this.attentionSettings.settings().upcomingWindowDays || 7;
+    return this.datedItems.filter(i => i.days > 0 && i.days <= window).sort((a, b) => a.days - b.days);
+  }
+
+  get attentionTotal(): number { return this.attentionList.length; }
+  get missedCount(): number { return this.attentionList.filter(i => i.tone === 'overdue').length; }
+  get dueTodayCount(): number { return this.attentionList.filter(i => i.tone === 'today').length; }
+  get showAlert(): boolean { return this.attentionSettings.settings().alertEnabled && !this.alertDismissed && this.attentionTotal > 0; }
+  get showUpcoming(): boolean { return this.attentionSettings.settings().upcomingEnabled && this.upcomingList.length > 0; }
+  get upcomingWindowDays(): number { return this.attentionSettings.settings().upcomingWindowDays || 7; }
 
   // ---- Stat card + tag redirections ----
   private get myName(): string { return this.auth.user()?.name || 'Srinivas K'; }

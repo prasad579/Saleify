@@ -1,0 +1,40 @@
+<div class="portal-shell">
+  <header class="portal-topbar">
+    <div class="brand">
+      <span class="logo">🤖</span>
+      <div>
+        <strong>SaaSify</strong>
+        <small>Customer Portal</small>
+      </div>
+    </div>
+
+    <div class="user-area">
+      <button type="button" class="icon-btn" title="Help" aria-label="Help">❓</button>
+      <button type="button" class="icon-btn bell" title="Notifications" aria-label="Notifications">
+        🔔
+        <span class="badge-dot">3</span>
+      </button>
+      <div class="user-menu">
+        <button type="button" class="user-trigger" (click)="toggleMenu()">
+          <div class="avatar">{{ initials() }}</div>
+          <div class="user-text">
+            <div class="name">{{ auth.user()?.name || 'Customer' }}</div>
+            <div class="company">{{ auth.user()?.company || '' }}</div>
+          </div>
+          <span class="chevron">▾</span>
+        </button>
+        @if (menuOpen()) {
+          <div class="user-dropdown">
+            <button type="button" class="btn btn-outline full" (click)="signOut()">Logout</button>
+          </div>
+        }
+      </div>
+    </div>
+  </header>
+
+  <main class="portal-content">
+    <router-outlet />
+  </main>
+
+  <app-toast />
+</div>

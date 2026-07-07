@@ -1,5 +1,465 @@
 [
   {
+    "id": "dbda0258",
+    "timestamp": "2026-07-06 16:58:43 UTC",
+    "user": "John Ramesh",
+    "category": "Engagement Request",
+    "action": "Request submitted",
+    "details": "Free Trial request submitted by John Ramesh (Acme Corporation).",
+    "entity": "EngagementRequest",
+    "entityId": "ER-4002"
+  },
+  {
+    "id": "3d5a9de4",
+    "timestamp": "2026-07-06 16:51:13 UTC",
+    "user": "John Ramesh",
+    "category": "Engagement Request",
+    "action": "Request submitted",
+    "details": "Private Offer request submitted by John Ramesh (Acme Corporation).",
+    "entity": "EngagementRequest",
+    "entityId": "ER-4001"
+  },
+  {
+    "id": "cc8076fa",
+    "timestamp": "2026-06-27 04:59:00 UTC",
+    "user": "Srinivas K",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1009. Engagement locked from edits.",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "fbd8c246",
+    "timestamp": "2026-06-27 04:59:00 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement submitted",
+    "details": "Marked completed. Status set to Completed.",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "4c1b9584",
+    "timestamp": "2026-06-27 04:58:55 UTC",
+    "user": "Srinivas K",
+    "category": "Approvals",
+    "action": "Marketplace Review approved",
+    "details": "",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "d413ae0d",
+    "timestamp": "2026-06-27 04:58:41 UTC",
+    "user": "Srinivas K",
+    "category": "Approvals",
+    "action": "Entered approval workflow",
+    "details": "Next step: Marketplace Review.",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "fe65bc00",
+    "timestamp": "2026-06-27 04:58:40 UTC",
+    "user": "Srinivas K",
+    "category": "Meeting Notes",
+    "action": "Meeting notes updated",
+    "details": "0 action item(s), 0 reminder(s).",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "603aae6b",
+    "timestamp": "2026-06-27 04:58:37 UTC",
+    "user": "Srinivas K",
+    "category": "Pricing",
+    "action": "Pricing configured",
+    "details": "Net $0, 0% discount, 7 days.",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "e8e81a25",
+    "timestamp": "2026-06-27 04:57:20 UTC",
+    "user": "Srinivas K",
+    "category": "Products",
+    "action": "Products selected",
+    "details": "1 product(s) selected: prod-1.",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "d3d36cb8",
+    "timestamp": "2026-06-27 04:57:09 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement details updated",
+    "details": "Deal details updated.",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "6d4039c2",
+    "timestamp": "2026-06-27 04:56:44 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement created",
+    "details": "Hackathon for Hte on AWS, owner Priya Sharma.",
+    "entity": "DL-1015 \u2014 Hackathon \u2014 Hte",
+    "entityId": "DL-1015"
+  },
+  {
+    "id": "eb73347e",
+    "timestamp": "2026-06-27 04:55:56 UTC",
+    "user": "Srinivas K",
+    "category": "Offer Request",
+    "action": "Offer request re-pushed",
+    "details": "OFR-1008 payload refreshed and re-synced. Engagement re-locked.",
+    "entity": "DL-1014 \u2014 Workshop \u2014 Nop",
+    "entityId": "DL-1014"
+  },
+  {
+    "id": "0a1e5958",
+    "timestamp": "2026-06-27 04:55:56 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement submitted",
+    "details": "Marked completed. Status set to Completed.",
+    "entity": "DL-1014 \u2014 Workshop \u2014 Nop",
+    "entityId": "DL-1014"
+  },
+  {
+    "id": "17e1261c",
+    "timestamp": "2026-06-27 04:55:56 UTC",
+    "user": "Srinivas K",
+    "category": "Meeting Notes",
+    "action": "Meeting notes updated",
+    "details": "0 action item(s), 0 reminder(s).",
+    "entity": "DL-1014 \u2014 Workshop \u2014 Nop",
+    "entityId": "DL-1014"
+  },
+  {
+    "id": "1fadf85d",
+    "timestamp": "2026-06-27 04:55:26 UTC",
+    "user": "Srinivas K",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1008. Engagement locked from edits.",
+    "entity": "DL-1014 \u2014 Workshop \u2014 Nop",
+    "entityId": "DL-1014"
+  },
+  {
+    "id": "dc7293e2",
+    "timestamp": "2026-06-27 04:55:26 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement submitted",
+    "details": "Marked completed. Status set to Completed.",
+    "entity": "DL-1014 \u2014 Workshop \u2014 Nop",
+    "entityId": "DL-1014"
+  },
+  {
+    "id": "7daacae0",
+    "timestamp": "2026-06-27 04:55:25 UTC",
+    "user": "Srinivas K",
+    "category": "Meeting Notes",
+    "action": "Meeting notes updated",
+    "details": "0 action item(s), 0 reminder(s).",
+    "entity": "DL-1014 \u2014 Workshop \u2014 Nop",
+    "entityId": "DL-1014"
+  },
+  {
+    "id": "4ba9cc61",
+    "timestamp": "2026-06-27 04:55:22 UTC",
+    "user": "Srinivas K",
+    "category": "Products",
+    "action": "Products selected",
+    "details": "1 product(s) selected: prod-1.",
+    "entity": "DL-1014 \u2014 Workshop \u2014 Nop",
+    "entityId": "DL-1014"
+  },
+  {
+    "id": "64b2f53e",
+    "timestamp": "2026-06-27 04:55:14 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement created",
+    "details": "Workshop for Nop on AWS, owner Prasad.",
+    "entity": "DL-1014 \u2014 Workshop \u2014 Nop",
+    "entityId": "DL-1014"
+  },
+  {
+    "id": "0780dffb",
+    "timestamp": "2026-06-26 08:58:01 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Alerts \u0026 reminders saved",
+    "details": "Alert on, upcoming on (3d).",
+    "entity": "Alerts \u0026 Reminders",
+    "entityId": "attention-settings"
+  },
+  {
+    "id": "b8770b0d",
+    "timestamp": "2026-06-26 08:46:47 UTC",
+    "user": "Srinivas K",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1007. Engagement locked from edits.",
+    "entity": "DL-1013 \u2014 Free Trial \u2014 Saasif",
+    "entityId": "DL-1013"
+  },
+  {
+    "id": "40b1c225",
+    "timestamp": "2026-06-26 08:46:47 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement submitted",
+    "details": "Submitted to SaaSify. Status set to In Review.",
+    "entity": "DL-1013 \u2014 Free Trial \u2014 Saasif",
+    "entityId": "DL-1013"
+  },
+  {
+    "id": "0ff0d1f8",
+    "timestamp": "2026-06-26 08:46:47 UTC",
+    "user": "Srinivas K",
+    "category": "Meeting Notes",
+    "action": "Meeting notes updated",
+    "details": "4 action item(s), 0 reminder(s).",
+    "entity": "DL-1013 \u2014 Free Trial \u2014 Saasif",
+    "entityId": "DL-1013"
+  },
+  {
+    "id": "58f01645",
+    "timestamp": "2026-06-26 08:46:10 UTC",
+    "user": "Srinivas K",
+    "category": "Meeting Notes",
+    "action": "Meeting summary added",
+    "details": "4 action item(s), 0 reminder(s).",
+    "entity": "DL-1013 \u2014 Free Trial \u2014 Saasif",
+    "entityId": "DL-1013"
+  },
+  {
+    "id": "e8da6260",
+    "timestamp": "2026-06-26 08:43:39 UTC",
+    "user": "Srinivas K",
+    "category": "Pricing",
+    "action": "Pricing configured",
+    "details": "Net $0, 0% discount, 30 days.",
+    "entity": "DL-1013 \u2014 Free Trial \u2014 Saasif",
+    "entityId": "DL-1013"
+  },
+  {
+    "id": "5a38ffb4",
+    "timestamp": "2026-06-26 08:42:52 UTC",
+    "user": "Srinivas K",
+    "category": "Products",
+    "action": "Products selected",
+    "details": "1 product(s) selected: prod-1.",
+    "entity": "DL-1013 \u2014 Free Trial \u2014 Saasif",
+    "entityId": "DL-1013"
+  },
+  {
+    "id": "58fdf954",
+    "timestamp": "2026-06-26 08:42:06 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement created",
+    "details": "Free Trial for Saasif on AWS, owner Indrasena.",
+    "entity": "DL-1013 \u2014 Free Trial \u2014 Saasif",
+    "entityId": "DL-1013"
+  },
+  {
+    "id": "081d1f2c",
+    "timestamp": "2026-06-26 06:44:57 UTC",
+    "user": "Prasad Yalla",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1006. Engagement locked from edits.",
+    "entity": "DL-1012 \u2014 Private Offer",
+    "entityId": "DL-1012"
+  },
+  {
+    "id": "b900db43",
+    "timestamp": "2026-06-26 06:44:57 UTC",
+    "user": "Prasad Yalla",
+    "category": "Engagement",
+    "action": "Engagement submitted",
+    "details": "Submitted to SaaSify. Status set to In Review.",
+    "entity": "DL-1012 \u2014 Private Offer",
+    "entityId": "DL-1012"
+  },
+  {
+    "id": "ff6522f5",
+    "timestamp": "2026-06-26 06:43:02 UTC",
+    "user": "Prasad Yalla",
+    "category": "Pricing",
+    "action": "Pricing configured",
+    "details": "Net $2,83,565, 25% discount, 3 years.",
+    "entity": "DL-1012 \u2014 Private Offer",
+    "entityId": "DL-1012"
+  },
+  {
+    "id": "668de34c",
+    "timestamp": "2026-06-26 06:43:02 UTC",
+    "user": "Prasad Yalla",
+    "category": "Pricing",
+    "action": "Pricing configured",
+    "details": "Net $3,40,278, 10% discount, 3 years.",
+    "entity": "DL-1012 \u2014 Private Offer",
+    "entityId": "DL-1012"
+  },
+  {
+    "id": "8b924a98",
+    "timestamp": "2026-06-26 06:43:00 UTC",
+    "user": "Prasad Yalla",
+    "category": "Engagement",
+    "action": "Engagement created",
+    "details": "Private Offer for \u2014 on AWS, owner Srinivas K.",
+    "entity": "DL-1012 \u2014 Private Offer",
+    "entityId": "DL-1012"
+  },
+  {
+    "id": "692df9d2",
+    "timestamp": "2026-06-26 05:38:05 UTC",
+    "user": "Srinivas K",
+    "category": "Offer Request",
+    "action": "Offer request pushed",
+    "details": "Pushed to SaaSify (AWS) as OFR-1005. Engagement locked from edits.",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "05f5a620",
+    "timestamp": "2026-06-26 05:38:05 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement submitted",
+    "details": "Submitted to SaaSify. Status set to In Review.",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "c282f69f",
+    "timestamp": "2026-06-26 05:37:18 UTC",
+    "user": "Srinivas K",
+    "category": "Approvals",
+    "action": "Marketplace Review approved",
+    "details": "",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "5c4a2d87",
+    "timestamp": "2026-06-26 05:37:13 UTC",
+    "user": "Srinivas K",
+    "category": "Approvals",
+    "action": "Legal Review approved",
+    "details": "",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "ba411bda",
+    "timestamp": "2026-06-26 05:37:08 UTC",
+    "user": "Srinivas K",
+    "category": "Approvals",
+    "action": "Entered approval workflow",
+    "details": "Next step: Legal Review.",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "d9d8653c",
+    "timestamp": "2026-06-26 05:37:08 UTC",
+    "user": "Srinivas K",
+    "category": "Meeting Notes",
+    "action": "Meeting notes updated",
+    "details": "0 action item(s), 0 reminder(s).",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "bb7fb521",
+    "timestamp": "2026-06-26 05:37:03 UTC",
+    "user": "Srinivas K",
+    "category": "Pricing",
+    "action": "Pricing configured",
+    "details": "Net $18,540, 15% discount, 3 years.",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "2ad6004a",
+    "timestamp": "2026-06-26 05:35:57 UTC",
+    "user": "Srinivas K",
+    "category": "Products",
+    "action": "Products selected",
+    "details": "1 product(s) selected: prod-1.",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "0de35461",
+    "timestamp": "2026-06-26 05:35:49 UTC",
+    "user": "Srinivas K",
+    "category": "Engagement",
+    "action": "Engagement created",
+    "details": "Private Offer for Networksoltions on AWS, owner Srinivas K.",
+    "entity": "DL-1011 \u2014 Private Offer For-Networksoltions-From July 2026- 3 years deal",
+    "entityId": "DL-1011"
+  },
+  {
+    "id": "ff7f8ec4",
+    "timestamp": "2026-06-26 05:33:35 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Alerts \u0026 reminders saved",
+    "details": "Alert off, upcoming off (3d).",
+    "entity": "Alerts \u0026 Reminders",
+    "entityId": "attention-settings"
+  },
+  {
+    "id": "e1ccc3e0",
+    "timestamp": "2026-06-26 05:33:19 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Alerts \u0026 reminders saved",
+    "details": "Alert on, upcoming off (3d).",
+    "entity": "Alerts \u0026 Reminders",
+    "entityId": "attention-settings"
+  },
+  {
+    "id": "a5595e27",
+    "timestamp": "2026-06-26 04:58:43 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Alerts \u0026 reminders reset",
+    "details": "Restored the default alert settings.",
+    "entity": "Alerts \u0026 Reminders",
+    "entityId": "attention-settings"
+  },
+  {
+    "id": "9711471a",
+    "timestamp": "2026-06-26 04:58:43 UTC",
+    "user": "Prasad Yalla",
+    "category": "Settings",
+    "action": "Alerts \u0026 reminders saved",
+    "details": "Alert on, upcoming on (14d).",
+    "entity": "Alerts \u0026 Reminders",
+    "entityId": "attention-settings"
+  },
+  {
+    "id": "985bb269",
+    "timestamp": "2026-06-26 04:18:57 UTC",
+    "user": "Srinivas K",
+    "category": "Settings",
+    "action": "Home dashboard saved",
+    "details": "7 of 7 home cards enabled.",
+    "entity": "Home Dashboard",
+    "entityId": "home-settings"
+  },
+  {
     "id": "46c1fa35",
     "timestamp": "2026-06-26 03:16:13 UTC",
     "user": "Srinivas K",

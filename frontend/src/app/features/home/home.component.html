@@ -14,6 +14,65 @@
   </div>
 </div>
 
+@if (showAlert) {
+  <section class="attention-alert" [class.has-missed]="missedCount > 0">
+    <button type="button" class="attention-close" (click)="dismissAlert()" aria-label="Dismiss">✕</button>
+    <div class="attention-head">
+      <span class="attention-bell">🔔</span>
+      <div>
+        <strong class="attention-title">{{ attentionTotal }} item{{ attentionTotal === 1 ? '' : 's' }} need your attention today</strong>
+        <div class="attention-sub">
+          @if (missedCount > 0) { <span class="att-pill missed">{{ missedCount }} missed / overdue</span> }
+          @if (dueTodayCount > 0) { <span class="att-pill today">{{ dueTodayCount }} due today</span> }
+        </div>
+      </div>
+    </div>
+    <ul class="attention-list">
+      @for (a of attentionList.slice(0, 6); track $index) {
+        <li class="attention-item" [class.overdue]="a.tone === 'overdue'">
+          <a [routerLink]="a.link" class="attention-link">
+            <span class="att-icon">{{ a.icon }}</span>
+            <span class="att-body">
+              <span class="att-text">{{ a.text }}</span>
+              <span class="att-context">{{ a.kind }} · {{ a.context }}</span>
+            </span>
+            <span class="att-status" [class.overdue]="a.tone === 'overdue'">{{ a.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+    @if (attentionTotal > 6) {
+      <a routerLink="/deals" [queryParams]="{ scope: 'open' }" class="attention-more">+ {{ attentionTotal - 6 }} more — view all engagements →</a>
+    }
+  </section>
+}
+
+@if (showUpcoming) {
+  <section class="card upcoming-card">
+    <div class="upcoming-head">
+      <h3>📅 Upcoming</h3>
+      <span class="upcoming-sub">Due in the next {{ upcomingWindowDays }} days</span>
+    </div>
+    <ul class="upcoming-list">
+      @for (u of upcomingList.slice(0, 6); track $index) {
+        <li class="upcoming-item">
+          <a [routerLink]="u.link" class="upcoming-link">
+            <span class="up-icon">{{ u.icon }}</span>
+            <span class="up-body">
+              <span class="up-text">{{ u.text }}</span>
+              <span class="up-context">{{ u.kind }} · {{ u.context }}</span>
+            </span>
+            <span class="up-status">{{ u.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+    @if (upcomingList.length > 6) {
+      <span class="upcoming-more">+ {{ upcomingList.length - 6 }} more upcoming</span>
+    }
+  </section>
+}
+
 @if (data) {
   @if (homeSettings.enabled('stats')) {
   <div class="stat-grid">

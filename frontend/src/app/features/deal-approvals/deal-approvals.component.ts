@@ -296,9 +296,10 @@ export class DealApprovalsComponent implements OnInit {
     this.error = '';
     // Status outcome depends on engagement type (Submit to SaaSify / Mark Completed).
     this.api.submitEngagement(this.dealId).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.saving = false;
-        this.router.navigate(['/deals', this.dealId]);
+        // After the final submit the engagement becomes an offer request — go straight to it.
+        this.router.navigate(res?.offerRequestId ? ['/offer-requests', res.offerRequestId] : ['/offer-requests']);
       },
       error: (err) => {
         this.saving = false;

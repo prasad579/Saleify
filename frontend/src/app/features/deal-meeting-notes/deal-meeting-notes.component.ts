@@ -221,7 +221,7 @@ export class DealMeetingNotesComponent implements OnInit {
         } else {
           // No approvals for this engagement type — this is the final submit.
           this.api.submitEngagement(this.dealId).subscribe({
-            next: () => this.router.navigate(['/deals', this.dealId]),
+            next: (res: any) => this.router.navigate(res?.offerRequestId ? ['/offer-requests', res.offerRequestId] : ['/offer-requests']),
             error: () => {
               this.saving = false;
               this.router.navigate(['/deals', this.dealId]);

@@ -1,16 +1,53 @@
 <div class="auth-page">
+  <!-- Left: themed content + illustration (new) -->
   <section class="hero">
-    <div class="logo">🤖</div>
-    <h1>Saleify</h1>
-    <p class="tagline">AI-Powered Deal Desk</p>
-    <ul>
-      <li><span class="icon">⚡</span> Faster Deal Cycles</li>
-      <li><span class="icon">✅</span> Smarter Approvals</li>
-      <li><span class="icon">🔗</span> Unified Workspace</li>
+    <div class="hero-brand">
+      <span class="hero-logo">🤖</span>
+      <div class="hero-brand-text">
+        <strong>SaaSify</strong>
+        <small>Marketplace Copilot</small>
+      </div>
+    </div>
+
+    <h1 class="welcome">Welcome to<br><span class="accent">SaaSify Customer Portal</span></h1>
+    <p class="intro">Submit requests, track progress, and collaborate with our team — all in one place.</p>
+
+    <ul class="features">
+      <li>
+        <span class="feat-icon">✈️</span>
+        <div><strong>Submit Requests</strong><p>Request Free Trials, Private Offers, POCs and more.</p></div>
+      </li>
+      <li>
+        <span class="feat-icon">📈</span>
+        <div><strong>Track Progress</strong><p>Stay updated on the status of all your requests.</p></div>
+      </li>
+      <li>
+        <span class="feat-icon">📄</span>
+        <div><strong>Access Documents</strong><p>View proposals, agreements, and other important documents.</p></div>
+      </li>
+      <li>
+        <span class="feat-icon">💬</span>
+        <div><strong>Communicate Easily</strong><p>Chat with our team and get faster responses.</p></div>
+      </li>
     </ul>
-    <div class="hero-illustration">💻 🤖</div>
+
+    <div class="preview" aria-hidden="true">
+      <div class="preview-bar">
+        <span class="pb-brand">🤖 SaaSify</span>
+        <span class="pb-right">🔔 <span class="pb-avatar"></span></span>
+      </div>
+      <div class="preview-body">
+        <div class="pb-title">My Requests</div>
+        <div class="pb-row"><div><strong>Private Offer</strong><span class="st in-progress">In Progress</span></div><span class="bar"></span></div>
+        <div class="pb-row"><div><strong>Free Trial</strong><span class="st active">Active</span></div><span class="bar"></span></div>
+        <div class="pb-row"><div><strong>POC Request</strong><span class="st review">Under Review</span></div><span class="bar"></span></div>
+      </div>
+      <span class="preview-plant">🪴</span>
+      <span class="preview-person">🧑‍💻</span>
+    </div>
   </section>
 
+  <!-- Right: default login (unchanged) -->
   <section class="form-panel">
     <h2>Welcome Back!</h2>
     <p class="subtitle">Sign in to continue to your deal desk</p>
@@ -28,6 +65,11 @@
       {{ loading ? 'Signing in…' : '🚀 Try Demo Login' }}
     </button>
     <p class="demo-hint">Use demo&#64;marketplace.com / demo123 — or any email when API is running</p>
+
+    <button type="button" class="btn btn-outline full" (click)="customerDemoLogin()" [disabled]="loading">
+      {{ loading ? 'Signing in…' : '🏢 Try Customer Demo Login' }}
+    </button>
+    <p class="demo-hint">Sign in as a customer to submit and track engagement requests</p>
 
     <div class="divider"><span>or sign in with email</span></div>
 

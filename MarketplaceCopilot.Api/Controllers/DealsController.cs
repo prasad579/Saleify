@@ -414,8 +414,8 @@ public class DealsController(
         history.Log(deal, "Approvals", "Deal submitted for offer request.", "All approvals complete.");
         audit.LogDeal(deal, "Approvals", "Submitted for offer request", "All approvals complete — status set to In Review.");
         store.SaveDeals();
-        offerRequests.Record(deal);
-        return new { success = true, message = "Deal submitted. Proceed to offer request summary.", deal = dealService.ToDetail(deal) };
+        var offer = offerRequests.Record(deal);
+        return new { success = true, message = "Deal submitted. Proceed to offer request summary.", offerRequestId = offer.Id, deal = dealService.ToDetail(deal) };
     }
 
     /// <summary>
@@ -435,8 +435,8 @@ public class DealsController(
         history.Log(deal, "Engagement", $"Engagement submitted — {message}", $"Status set to {status}.");
         audit.LogDeal(deal, "Engagement", "Engagement submitted", $"{message} Status set to {status}.");
         store.SaveDeals();
-        offerRequests.Record(deal);
-        return new { success = true, message, status, deal = dealService.ToDetail(deal) };
+        var offer = offerRequests.Record(deal);
+        return new { success = true, message, status, offerRequestId = offer.Id, deal = dealService.ToDetail(deal) };
     }
 
     private static (string status, string message) ResolveSubmitOutcome(string engagementType) => engagementType switch

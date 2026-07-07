@@ -24,22 +24,29 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
     {
         deal.Approvals ??= new ApprovalData();
         var fp = BuildPricingFingerprint(deal);
-        if (deal.Approvals.Steps.Count == 0)
+        var firstTime = deal.Approvals.Steps.Count == 0;
+        if (firstTime)
         {
             deal.Approvals.PricingFingerprint = fp;
             deal.Approvals.Version = "V1.0";
             deal.Approvals.LastUpdatedAt = Now();
             deal.Approvals.LastUpdatedBy = DefaultUser;
-            RebuildPlan(deal);
-            GenerateDocuments(deal, isRegeneration: false);
-            LogAudit(deal, "Approval", "Approval plan initialized", "Required approval steps generated from deal rules.", DefaultUser);
         }
         else if (deal.Approvals.PricingFingerprint != fp)
         {
             HandlePricingChange(deal, fp);
         }
 
-        RefreshRuleMatches(deal);
+        // Always reconcile the steps with the rules that currently match (e.g. add Finance Review
+        // when the discount crosses the threshold, or drop it when it no longer applies).
+        ReconcileSteps(deal);
+
+        if (firstTime)
+        {
+            GenerateDocuments(deal, isRegeneration: false);
+            LogAudit(deal, "Approval", "Approval plan initialized", "Required approval steps generated from deal rules.", DefaultUser);
+        }
+
         if (!deal.Approvals.DocumentsLocked)
         {
             var ts = string.IsNullOrWhiteSpace(deal.Approvals.LastUpdatedAt) ? Now() : deal.Approvals.LastUpdatedAt;
@@ -258,40 +265,72 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
         return required.Count > 0 && required.All(s => s.Status == "Approved");
     }
 
-    private void RebuildPlan(Deal deal)
+    /// <summary>
+    /// Reconcile the approval steps with the rules that currently match: add a reviewer step for
+    /// each newly-matched rule (e.g. Finance Review once a discount exceeds the threshold), drop
+    /// steps whose rule no longer matches (or was disabled), refresh titles/reasons, and keep the
+    /// EULA step last. Existing step status and comments are preserved.
+    /// </summary>
+    private void ReconcileSteps(Deal deal)
     {
         var rules = EvaluateRules(deal);
         deal.Approvals!.RuleMatches = rules;
-        var steps = new List<ApprovalStep>();
-        var order = 1;
+        var matched = rules.Where(r => r.Matched).ToList();
+        var steps = deal.Approvals.Steps;
+        var hadReviewerSteps = steps.Any(s => s.Id != "eula");
 
-        // One reviewer step per matched rule, in the order the rules are configured in Settings.
-        foreach (var rule in rules.Where(r => r.Matched))
+        // Drop reviewer steps whose rule no longer matches (keep the EULA step).
+        steps.RemoveAll(s => s.Id != "eula" && matched.All(m => !string.Equals(m.Id, s.Id, StringComparison.OrdinalIgnoreCase)));
+
+        // Add or refresh a reviewer step per matched rule.
+        var addedReviewer = false;
+        foreach (var rule in matched)
         {
-            steps.Add(new ApprovalStep
+            var step = steps.FirstOrDefault(s => string.Equals(s.Id, rule.Id, StringComparison.OrdinalIgnoreCase));
+            if (step is null)
             {
-                Id = rule.Id,
-                Order = order++,
-                Title = string.IsNullOrWhiteSpace(rule.Title) ? rule.Id : rule.Title,
-                Assignee = string.IsNullOrWhiteSpace(rule.Assignee) ? "Unassigned" : rule.Assignee,
-                Status = "Pending",
-                RuleReason = rule.Reason
-            });
+                steps.Add(new ApprovalStep
+                {
+                    Id = rule.Id,
+                    Title = string.IsNullOrWhiteSpace(rule.Title) ? rule.Id : rule.Title,
+                    Assignee = string.IsNullOrWhiteSpace(rule.Assignee) ? "Unassigned" : rule.Assignee,
+                    Status = "Pending",
+                    RuleReason = rule.Reason
+                });
+                if (hadReviewerSteps) addedReviewer = true; // newly required after the plan already existed
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(rule.Title)) step.Title = rule.Title;
+                if (!string.IsNullOrWhiteSpace(rule.Assignee)) step.Assignee = rule.Assignee;
+                step.RuleReason = rule.Reason;
+            }
         }
 
-        steps.Add(new ApprovalStep
+        // Ensure the EULA / final-package step exists and is last.
+        var eula = steps.FirstOrDefault(s => s.Id == "eula");
+        if (eula is null)
         {
-            Id = "eula",
-            Order = order,
-            Title = "Generate EULA & Final Package",
-            Assignee = "System",
-            Status = "Pending",
-            RuleReason = IsNoMoneyDeal(deal)
-                ? ConsumptionNoteText
-                : "Auto-triggered after all approvals complete."
-        });
+            eula = new ApprovalStep { Id = "eula", Title = "Generate EULA & Final Package", Assignee = "System", Status = "Pending" };
+            steps.Add(eula);
+        }
+        eula.RuleReason = IsNoMoneyDeal(deal) ? ConsumptionNoteText : "Auto-triggered after all approvals complete.";
 
-        deal.Approvals.Steps = steps;
+        // Order: reviewer steps in rule order, then the EULA step.
+        var ordered = matched
+            .Select(m => steps.First(s => string.Equals(s.Id, m.Id, StringComparison.OrdinalIgnoreCase)))
+            .Append(eula)
+            .ToList();
+        for (var i = 0; i < ordered.Count; i++) ordered[i].Order = i + 1;
+        deal.Approvals.Steps = ordered;
+
+        // A new reviewer rule that started matching after approvals were underway needs review.
+        if (addedReviewer)
+        {
+            deal.Approvals.ChangesPendingReapproval = true;
+            if (string.IsNullOrWhiteSpace(deal.Approvals.ChangeSummary))
+                deal.Approvals.ChangeSummary = "A new approval rule now applies — please review the added step.";
+        }
     }
 
     /// <summary>
@@ -369,16 +408,6 @@ public class ApprovalService(IDealHistoryService history, IApprovalDocumentServi
         return matches;
     }
 
-    private void RefreshRuleMatches(Deal deal)
-    {
-        var rules = EvaluateRules(deal);
-        deal.Approvals!.RuleMatches = rules;
-        foreach (var step in deal.Approvals.Steps)
-        {
-            var rule = rules.FirstOrDefault(r => r.Id == step.Id);
-            if (rule != null) step.RuleReason = rule.Reason;
-        }
-    }
 
     private void GenerateDocuments(Deal deal, bool isRegeneration)
     {

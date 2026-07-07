@@ -1,0 +1,58 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">My Requests</h1>
+    <p class="page-subtitle">Track the status of every engagement request you've submitted.</p>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="newRequest()">+ New Request</button>
+</div>
+
+<section class="card section-card">
+  <label class="toolbar-field">
+    Search
+    <input type="search" [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Request ID, type, marketplace, status…" />
+  </label>
+
+  @if (loading) {
+    <p class="hint">Loading your requests…</p>
+  } @else if (!filtered.length) {
+    <div class="empty-state">
+      <span class="empty-icon">📭</span>
+      <h3>No requests yet</h3>
+      <p>Submit a new engagement request to get started.</p>
+      <button type="button" class="btn btn-primary" (click)="newRequest()">+ New Request</button>
+    </div>
+  } @else {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Request ID</th>
+          <th>Type</th>
+          <th>Marketplace</th>
+          <th>Products</th>
+          <th>Status</th>
+          <th>Submitted</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of pageItems; track r.id) {
+          <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.requestType }}</td>
+            <td>{{ r.marketplace }}</td>
+            <td>{{ r.productIds?.length || 0 }} product(s)</td>
+            <td><span class="badge" [class]="statusClass(r.status)">{{ r.status }}</span></td>
+            <td>{{ r.createdAt }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalPageCount > 1) {
+      <div class="pagination">
+        <button type="button" class="btn btn-outline btn-sm" [disabled]="page <= 1" (click)="page = page - 1">← Prev</button>
+        <span>Page {{ page }} of {{ totalPageCount }}</span>
+        <button type="button" class="btn btn-outline btn-sm" [disabled]="page >= totalPageCount" (click)="page = page + 1">Next →</button>
+      </div>
+    }
+  }
+</section>

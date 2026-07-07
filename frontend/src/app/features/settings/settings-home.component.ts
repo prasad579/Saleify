@@ -24,6 +24,12 @@ export class SettingsHomeComponent {
       description: 'Choose which cards appear on the home page — stats, insights, tags, open engagements, recent activity, tasks, and reminders.'
     },
     {
+      path: '/settings/alerts',
+      icon: '🔔',
+      title: 'Alerts & Reminders',
+      description: 'Turn the home “needs attention” alert and “upcoming” card on or off, set how many days ahead to look, and choose which items count.'
+    },
+    {
       path: '/settings/engagement-types',
       icon: '🧭',
       title: 'Engagement Types',

@@ -61,6 +61,21 @@ export class LoginComponent implements OnInit {
     });
   }
 
+  customerDemoLogin() {
+    this.error = '';
+    this.loading = true;
+    this.email = 'customer@acme.com';
+    this.password = 'customer123';
+    this.api.login({ email: this.email, password: this.password }).subscribe({
+      next: (res) => this.finishLogin(res),
+      error: () => {
+        this.auth.customerDemoLogin(this.email);
+        this.loading = false;
+        void this.router.navigate(['/portal/requests']);
+      }
+    });
+  }
+
   googleLogin() {
     if (!this.googleEnabled) {
       this.error = 'Google Sign-In is not configured yet. Use Demo Login or email/password.';
@@ -109,15 +124,17 @@ export class LoginComponent implements OnInit {
       if (res.status === 'awaiting_role') void this.router.navigate(['/signup/awaiting-role']);
       return;
     }
+    const role = res?.role || 'Sales Representative';
     this.auth.login(
       res?.email || this.email,
       this.password,
       res?.name || this.email.split('@')[0] || 'Demo User',
-      res?.role || 'Sales Representative',
+      role,
       res?.token || 'demo-token',
       res?.status || 'approved',
-      res?.provider || 'local'
+      res?.provider || 'local',
+      res?.company || ''
     );
-    void this.router.navigate(['/home']);
+    void this.router.navigate([role === 'Customer' ? '/portal/requests' : '/home']);
   }
 }

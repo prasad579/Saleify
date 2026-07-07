@@ -10,14 +10,15 @@ export interface UserSession {
   token: string;
   status: AuthStatus;
   provider?: string;
+  company?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   user = signal<UserSession | null>(this.load());
 
-  login(email: string, _password: string, name = 'Srinivas K', role = 'Sales Representative', token = 'demo-token', status: AuthStatus = 'approved', provider = 'local') {
-    this.setSession({ name, email, role, token, status, provider });
+  login(email: string, _password: string, name = 'Srinivas K', role = 'Sales Representative', token = 'demo-token', status: AuthStatus = 'approved', provider = 'local', company = '') {
+    this.setSession({ name, email, role, token, status, provider, company });
   }
 
   oauthLogin(token: string, email: string, name: string, role: string, provider: string, status: AuthStatus = 'approved') {
@@ -67,6 +68,18 @@ export class AuthService {
     });
   }
 
+  customerDemoLogin(email = 'customer@acme.com') {
+    this.setSession({
+      name: 'John Ramesh',
+      email,
+      role: 'Customer',
+      token: 'demo-local-session',
+      status: 'approved',
+      provider: 'local',
+      company: 'Acme Corporation'
+    });
+  }
+
   isLoggedIn() {
     return !!this.user();
   }
@@ -77,6 +90,10 @@ export class AuthService {
 
   private setSession(session: UserSession) {
     localStorage.setItem('mc_user', JSON.stringify(session));
+    // A fresh approved sign-in re-shows the home "needs attention" alert (dismissal is per-login).
+    if (session.status === 'approved') {
+      try { localStorage.removeItem('mc_home_alert_dismissed'); } catch { /* ignore */ }
+    }
     this.user.set(session);
   }
 
@@ -95,7 +112,8 @@ export class AuthService {
         role: parsed.role ?? '',
         token: parsed.token ?? '',
         status: parsed.status || 'approved',
-        provider: parsed.provider
+        provider: parsed.provider,
+        company: parsed.company
       };
     } catch {
       localStorage.removeItem('mc_user');

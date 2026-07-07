@@ -1,0 +1,46 @@
+[
+  {
+    "id": "ER-4002",
+    "requestType": "Free Trial",
+    "marketplace": "AWS",
+    "productIds": [
+      "prod-1"
+    ],
+    "expectedStartDate": "2026-07-13",
+    "expectedDuration": "1 Month",
+    "estimatedUsers": "1\u201310",
+    "businessNeed": "",
+    "budgetRange": "Under $10,000",
+    "otherRequirements": "",
+    "contactPreference": "Email",
+    "preferredTimeToContact": "",
+    "attachmentNames": [],
+    "status": "Submitted",
+    "customerName": "John Ramesh",
+    "customerEmail": "customer@acme.com",
+    "companyName": "Acme Corporation",
+    "createdAt": "2026-07-06 16:58:43 UTC"
+  },
+  {
+    "id": "ER-4001",
+    "requestType": "Private Offer",
+    "marketplace": "AWS",
+    "productIds": [
+      "prod-1"
+    ],
+    "expectedStartDate": "2026-08-01",
+    "expectedDuration": "1 Year",
+    "estimatedUsers": "51-200",
+    "businessNeed": "Need a private offer for onboarding automation.",
+    "budgetRange": "$50,000 - $150,000",
+    "otherRequirements": "",
+    "contactPreference": "Email",
+    "preferredTimeToContact": "Morning (9am - 12pm)",
+    "attachmentNames": [],
+    "status": "Submitted",
+    "customerName": "John Ramesh",
+    "customerEmail": "customer@acme.com",
+    "companyName": "Acme Corporation",
+    "createdAt": "2026-07-06 16:51:13 UTC"
+  }
+]

@@ -1,0 +1,9 @@
+{
+  "alertEnabled": true,
+  "upcomingEnabled": true,
+  "upcomingWindowDays": 3,
+  "includeTasks": true,
+  "includeReminders": true,
+  "includeEngagements": true,
+  "updatedAt": "2026-06-26 08:58 UTC"
+}

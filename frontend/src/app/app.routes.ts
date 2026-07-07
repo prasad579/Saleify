@@ -24,11 +24,15 @@ import { ApprovalSettingsComponent } from '@features/approval-settings/approval-
 import { PeopleSettingsComponent } from '@features/people-settings/people-settings.component';
 import { EngagementTypesComponent } from '@features/engagement-types/engagement-types.component';
 import { HomeSettingsComponent } from '@features/home-settings/home-settings.component';
+import { AttentionSettingsComponent } from '@features/attention-settings/attention-settings.component';
 import { AuditLogComponent } from '@features/audit-log/audit-log.component';
 import { OfferRequestsComponent } from '@features/offer-requests/offer-requests.component';
 import { OfferRequestDetailComponent } from '@features/offer-request-detail/offer-request-detail.component';
 import { SettingsHomeComponent } from '@features/settings/settings-home.component';
-import { authGuard, guestGuard } from '@core/guards/auth.guard';
+import { CustomerShellComponent } from '@layout/customer-shell/customer-shell.component';
+import { EngagementRequestNewComponent } from '@features/customer-portal/engagement-request-new.component';
+import { EngagementRequestsListComponent } from '@features/customer-portal/engagement-requests-list.component';
+import { authGuard, guestGuard, customerGuard } from '@core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -55,6 +59,7 @@ export const routes: Routes = [
       { path: 'settings/approvals', component: ApprovalSettingsComponent },
       { path: 'settings/engagement-types', component: EngagementTypesComponent },
       { path: 'settings/home', component: HomeSettingsComponent },
+      { path: 'settings/alerts', component: AttentionSettingsComponent },
       { path: 'settings/people', component: PeopleSettingsComponent },
       { path: 'offer-requests', component: OfferRequestsComponent },
       { path: 'offer-requests/:id', component: OfferRequestDetailComponent },
@@ -67,6 +72,16 @@ export const routes: Routes = [
       { path: 'deals/:id/meeting-notes', component: DealMeetingNotesComponent },
       { path: 'deals/:id/approvals', component: DealApprovalsComponent },
       { path: 'deals/:id', component: DealOverviewComponent },
+    ]
+  },
+  {
+    path: 'portal',
+    component: CustomerShellComponent,
+    canActivate: [customerGuard],
+    children: [
+      { path: '', redirectTo: 'requests', pathMatch: 'full' },
+      { path: 'requests', component: EngagementRequestsListComponent },
+      { path: 'requests/new', component: EngagementRequestNewComponent },
     ]
   },
   { path: '**', redirectTo: 'login' }

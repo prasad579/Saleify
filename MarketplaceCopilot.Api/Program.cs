@@ -29,6 +29,7 @@ builder.Services.AddSingleton<IApprovalService, ApprovalService>();
 builder.Services.AddSingleton<IDealService, DealService>();
 builder.Services.AddSingleton<IOfferRequestService, OfferRequestService>();
 builder.Services.AddSingleton<ISnapshotService, SnapshotService>();
+builder.Services.AddSingleton<IEngagementRequestService, EngagementRequestService>();
 
 var authSection = builder.Configuration.GetSection("Auth");
 var frontendUrl = authSection["FrontendUrl"] ?? "http://localhost:4200";
@@ -90,6 +91,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.Services.GetRequiredService<UserStore>().EnsureSeeded();
+app.Services.GetRequiredService<UserStore>().EnsureCustomerDemoSeeded();
 
 if (app.Environment.IsDevelopment())
 {

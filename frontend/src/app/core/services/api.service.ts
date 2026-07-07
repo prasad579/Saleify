@@ -13,6 +13,7 @@ import { Person } from '@shared/data/lookups';
 import { ApprovalRulesSettings } from '@shared/data/approval-settings.model';
 import { EngagementTypeSettings } from '@shared/data/engagement-types.model';
 import { HomeSettings } from '@shared/data/home-settings.model';
+import { AttentionSettings } from '@shared/data/attention-settings.model';
 import { AuditLogPage } from '@shared/data/audit.model';
 import { OfferRequest, CaptureResponseRequest } from '@shared/data/offer-request.model';
 
@@ -104,6 +105,11 @@ export class ApiService {
   saveHomeSettings(settings: HomeSettings) { return this.http.put<HomeSettings>(`${this.base}/home-settings`, settings); }
   resetHomeSettings() { return this.http.post<HomeSettings>(`${this.base}/home-settings/reset`, {}); }
 
+  // Alerts & reminders (home attention alert + upcoming card)
+  getAttentionSettings() { return this.http.get<AttentionSettings>(`${this.base}/attention-settings`); }
+  saveAttentionSettings(settings: AttentionSettings) { return this.http.put<AttentionSettings>(`${this.base}/attention-settings`, settings); }
+  resetAttentionSettings() { return this.http.post<AttentionSettings>(`${this.base}/attention-settings/reset`, {}); }
+
   // Offer requests (engagements pushed to a destination + responses)
   getOfferRequests() { return this.http.get<OfferRequest[]>(`${this.base}/offer-requests`); }
   getOfferRequest(id: string) { return this.http.get<OfferRequest>(`${this.base}/offer-requests/${id}`); }
@@ -127,6 +133,16 @@ export class ApiService {
   getPlaybooks() { return this.http.get(`${this.base}/engagement-playbooks`); }
   savePlaybook(playbook: unknown) { return this.http.put(`${this.base}/engagement-playbooks`, playbook); }
   resetPlaybooks() { return this.http.post(`${this.base}/engagement-playbooks/reset`, {}); }
+
+  // Engagement requests (Customer Portal — requests submitted by customers)
+  getMyEngagementRequests(customerEmail: string) {
+    return this.http.get<any[]>(`${this.base}/engagement-requests?customerEmail=${encodeURIComponent(customerEmail)}`);
+  }
+  getEngagementRequest(id: string) { return this.http.get<any>(`${this.base}/engagement-requests/${id}`); }
+  createEngagementRequest(payload: unknown, customerEmail: string, customerName: string, companyName: string) {
+    const q = new URLSearchParams({ customerEmail, customerName, companyName }).toString();
+    return this.http.post<any>(`${this.base}/engagement-requests?${q}`, payload);
+  }
 
   login(body: { email: string; password: string }) { return this.http.post(`${this.base}/auth/login`, body); }
   signup(body: { email: string; password: string; fullName: string }) { return this.http.post(`${this.base}/auth/signup`, body); }

@@ -89,7 +89,8 @@ public class AuthController(IConfiguration config, UserStore users, IWebHostEnvi
         Name = user.Name,
         Email = user.Email,
         Status = user.Status,
-        Provider = user.Provider
+        Provider = user.Provider,
+        Company = user.Company
     };
 
     [HttpPost("verify-email")]

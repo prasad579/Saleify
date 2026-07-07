@@ -21,8 +21,10 @@ public class DataStore
     private readonly string _peopleFilePath;
     private readonly string _engagementTypesFilePath;
     private readonly string _homeSettingsFilePath;
+    private readonly string _attentionSettingsFilePath;
     private readonly string _offerRequestsFilePath;
     private readonly string _auditLogFilePath;
+    private readonly string _engagementRequestsFilePath;
 
     public List<Deal> Deals { get; private set; } = [];
     public List<CampaignEvent> CampaignEvents { get; private set; } = [];
@@ -32,8 +34,10 @@ public class DataStore
     public List<Person> People { get; private set; } = [];
     public EngagementTypeSettings EngagementTypeSettings { get; private set; } = new();
     public HomeSettings HomeSettings { get; private set; } = new();
+    public AttentionSettings AttentionSettings { get; private set; } = new();
     public List<OfferRequest> OfferRequests { get; private set; } = [];
     public List<AuditEntry> AuditLog { get; private set; } = [];
+    public List<EngagementRequest> EngagementRequests { get; private set; } = [];
 
     /// <summary>Keep the audit log bounded so the JSON file and memory footprint stay reasonable.</summary>
     private const int MaxAuditEntries = 2000;
@@ -86,8 +90,10 @@ public class DataStore
         _peopleFilePath = Path.Combine(dataDir, "people.json");
         _engagementTypesFilePath = Path.Combine(dataDir, "engagement-types.json");
         _homeSettingsFilePath = Path.Combine(dataDir, "home-settings.json");
+        _attentionSettingsFilePath = Path.Combine(dataDir, "attention-settings.json");
         _offerRequestsFilePath = Path.Combine(dataDir, "offer-requests.json");
         _auditLogFilePath = Path.Combine(dataDir, "audit-log.json");
+        _engagementRequestsFilePath = Path.Combine(dataDir, "engagement-requests.json");
         LoadDeals();
         LoadCampaignEvents();
         LoadPlaybooks();
@@ -96,8 +102,40 @@ public class DataStore
         LoadPeople();
         LoadEngagementTypes();
         LoadHomeSettings();
+        LoadAttentionSettings();
         LoadOfferRequests();
         LoadAuditLog();
+        LoadEngagementRequests();
+    }
+
+    public string NextEngagementRequestId()
+    {
+        var max = EngagementRequests
+            .Select(r => int.TryParse(r.Id.Replace("ER-", "", StringComparison.OrdinalIgnoreCase), out var n) ? n : 4000)
+            .DefaultIfEmpty(4000)
+            .Max();
+        return $"ER-{max + 1}";
+    }
+
+    public void SaveEngagementRequests() =>
+        File.WriteAllText(_engagementRequestsFilePath, JsonSerializer.Serialize(EngagementRequests, JsonOptions));
+
+    private void LoadEngagementRequests()
+    {
+        if (!File.Exists(_engagementRequestsFilePath))
+        {
+            EngagementRequests = [];
+            return;
+        }
+        try
+        {
+            var loaded = JsonSerializer.Deserialize<List<EngagementRequest>>(File.ReadAllText(_engagementRequestsFilePath), JsonOptions);
+            EngagementRequests = loaded ?? [];
+        }
+        catch
+        {
+            EngagementRequests = [];
+        }
     }
 
     public string NextOfferRequestId()
@@ -482,6 +520,55 @@ public class DataStore
             new() { Key = "reminders",      Label = "Today's Reminders",  Description = "Upcoming and overdue reminders.", Enabled = true }
         ]
     };
+
+    // ---------------- Attention / alert settings ----------------
+
+    public void SaveAttentionSettings()
+    {
+        AttentionSettings.UpdatedAt = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm") + " UTC";
+        File.WriteAllText(_attentionSettingsFilePath, JsonSerializer.Serialize(AttentionSettings, JsonOptions));
+    }
+
+    public void ResetAttentionSettings()
+    {
+        AttentionSettings = new AttentionSettings();
+        SaveAttentionSettings();
+    }
+
+    public void ApplyAttentionSettings(AttentionSettings incoming)
+    {
+        AttentionSettings = new AttentionSettings
+        {
+            AlertEnabled = incoming.AlertEnabled,
+            UpcomingEnabled = incoming.UpcomingEnabled,
+            UpcomingWindowDays = Math.Clamp(incoming.UpcomingWindowDays <= 0 ? 7 : incoming.UpcomingWindowDays, 1, 30),
+            IncludeTasks = incoming.IncludeTasks,
+            IncludeReminders = incoming.IncludeReminders,
+            IncludeEngagements = incoming.IncludeEngagements
+        };
+        SaveAttentionSettings();
+    }
+
+    private void LoadAttentionSettings()
+    {
+        if (!File.Exists(_attentionSettingsFilePath))
+        {
+            AttentionSettings = new AttentionSettings();
+            SaveAttentionSettings();
+            return;
+        }
+        try
+        {
+            var loaded = JsonSerializer.Deserialize<AttentionSettings>(File.ReadAllText(_attentionSettingsFilePath), JsonOptions);
+            AttentionSettings = loaded ?? new AttentionSettings();
+            if (AttentionSettings.UpcomingWindowDays <= 0) AttentionSettings.UpcomingWindowDays = 7;
+        }
+        catch
+        {
+            AttentionSettings = new AttentionSettings();
+            SaveAttentionSettings();
+        }
+    }
 
     // ---------------- Global audit log ----------------
 

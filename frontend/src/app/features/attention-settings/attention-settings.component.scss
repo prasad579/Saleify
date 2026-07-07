@@ -1,0 +1,55 @@
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.setting-card { margin-bottom: 16px; }
+.setting-card h3 { margin: 0 0 4px; }
+.hint { color: var(--muted); font-size: 13px; margin: 0 0 12px; }
+
+.toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+  &:first-of-type { border-top: none; }
+
+  input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; flex: 0 0 auto; }
+}
+.toggle-text strong { font-size: 14px; }
+.toggle-text p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+
+.window-field select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 14px;
+  background: #fff;
+  min-width: 140px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  input[type="checkbox"] { width: 17px; height: 17px; }
+}
+
+.save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 8px;
+  .updated { color: var(--muted); font-size: 12px; }
+}
