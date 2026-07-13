@@ -8,7 +8,7 @@ import { AuthService } from '@core/services/auth.service';
   template: `
     <div class="center-card">
       <div class="icon">🎉</div>
-      <h2>Welcome to Saleify!</h2>
+      <h2>Welcome to SaaSify!</h2>
       <p>Your role has been assigned.</p>
       <div class="role-badge">Role: {{ auth.user()?.role }}</div>
       <button class="btn btn-primary full" (click)="go()">Go to Dashboard →</button>

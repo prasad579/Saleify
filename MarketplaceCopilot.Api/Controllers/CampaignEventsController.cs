@@ -7,7 +7,7 @@ namespace MarketplaceCopilot.Api.Controllers;
 
 [ApiController]
 [Route("api/campaign-events")]
-public class CampaignEventsController(DataStore store, IAuditService audit) : ControllerBase
+public class CampaignEventsController(DataStore store, IAuditService audit, ITenantAccessor tenant) : ControllerBase
 {
     /// <summary>Engagement types used for the conversion funnel, in funnel order.</summary>
     private static readonly string[] EngagementOrder =
@@ -97,7 +97,7 @@ public class CampaignEventsController(DataStore store, IAuditService audit) : Co
         var ev = store.CampaignEvents.FirstOrDefault(e => e.Id == id);
         if (ev is null) return NotFound();
 
-        var deals = store.Deals.Where(d => d.CampaignEventId == id).ToList();
+        var deals = store.Deals.Where(d => d.CampaignEventId == id && d.TenantId == tenant.TenantId).ToList();
         var funnel = new ConversionFunnel
         {
             EventId = ev.Id,

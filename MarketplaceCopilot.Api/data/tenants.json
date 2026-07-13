@@ -1,0 +1,70 @@
+[
+  {
+    "id": "TEN-1",
+    "name": "SaaSify",
+    "createdAt": "2026-07-12",
+    "connections": [
+      {
+        "cloud": "AWS",
+        "status": "Connected",
+        "sellerLabel": "afae1e1f-010f-4da3-8943-c91e04467381",
+        "connectedAt": "2026-07-12",
+        "lastSyncedAt": "2026-07-12",
+        "productCount": 6,
+        "lastError": ""
+      },
+      {
+        "cloud": "Azure",
+        "status": "Connected",
+        "sellerLabel": "spektra.saas-enablement-for-amp",
+        "connectedAt": "2026-07-12",
+        "lastSyncedAt": "2026-07-12 12:11:17 UTC",
+        "productCount": 4,
+        "lastError": ""
+      },
+      {
+        "cloud": "GCP",
+        "status": "Not Connected",
+        "sellerLabel": "",
+        "connectedAt": "2026-07-12 12:05:36 UTC",
+        "lastSyncedAt": "2026-07-12 12:05:37 UTC",
+        "productCount": 0,
+        "lastError": ""
+      }
+    ]
+  },
+  {
+    "id": "TEN-2",
+    "name": "Northwind Cloud Solutions",
+    "createdAt": "2026-07-12",
+    "connections": [
+      {
+        "cloud": "GCP",
+        "status": "Connected",
+        "sellerLabel": "northwind-gcp-seller",
+        "connectedAt": "2026-07-12",
+        "lastSyncedAt": "2026-07-12",
+        "productCount": 3,
+        "lastError": ""
+      },
+      {
+        "cloud": "AWS",
+        "status": "Not Connected",
+        "sellerLabel": "",
+        "connectedAt": "",
+        "lastSyncedAt": "",
+        "productCount": 0,
+        "lastError": ""
+      },
+      {
+        "cloud": "Azure",
+        "status": "Not Connected",
+        "sellerLabel": "",
+        "connectedAt": "",
+        "lastSyncedAt": "",
+        "productCount": 0,
+        "lastError": ""
+      }
+    ]
+  }
+]

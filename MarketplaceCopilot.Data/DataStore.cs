@@ -25,6 +25,8 @@ public class DataStore
     private readonly string _offerRequestsFilePath;
     private readonly string _auditLogFilePath;
     private readonly string _engagementRequestsFilePath;
+    private readonly string _tenantsFilePath;
+    private readonly string _productsFilePath;
 
     public List<Deal> Deals { get; private set; } = [];
     public List<CampaignEvent> CampaignEvents { get; private set; } = [];
@@ -38,45 +40,11 @@ public class DataStore
     public List<OfferRequest> OfferRequests { get; private set; } = [];
     public List<AuditEntry> AuditLog { get; private set; } = [];
     public List<EngagementRequest> EngagementRequests { get; private set; } = [];
+    public List<Tenant> Tenants { get; private set; } = [];
+    public List<Product> Products { get; private set; } = [];
 
     /// <summary>Keep the audit log bounded so the JSON file and memory footprint stay reasonable.</summary>
     private const int MaxAuditEntries = 2000;
-
-    public List<Product> Products { get; } =
-    [
-        new()
-        {
-            Id = "prod-1",
-            Name = "SaaSify AI Agent – Azure Marketplace Onboarding",
-            Description = "AI-powered onboarding assistant for Azure Marketplace listings.",
-            Marketplaces = ["Azure", "AWS"],
-            ListPricePerYear = 120000
-        },
-        new()
-        {
-            Id = "prod-2",
-            Name = "SaaSify Contract Intelligence",
-            Description = "Automate contract review and compliance checks.",
-            Marketplaces = ["Azure", "GCP"],
-            ListPricePerYear = 95000
-        },
-        new()
-        {
-            Id = "prod-3",
-            Name = "CloudLabs Training Suite",
-            Description = "Hands-on cloud training labs for enterprise teams.",
-            Marketplaces = ["AWS", "Azure", "GCP"],
-            ListPricePerYear = 75000
-        },
-        new()
-        {
-            Id = "prod-4",
-            Name = "C3 Analytics Platform",
-            Description = "Enterprise analytics and reporting for marketplace deals.",
-            Marketplaces = ["Azure"],
-            ListPricePerYear = 110000
-        }
-    ];
 
     public DataStore(IHostEnvironment env)
     {
@@ -94,6 +62,10 @@ public class DataStore
         _offerRequestsFilePath = Path.Combine(dataDir, "offer-requests.json");
         _auditLogFilePath = Path.Combine(dataDir, "audit-log.json");
         _engagementRequestsFilePath = Path.Combine(dataDir, "engagement-requests.json");
+        _tenantsFilePath = Path.Combine(dataDir, "tenants.json");
+        _productsFilePath = Path.Combine(dataDir, "products.json");
+        LoadTenants();
+        LoadProducts();
         LoadDeals();
         LoadCampaignEvents();
         LoadPlaybooks();
@@ -107,6 +79,249 @@ public class DataStore
         LoadAuditLog();
         LoadEngagementRequests();
     }
+
+    // ---------------- Tenants ----------------
+
+    public string NextTenantId()
+    {
+        var max = Tenants
+            .Select(t => int.TryParse(t.Id.Replace("TEN-", "", StringComparison.OrdinalIgnoreCase), out var n) ? n : 0)
+            .DefaultIfEmpty(0)
+            .Max();
+        return $"TEN-{max + 1}";
+    }
+
+    public void SaveTenants() =>
+        File.WriteAllText(_tenantsFilePath, JsonSerializer.Serialize(Tenants, JsonOptions));
+
+    private void LoadTenants()
+    {
+        if (!File.Exists(_tenantsFilePath))
+        {
+            Tenants = CreateSeedTenants();
+            SaveTenants();
+            return;
+        }
+        try
+        {
+            var loaded = JsonSerializer.Deserialize<List<Tenant>>(File.ReadAllText(_tenantsFilePath), JsonOptions);
+            Tenants = loaded is { Count: > 0 } ? loaded : CreateSeedTenants();
+        }
+        catch
+        {
+            Tenants = CreateSeedTenants();
+            SaveTenants();
+        }
+    }
+
+    /// <summary>
+    /// Two tenants are seeded (not one) so cross-tenant isolation is actually demonstrable: SaaSify
+    /// (pre-connected to AWS + Azure, matching the real products already sourced from those
+    /// marketplaces) and Northwind Cloud Solutions (a distinct demo tenant, pre-connected to GCP
+    /// only, with its own connector-generated catalog).
+    /// </summary>
+    private static List<Tenant> CreateSeedTenants()
+    {
+        var today = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
+        return
+        [
+            new()
+            {
+                Id = Tenant.DefaultTenantId,
+                Name = "SaaSify",
+                CreatedAt = today,
+                Connections =
+                [
+                    new() { Cloud = "AWS", Status = "Connected", SellerLabel = "afae1e1f-010f-4da3-8943-c91e04467381", ConnectedAt = today, LastSyncedAt = today, ProductCount = 6 },
+                    new() { Cloud = "Azure", Status = "Connected", SellerLabel = "spektra.saas-enablement-for-amp", ConnectedAt = today, LastSyncedAt = today, ProductCount = 5 },
+                    new() { Cloud = "GCP", Status = "Not Connected" }
+                ]
+            },
+            new()
+            {
+                Id = "TEN-2",
+                Name = "Northwind Cloud Solutions",
+                CreatedAt = today,
+                Connections =
+                [
+                    new() { Cloud = "GCP", Status = "Connected", SellerLabel = "northwind-gcp-seller", ConnectedAt = today, LastSyncedAt = today, ProductCount = 3 },
+                    new() { Cloud = "AWS", Status = "Not Connected" },
+                    new() { Cloud = "Azure", Status = "Not Connected" }
+                ]
+            }
+        ];
+    }
+
+    // ---------------- Products ----------------
+
+    public string NextProductId()
+    {
+        var max = Products
+            .Select(p => int.TryParse(p.Id.Replace("prod-", "", StringComparison.OrdinalIgnoreCase), out var n) ? n : 0)
+            .DefaultIfEmpty(0)
+            .Max();
+        return $"prod-{max + 1}";
+    }
+
+    public void SaveProducts() =>
+        File.WriteAllText(_productsFilePath, JsonSerializer.Serialize(Products, JsonOptions));
+
+    private void LoadProducts()
+    {
+        if (!File.Exists(_productsFilePath))
+        {
+            Products = CreateSeedProducts();
+            SaveProducts();
+            return;
+        }
+        try
+        {
+            var loaded = JsonSerializer.Deserialize<List<Product>>(File.ReadAllText(_productsFilePath), JsonOptions);
+            Products = loaded is { Count: > 0 } ? loaded : CreateSeedProducts();
+        }
+        catch
+        {
+            Products = CreateSeedProducts();
+            SaveProducts();
+        }
+    }
+
+    /// <summary>
+    /// SaaSify's (TEN-1) products are its real marketplace listings:
+    /// AWS:   https://aws.amazon.com/marketplace/search/results?searchTerms=saasify&CREATOR=afae1e1f-010f-4da3-8943-c91e04467381&filters=CREATOR
+    /// Azure: https://marketplace.microsoft.com/en-us/search/products?search=spektra&page=1&product=saas
+    /// Northwind's (TEN-2) products mirror what GcpMockConnector would generate for that tenant name —
+    /// seeded directly here so first boot doesn't require an extra startup sync call.
+    /// </summary>
+    private static List<Product> CreateSeedProducts() =>
+    [
+        new()
+        {
+            Id = "prod-1", TenantId = Tenant.DefaultTenantId, Cloud = "AWS", ExternalId = "prod-1",
+            Name = "SaaSify Cloud GTM Platform",
+            Description = "Single integrated platform to list and manage the full lifecycle of SaaS solutions across AWS, Azure, and GCP marketplaces — offer management, subscription lifecycle, smart metering, and analytics, with white-glove onboarding.",
+            Marketplaces = ["AWS", "Azure", "GCP"],
+            ListPricePerYear = 120000,
+            BillingModel = "Subscription (Contract)"
+        },
+        new()
+        {
+            Id = "prod-2", TenantId = Tenant.DefaultTenantId, Cloud = "AWS", ExternalId = "prod-2",
+            Name = "SaaSify Cloud GTM Platform for Startups",
+            Description = "Right-sized edition of the Cloud GTM Platform for early-stage vendors — unlimited listings, up to 25 private offers, and white-glove onboarding to go live within 1-2 weeks.",
+            Marketplaces = ["AWS", "Azure", "GCP"],
+            ListPricePerYear = 5000,
+            BillingModel = "Subscription (Contract)"
+        },
+        new()
+        {
+            Id = "prod-3", TenantId = Tenant.DefaultTenantId, Cloud = "AWS", ExternalId = "prod-3",
+            Name = "SaaSify AWS ACE Connector for Salesforce",
+            Description = "No-code, bi-directional sync between Salesforce CRM and the AWS Partner Network's ACE co-sell pipeline — eliminates manual data entry with real-time opportunity status updates.",
+            Marketplaces = ["AWS"],
+            ListPricePerYear = 8988,
+            BillingModel = "Usage-Based (PAYG)"
+        },
+        new()
+        {
+            Id = "prod-4", TenantId = Tenant.DefaultTenantId, Cloud = "AWS", ExternalId = "prod-4",
+            Name = "SaaSify AWS ACE Connector for HubSpot",
+            Description = "No-code, bi-directional sync between HubSpot CRM and the AWS Partner Network's ACE co-sell pipeline, so teams manage co-sell opportunities without leaving HubSpot.",
+            Marketplaces = ["AWS"],
+            ListPricePerYear = 6000,
+            BillingModel = "Usage-Based (PAYG) — 30-day free trial"
+        },
+        new()
+        {
+            Id = "prod-5", TenantId = Tenant.DefaultTenantId, Cloud = "AWS", ExternalId = "prod-5",
+            Name = "Spektra SaaSify Agent for AWS Partner Central Migration",
+            Description = "AI-powered self-service agent for the mandatory AWS Partner Central migration — assesses existing setup, flags compliance risks, and automates account linking and IAM setup.",
+            Marketplaces = ["AWS"],
+            ListPricePerYear = 0,
+            BillingModel = "Free / Nominal"
+        },
+        new()
+        {
+            Id = "prod-6", TenantId = Tenant.DefaultTenantId, Cloud = "AWS", ExternalId = "prod-6",
+            Name = "Spektra SaaSify Agent for AWS Partner Revenue Measurement (PRM)",
+            Description = "Discovers, tags, and tracks AWS resources across partner environments to maximize revenue attribution and PRM program compliance.",
+            Marketplaces = ["AWS"],
+            ListPricePerYear = 0,
+            BillingModel = "Free / Nominal"
+        },
+        new()
+        {
+            Id = "prod-7", TenantId = Tenant.DefaultTenantId, Cloud = "Azure", ExternalId = "prod-7",
+            Name = "SaaSify Cloud Marketplace Platform",
+            Description = "Manages the full lifecycle of transactable offers in Azure Marketplace — offer management, pricing recommendations, and end-to-end subscription lifecycle for PAYG and private offers, with white-glove onboarding.",
+            Marketplaces = ["Azure"],
+            ListPricePerYear = 7500,
+            BillingModel = "Subscription (Contract)"
+        },
+        new()
+        {
+            Id = "prod-8", TenantId = Tenant.DefaultTenantId, Cloud = "Azure", ExternalId = "prod-8",
+            Name = "SaaSify SaaS Contract",
+            Description = "Private-offer / annual-commitment edition of the SaaSify Cloud Marketplace Platform for Azure ISVs, with the same offer management and subscription lifecycle tooling.",
+            Marketplaces = ["Azure"],
+            ListPricePerYear = 7500,
+            BillingModel = "Subscription (Contract) — Private Offer"
+        },
+        new()
+        {
+            Id = "prod-9", TenantId = Tenant.DefaultTenantId, Cloud = "Azure", ExternalId = "prod-9",
+            Name = "SaaSify Cloud Marketplace Platform for Startups",
+            Description = "Startup edition of the SaaSify Cloud Marketplace Platform for Azure ISVs under $10M revenue — same white-glove onboarding and lifecycle management at a discounted launch price.",
+            Marketplaces = ["Azure"],
+            ListPricePerYear = 5000,
+            BillingModel = "Subscription (Contract) — Startup tier"
+        },
+        new()
+        {
+            Id = "prod-10", TenantId = Tenant.DefaultTenantId, Cloud = "Azure", ExternalId = "prod-10",
+            Name = "Cloud SAAS Kit",
+            Description = "Starter kit to accelerate setting up CSP Control Center (C3) SaaS solutions — a self-service marketplace for Microsoft CSP partners and their resellers, with plan/offer management and fine-grained access control.",
+            Marketplaces = ["Azure"],
+            ListPricePerYear = 0,
+            BillingModel = "Custom Pricing (Private Offer)"
+        },
+        new()
+        {
+            Id = "prod-11", TenantId = Tenant.DefaultTenantId, Cloud = "Azure", ExternalId = "prod-11",
+            Name = "SaaSify AI Agent - Azure Marketplace Onboarding Accelerator",
+            Description = "Agentic AI that accelerates Azure Marketplace onboarding — validates offer parameters, automates compliance checks, and streamlines private-offer creation for ISVs.",
+            Marketplaces = ["Azure"],
+            ListPricePerYear = 0,
+            BillingModel = "Free / Nominal"
+        },
+        new()
+        {
+            Id = "ten-2-gcp-marketplace-launchpad", TenantId = "TEN-2", Cloud = "GCP", ExternalId = "marketplace-launchpad",
+            Name = "Northwind Cloud Solutions Marketplace Launchpad",
+            Description = "Onboards Northwind Cloud Solutions's SaaS listings onto Google Cloud Marketplace with guided offer and pricing setup.",
+            Marketplaces = ["GCP"],
+            ListPricePerYear = 90000,
+            BillingModel = "Subscription (Contract)"
+        },
+        new()
+        {
+            Id = "ten-2-gcp-producer-portal-connector", TenantId = "TEN-2", Cloud = "GCP", ExternalId = "producer-portal-connector",
+            Name = "Northwind Cloud Solutions Producer Portal Connector",
+            Description = "Syncs product and entitlement data between internal systems and the GCP Producer Portal.",
+            Marketplaces = ["GCP"],
+            ListPricePerYear = 7200,
+            BillingModel = "Usage-Based (PAYG)"
+        },
+        new()
+        {
+            Id = "ten-2-gcp-usage-metering-agent", TenantId = "TEN-2", Cloud = "GCP", ExternalId = "usage-metering-agent",
+            Name = "Northwind Cloud Solutions Usage Metering Agent",
+            Description = "Automates usage-based billing metering and reporting for GCP Marketplace SaaS listings.",
+            Marketplaces = ["GCP"],
+            ListPricePerYear = 0,
+            BillingModel = "Free / Nominal"
+        }
+    ];
 
     public string NextEngagementRequestId()
     {
@@ -991,11 +1206,20 @@ public class DataStore
         var changed = false;
         foreach (var deal in Deals)
         {
-            if (!string.IsNullOrWhiteSpace(deal.CreatedAt)) continue;
-            var num = ParseDealNumber(deal.Id);
-            var daysAgo = Math.Max(0, maxNum - num);
-            deal.CreatedAt = DateTime.UtcNow.Date.AddDays(-daysAgo).ToString("yyyy-MM-dd");
-            changed = true;
+            if (string.IsNullOrWhiteSpace(deal.CreatedAt))
+            {
+                var num = ParseDealNumber(deal.Id);
+                var daysAgo = Math.Max(0, maxNum - num);
+                deal.CreatedAt = DateTime.UtcNow.Date.AddDays(-daysAgo).ToString("yyyy-MM-dd");
+                changed = true;
+            }
+            // Pre-multi-tenancy deals have no TenantId — default them to the seeded tenant so they
+            // keep resolving correctly instead of becoming invisible to every tenant-scoped query.
+            if (string.IsNullOrWhiteSpace(deal.TenantId))
+            {
+                deal.TenantId = Tenant.DefaultTenantId;
+                changed = true;
+            }
         }
 
         if (changed) SaveDeals();

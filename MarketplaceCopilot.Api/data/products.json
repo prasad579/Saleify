@@ -1,0 +1,321 @@
+[
+  {
+    "id": "prod-1",
+    "name": "SaaSify Cloud GTM Platform",
+    "family": "SaaSify",
+    "description": "Single integrated platform to list and manage the full lifecycle of SaaS solutions across AWS, Azure, and GCP marketplaces \u2014 offer management, subscription lifecycle, smart metering, and analytics, with white-glove onboarding.",
+    "marketplaces": [
+      "AWS",
+      "Azure",
+      "GCP"
+    ],
+    "listPricePerYear": 120000,
+    "billingModel": "Subscription (Contract)",
+    "tenantId": "TEN-1",
+    "cloud": "AWS",
+    "externalId": "prod-1",
+    "discontinued": false
+  },
+  {
+    "id": "prod-2",
+    "name": "SaaSify Cloud GTM Platform for Startups",
+    "family": "SaaSify",
+    "description": "Right-sized edition of the Cloud GTM Platform for early-stage vendors \u2014 unlimited listings, up to 25 private offers, and white-glove onboarding to go live within 1-2 weeks.",
+    "marketplaces": [
+      "AWS",
+      "Azure",
+      "GCP"
+    ],
+    "listPricePerYear": 5000,
+    "billingModel": "Subscription (Contract)",
+    "tenantId": "TEN-1",
+    "cloud": "AWS",
+    "externalId": "prod-2",
+    "discontinued": false
+  },
+  {
+    "id": "prod-3",
+    "name": "SaaSify AWS ACE Connector for Salesforce",
+    "family": "SaaSify",
+    "description": "No-code, bi-directional sync between Salesforce CRM and the AWS Partner Network\u0027s ACE co-sell pipeline \u2014 eliminates manual data entry with real-time opportunity status updates.",
+    "marketplaces": [
+      "AWS"
+    ],
+    "listPricePerYear": 8988,
+    "billingModel": "Usage-Based (PAYG)",
+    "tenantId": "TEN-1",
+    "cloud": "AWS",
+    "externalId": "prod-3",
+    "discontinued": false
+  },
+  {
+    "id": "prod-4",
+    "name": "SaaSify AWS ACE Connector for HubSpot",
+    "family": "SaaSify",
+    "description": "No-code, bi-directional sync between HubSpot CRM and the AWS Partner Network\u0027s ACE co-sell pipeline, so teams manage co-sell opportunities without leaving HubSpot.",
+    "marketplaces": [
+      "AWS"
+    ],
+    "listPricePerYear": 6000,
+    "billingModel": "Usage-Based (PAYG) \u2014 30-day free trial",
+    "tenantId": "TEN-1",
+    "cloud": "AWS",
+    "externalId": "prod-4",
+    "discontinued": false
+  },
+  {
+    "id": "prod-5",
+    "name": "Spektra SaaSify Agent for AWS Partner Central Migration",
+    "family": "SaaSify",
+    "description": "AI-powered self-service agent for the mandatory AWS Partner Central migration \u2014 assesses existing setup, flags compliance risks, and automates account linking and IAM setup.",
+    "marketplaces": [
+      "AWS"
+    ],
+    "listPricePerYear": 0,
+    "billingModel": "Free / Nominal",
+    "tenantId": "TEN-1",
+    "cloud": "AWS",
+    "externalId": "prod-5",
+    "discontinued": false
+  },
+  {
+    "id": "prod-6",
+    "name": "Spektra SaaSify Agent for AWS Partner Revenue Measurement (PRM)",
+    "family": "SaaSify",
+    "description": "Discovers, tags, and tracks AWS resources across partner environments to maximize revenue attribution and PRM program compliance.",
+    "marketplaces": [
+      "AWS"
+    ],
+    "listPricePerYear": 0,
+    "billingModel": "Free / Nominal",
+    "tenantId": "TEN-1",
+    "cloud": "AWS",
+    "externalId": "prod-6",
+    "discontinued": false
+  },
+  {
+    "id": "prod-7",
+    "name": "SaaSify Cloud Marketplace Platform",
+    "family": "SaaSify",
+    "description": "Manages the full lifecycle of transactable offers in Azure Marketplace \u2014 offer management, pricing recommendations, and end-to-end subscription lifecycle for PAYG and private offers, with white-glove onboarding.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 7500,
+    "billingModel": "Subscription (Contract)",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "prod-7",
+    "discontinued": true
+  },
+  {
+    "id": "prod-8",
+    "name": "SaaSify SaaS Contract",
+    "family": "SaaSify",
+    "description": "Private-offer / annual-commitment edition of the SaaSify Cloud Marketplace Platform for Azure ISVs, with the same offer management and subscription lifecycle tooling.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 7500,
+    "billingModel": "Subscription (Contract) \u2014 Private Offer",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "prod-8",
+    "discontinued": true
+  },
+  {
+    "id": "prod-9",
+    "name": "SaaSify Cloud Marketplace Platform for Startups",
+    "family": "SaaSify",
+    "description": "Startup edition of the SaaSify Cloud Marketplace Platform for Azure ISVs under $10M revenue \u2014 same white-glove onboarding and lifecycle management at a discounted launch price.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 5000,
+    "billingModel": "Subscription (Contract) \u2014 Startup tier",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "prod-9",
+    "discontinued": true
+  },
+  {
+    "id": "prod-10",
+    "name": "Cloud SAAS Kit",
+    "family": "SaaSify",
+    "description": "Starter kit to accelerate setting up CSP Control Center (C3) SaaS solutions \u2014 a self-service marketplace for Microsoft CSP partners and their resellers, with plan/offer management and fine-grained access control.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 0,
+    "billingModel": "Custom Pricing (Private Offer)",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "prod-10",
+    "discontinued": true
+  },
+  {
+    "id": "prod-11",
+    "name": "SaaSify AI Agent - Azure Marketplace Onboarding Accelerator",
+    "family": "SaaSify",
+    "description": "Agentic AI that accelerates Azure Marketplace onboarding \u2014 validates offer parameters, automates compliance checks, and streamlines private-offer creation for ISVs.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 0,
+    "billingModel": "Free / Nominal",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "prod-11",
+    "discontinued": true
+  },
+  {
+    "id": "ten-2-gcp-marketplace-launchpad",
+    "name": "Northwind Cloud Solutions Marketplace Launchpad",
+    "family": "SaaSify",
+    "description": "Onboards Northwind Cloud Solutions\u0027s SaaS listings onto Google Cloud Marketplace with guided offer and pricing setup.",
+    "marketplaces": [
+      "GCP"
+    ],
+    "listPricePerYear": 90000,
+    "billingModel": "Subscription (Contract)",
+    "tenantId": "TEN-2",
+    "cloud": "GCP",
+    "externalId": "marketplace-launchpad",
+    "discontinued": false
+  },
+  {
+    "id": "ten-2-gcp-producer-portal-connector",
+    "name": "Northwind Cloud Solutions Producer Portal Connector",
+    "family": "SaaSify",
+    "description": "Syncs product and entitlement data between internal systems and the GCP Producer Portal.",
+    "marketplaces": [
+      "GCP"
+    ],
+    "listPricePerYear": 7200,
+    "billingModel": "Usage-Based (PAYG)",
+    "tenantId": "TEN-2",
+    "cloud": "GCP",
+    "externalId": "producer-portal-connector",
+    "discontinued": false
+  },
+  {
+    "id": "ten-2-gcp-usage-metering-agent",
+    "name": "Northwind Cloud Solutions Usage Metering Agent",
+    "family": "SaaSify",
+    "description": "Automates usage-based billing metering and reporting for GCP Marketplace SaaS listings.",
+    "marketplaces": [
+      "GCP"
+    ],
+    "listPricePerYear": 0,
+    "billingModel": "Free / Nominal",
+    "tenantId": "TEN-2",
+    "cloud": "GCP",
+    "externalId": "usage-metering-agent",
+    "discontinued": false
+  },
+  {
+    "id": "ten-1-gcp-marketplace-launchpad",
+    "name": "SaaSify Marketplace Launchpad",
+    "family": "SaaSify",
+    "description": "Onboards SaaSify\u0027s SaaS listings onto Google Cloud Marketplace with guided offer and pricing setup.",
+    "marketplaces": [
+      "GCP"
+    ],
+    "listPricePerYear": 90000,
+    "billingModel": "Subscription (Contract)",
+    "tenantId": "TEN-1",
+    "cloud": "GCP",
+    "externalId": "marketplace-launchpad",
+    "discontinued": true
+  },
+  {
+    "id": "ten-1-gcp-producer-portal-connector",
+    "name": "SaaSify Producer Portal Connector",
+    "family": "SaaSify",
+    "description": "Syncs product and entitlement data between internal systems and the GCP Producer Portal.",
+    "marketplaces": [
+      "GCP"
+    ],
+    "listPricePerYear": 7200,
+    "billingModel": "Usage-Based (PAYG)",
+    "tenantId": "TEN-1",
+    "cloud": "GCP",
+    "externalId": "producer-portal-connector",
+    "discontinued": true
+  },
+  {
+    "id": "ten-1-gcp-usage-metering-agent",
+    "name": "SaaSify Usage Metering Agent",
+    "family": "SaaSify",
+    "description": "Automates usage-based billing metering and reporting for GCP Marketplace SaaS listings.",
+    "marketplaces": [
+      "GCP"
+    ],
+    "listPricePerYear": 0,
+    "billingModel": "Free / Nominal",
+    "tenantId": "TEN-1",
+    "cloud": "GCP",
+    "externalId": "usage-metering-agent",
+    "discontinued": true
+  },
+  {
+    "id": "ten-1-azure-platform",
+    "name": "SaaSify Cloud Marketplace Platform",
+    "family": "SaaSify",
+    "description": "Manages the full lifecycle of SaaSify\u0027s transactable offers in Azure Marketplace \u2014 offer management, pricing recommendations, subscription lifecycle.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 7500,
+    "billingModel": "Subscription (Contract)",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "platform",
+    "discontinued": false
+  },
+  {
+    "id": "ten-1-azure-startup-platform",
+    "name": "SaaSify Cloud Marketplace Platform for Startups",
+    "family": "SaaSify",
+    "description": "Startup edition of the Cloud Marketplace Platform for Azure ISVs under $10M revenue.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 5000,
+    "billingModel": "Subscription (Contract) \u2014 Startup tier",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "startup-platform",
+    "discontinued": false
+  },
+  {
+    "id": "ten-1-azure-saas-contract",
+    "name": "SaaSify SaaS Contract",
+    "family": "SaaSify",
+    "description": "Private-offer / annual-commitment edition of the Cloud Marketplace Platform.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 7500,
+    "billingModel": "Subscription (Contract) \u2014 Private Offer",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "saas-contract",
+    "discontinued": false
+  },
+  {
+    "id": "ten-1-azure-onboarding-agent",
+    "name": "SaaSify AI Onboarding Accelerator",
+    "family": "SaaSify",
+    "description": "Agentic AI that accelerates Azure Marketplace onboarding \u2014 validates offer parameters, automates compliance checks.",
+    "marketplaces": [
+      "Azure"
+    ],
+    "listPricePerYear": 0,
+    "billingModel": "Free / Nominal",
+    "tenantId": "TEN-1",
+    "cloud": "Azure",
+    "externalId": "onboarding-agent",
+    "discontinued": false
+  }
+]

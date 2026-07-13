@@ -48,6 +48,12 @@ export class SettingsHomeComponent {
       description: 'Manage the engagement owners — add people, set their role, enable/disable them, and restrict who can own which engagement types.'
     },
     {
+      path: '/settings/marketplaces',
+      icon: '🔌',
+      title: 'Connected Marketplaces',
+      description: 'Connect AWS, Azure, and GCP seller accounts to sync your product catalog for engagements — and re-sync or disconnect anytime.'
+    },
+    {
       path: '/settings/playbooks',
       icon: '⚙️',
       title: 'Engagement Playbooks',

@@ -133,7 +133,9 @@ export class LoginComponent implements OnInit {
       res?.token || 'demo-token',
       res?.status || 'approved',
       res?.provider || 'local',
-      res?.company || ''
+      res?.company || '',
+      res?.tenantId || undefined,
+      res?.tenantName || undefined
     );
     void this.router.navigate([role === 'Customer' ? '/portal/requests' : '/home']);
   }

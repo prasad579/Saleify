@@ -58,7 +58,8 @@ export class DealsListComponent implements OnInit {
     { key: 'campaignEventName', label: 'Tag' },
     { key: 'stage', label: 'Stage' },
     { key: 'marketplaceStatus', label: 'Status' },
-    { key: 'owner', label: 'Owner' }
+    { key: 'owner', label: 'Owner' },
+    { key: 'requestedByCustomer', label: 'Customer Requested' }
   ];
 
   private readonly openStatuses = ['Draft', 'In Review', 'Waiting for Info', 'Lead', 'Quick Capture'];

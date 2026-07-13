@@ -29,7 +29,7 @@ public class EngagementRequest
     /// <summary>File names only — the portal captures attachments as UI metadata, not binary uploads.</summary>
     public List<string> AttachmentNames { get; set; } = [];
 
-    /// <summary>Submitted, In Progress, Under Review, Accepted, Declined.</summary>
+    /// <summary>Submitted, In Progress, Under Review, Accepted, Declined, Converted.</summary>
     public string Status { get; set; } = "Submitted";
 
     // ---- Requester ----
@@ -38,6 +38,9 @@ public class EngagementRequest
     public string CompanyName { get; set; } = "";
 
     public string CreatedAt { get; set; } = "";
+
+    /// <summary>The internal Deal created from this request, once converted (Status = "Converted").</summary>
+    public string ConvertedDealId { get; set; } = "";
 }
 
 /// <summary>Payload the Customer Portal posts to create a new engagement request.</summary>

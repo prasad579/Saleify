@@ -139,10 +139,23 @@ export class ApiService {
     return this.http.get<any[]>(`${this.base}/engagement-requests?customerEmail=${encodeURIComponent(customerEmail)}`);
   }
   getEngagementRequest(id: string) { return this.http.get<any>(`${this.base}/engagement-requests/${id}`); }
+  /** All requests across all customers — the internal/staff view. */
+  getAllEngagementRequests() { return this.http.get<any[]>(`${this.base}/engagement-requests/all`); }
+  convertEngagementRequestToDeal(id: string, owner: string) {
+    return this.http.post<any>(`${this.base}/engagement-requests/${id}/convert-to-deal?owner=${encodeURIComponent(owner)}`, {});
+  }
   createEngagementRequest(payload: unknown, customerEmail: string, customerName: string, companyName: string) {
     const q = new URLSearchParams({ customerEmail, customerName, companyName }).toString();
     return this.http.post<any>(`${this.base}/engagement-requests?${q}`, payload);
   }
+
+  // Tenants (connected marketplaces — connect / sync / disconnect a cloud's product catalog)
+  getMyTenant() { return this.http.get<any>(`${this.base}/tenants/me`); }
+  connectMarketplace(cloud: string, sellerLabel: string) {
+    return this.http.post<any>(`${this.base}/tenants/me/connections/${cloud}/connect`, { sellerLabel });
+  }
+  syncMarketplace(cloud: string) { return this.http.post<any>(`${this.base}/tenants/me/connections/${cloud}/sync`, {}); }
+  disconnectMarketplace(cloud: string) { return this.http.post<any>(`${this.base}/tenants/me/connections/${cloud}/disconnect`, {}); }
 
   login(body: { email: string; password: string }) { return this.http.post(`${this.base}/auth/login`, body); }
   signup(body: { email: string; password: string; fullName: string }) { return this.http.post(`${this.base}/auth/signup`, body); }

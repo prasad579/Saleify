@@ -1,5 +1,49 @@
 [
   {
+    "id": "ER-4004",
+    "requestType": "Private Offer",
+    "marketplace": "AWS",
+    "productIds": [
+      "prod-1"
+    ],
+    "expectedStartDate": "2026-07-20",
+    "expectedDuration": "1 Month",
+    "estimatedUsers": "1\u201310",
+    "businessNeed": "",
+    "budgetRange": "Under $10,000",
+    "otherRequirements": "",
+    "contactPreference": "Email",
+    "preferredTimeToContact": "Morning (9am \u2013 12pm)",
+    "attachmentNames": [],
+    "status": "Converted",
+    "customerName": "John Ramesh",
+    "customerEmail": "customer@acme.com",
+    "companyName": "Acme Corporation",
+    "createdAt": "2026-07-12 09:50:36 UTC",
+    "convertedDealId": "DL-1017"
+  },
+  {
+    "id": "ER-4003",
+    "requestType": "Private Offer",
+    "marketplace": "AWS",
+    "productIds": [],
+    "expectedStartDate": "2026-08-01",
+    "expectedDuration": "1 year",
+    "estimatedUsers": "50",
+    "businessNeed": "Need a private offer for renewal",
+    "budgetRange": "50k-100k",
+    "otherRequirements": "",
+    "contactPreference": "Email",
+    "preferredTimeToContact": "",
+    "attachmentNames": [],
+    "status": "Converted",
+    "customerName": "Test Customer",
+    "customerEmail": "test.customer@acme.com",
+    "companyName": "Acme Corp",
+    "createdAt": "2026-07-12 09:38:36 UTC",
+    "convertedDealId": "DL-1016"
+  },
+  {
     "id": "ER-4002",
     "requestType": "Free Trial",
     "marketplace": "AWS",
@@ -19,7 +63,8 @@
     "customerName": "John Ramesh",
     "customerEmail": "customer@acme.com",
     "companyName": "Acme Corporation",
-    "createdAt": "2026-07-06 16:58:43 UTC"
+    "createdAt": "2026-07-06 16:58:43 UTC",
+    "convertedDealId": ""
   },
   {
     "id": "ER-4001",
@@ -37,10 +82,11 @@
     "contactPreference": "Email",
     "preferredTimeToContact": "Morning (9am - 12pm)",
     "attachmentNames": [],
-    "status": "Submitted",
+    "status": "Converted",
     "customerName": "John Ramesh",
     "customerEmail": "customer@acme.com",
     "companyName": "Acme Corporation",
-    "createdAt": "2026-07-06 16:51:13 UTC"
+    "createdAt": "2026-07-06 16:51:13 UTC",
+    "convertedDealId": "DL-1003"
   }
 ]

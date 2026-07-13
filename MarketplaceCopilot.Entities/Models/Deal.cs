@@ -3,6 +3,8 @@ namespace MarketplaceCopilot.Entities;
 public class Deal
 {
     public string Id { get; set; } = "";
+    /// <summary>Owning tenant — every deal belongs to exactly one tenant.</summary>
+    public string TenantId { get; set; } = "";
     public string Name { get; set; } = "";
     public string Customer { get; set; } = "";
     public string ContactName { get; set; } = "";
@@ -17,6 +19,10 @@ public class Deal
     public bool QuickCapture { get; set; }
     public string CampaignEventId { get; set; } = "";
     public string CampaignEventName { get; set; } = "";
+    /// <summary>True when this engagement was created by converting a customer-submitted <see cref="EngagementRequest"/>.</summary>
+    public bool RequestedByCustomer { get; set; }
+    /// <summary>The originating <see cref="EngagementRequest"/> id, when <see cref="RequestedByCustomer"/> is true.</summary>
+    public string EngagementRequestId { get; set; } = "";
     public string BillingAccountId { get; set; } = "";
     /// <summary>Per-marketplace billing account IDs, keyed by marketplace (e.g. "AWS", "Azure", "GCP").</summary>
     public Dictionary<string, string> BillingAccountIds { get; set; } = new();

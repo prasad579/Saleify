@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using MarketplaceCopilot.Api;
 using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Services;
+using MarketplaceCopilot.Services.Connectors;
 using MarketplaceCopilot.Services.Contracts;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -17,6 +18,8 @@ builder.Services.AddSingleton<UserStore>();
 // Resolve the acting user from the current request (X-Acting-User header) for audit attribution.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IActingUserAccessor, HttpActingUserAccessor>();
+// Resolve the current tenant server-side from the caller's auth token (not a trusted client header).
+builder.Services.AddSingleton<ITenantAccessor, HttpTenantAccessor>();
 
 // Service layer (registered against their contracts)
 builder.Services.AddSingleton<IAuditService, AuditService>();
@@ -30,6 +33,13 @@ builder.Services.AddSingleton<IDealService, DealService>();
 builder.Services.AddSingleton<IOfferRequestService, OfferRequestService>();
 builder.Services.AddSingleton<ISnapshotService, SnapshotService>();
 builder.Services.AddSingleton<IEngagementRequestService, EngagementRequestService>();
+
+// Marketplace connectors (one per cloud — mocked for now, no real seller credentials available)
+// and the tenant service that orchestrates connect/sync/disconnect over them.
+builder.Services.AddSingleton<IMarketplaceConnector, AwsMockConnector>();
+builder.Services.AddSingleton<IMarketplaceConnector, AzureMockConnector>();
+builder.Services.AddSingleton<IMarketplaceConnector, GcpMockConnector>();
+builder.Services.AddSingleton<ITenantService, TenantService>();
 
 var authSection = builder.Configuration.GetSection("Auth");
 var frontendUrl = authSection["FrontendUrl"] ?? "http://localhost:4200";

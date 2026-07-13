@@ -81,6 +81,8 @@ public class AuthRequest
     public string Email { get; set; } = "";
     public string Password { get; set; } = "";
     public string? FullName { get; set; }
+    /// <summary>Company/org name at signup — resolves or creates the tenant this user belongs to.</summary>
+    public string? Company { get; set; }
 }
 
 public class AuthResponse
@@ -94,6 +96,8 @@ public class AuthResponse
     public string? Status { get; set; }
     public string? Provider { get; set; }
     public string? Company { get; set; }
+    public string? TenantId { get; set; }
+    public string? TenantName { get; set; }
 }
 
 public class ExtractInsightsRequest

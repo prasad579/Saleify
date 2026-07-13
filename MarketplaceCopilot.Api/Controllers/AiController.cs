@@ -7,7 +7,7 @@ namespace MarketplaceCopilot.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AiController(DataStore store, IAiService ai) : ControllerBase
+public class AiController(DataStore store, IAiService ai, ITenantAccessor tenant) : ControllerBase
 {
     [HttpPost("extract-insights")]
     public ActionResult<object> ExtractInsights([FromBody] ExtractInsightsRequest request)
@@ -27,7 +27,7 @@ public class AiController(DataStore store, IAiService ai) : ControllerBase
     {
         var deal = string.IsNullOrWhiteSpace(request.DealId)
             ? null
-            : store.Deals.FirstOrDefault(d => d.Id == request.DealId);
-        return new CopilotChatResponse { Reply = ai.Chat(request.Message, deal, store) };
+            : store.Deals.FirstOrDefault(d => d.Id == request.DealId && d.TenantId == tenant.TenantId);
+        return new CopilotChatResponse { Reply = ai.Chat(request.Message, deal, store, tenant.TenantId) };
     }
 }

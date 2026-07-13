@@ -7,7 +7,7 @@ namespace MarketplaceCopilot.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class DashboardController(DataStore store) : ControllerBase
+public class DashboardController(DataStore store, ITenantAccessor tenant) : ControllerBase
 {
     /// <summary>Counters for the Home "Engagement Insights" card.</summary>
     [HttpGet("insights")]
@@ -17,7 +17,7 @@ public class DashboardController(DataStore store) : ControllerBase
     [HttpGet]
     public ActionResult<DashboardSummary> Get()
     {
-        var deals = store.Deals.Where(d => !d.Archived).ToList();
+        var deals = store.Deals.Where(d => !d.Archived && d.TenantId == tenant.TenantId).ToList();
         var openDeals = deals
             .Where(d => d.MarketplaceStatus is not "Published" and not "Abandoned")
             .OrderByDescending(d => d.CreatedAt)

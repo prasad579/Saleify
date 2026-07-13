@@ -1,0 +1,74 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Customer Requests</h1>
+    <p class="page-subtitle">Engagement requests submitted by customers from the Customer Portal — convert one into a deal to start working it.</p>
+  </div>
+  <button type="button" class="btn btn-outline" (click)="load()">↻ Refresh</button>
+</div>
+
+<section class="card section-card">
+  <label class="tb-field grow">
+    Search
+    <input type="search" [(ngModel)]="search" (ngModelChange)="onSearchChange()" placeholder="Request ID, type, marketplace, customer, status…" />
+  </label>
+
+  @if (loading) {
+    <p class="muted">Loading requests…</p>
+  } @else if (!filtered.length) {
+    <div class="empty-state">
+      <span class="empty-icon">📭</span>
+      <h3>No requests found</h3>
+      <p>{{ requests.length ? 'No requests match this search.' : 'No customers have submitted a request yet.' }}</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="data-table er-table">
+        <thead>
+          <tr>
+            <th>Request</th>
+            <th>Customer</th>
+            <th>Marketplace</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th aria-label="Action"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of pageItems; track r.id) {
+            <tr>
+              <td>
+                <strong>{{ r.requestType }}</strong>
+                <div class="cell-sub">{{ r.id }}</div>
+              </td>
+              <td>
+                {{ r.customerName }}
+                <div class="cell-sub">{{ r.companyName }} · {{ r.customerEmail }}</div>
+              </td>
+              <td>{{ r.marketplace || '—' }}</td>
+              <td class="nowrap">{{ r.createdAt }}</td>
+              <td><span class="badge" [class]="statusClass(r.status)">{{ r.status }}</span></td>
+              <td class="num">
+                @if (r.status === 'Converted') {
+                  <a [routerLink]="['/deals', r.convertedDealId]" class="cell-sub">View {{ r.convertedDealId }} →</a>
+                } @else {
+                  <button type="button" class="btn btn-primary btn-sm" [disabled]="converting === r.id" (click)="convert(r)">
+                    {{ converting === r.id ? 'Converting…' : 'Convert to Deal' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPageCount > 1) {
+      <div class="pagination">
+        <button type="button" class="btn btn-outline btn-sm" [disabled]="page <= 1" (click)="page = page - 1">← Prev</button>
+        <span>Page {{ page }} of {{ totalPageCount }}</span>
+        <button type="button" class="btn btn-outline btn-sm" [disabled]="page >= totalPageCount" (click)="page = page + 1">Next →</button>
+      </div>
+    }
+    <p class="muted result-count">{{ filtered.length }} of {{ requests.length }} request(s)</p>
+  }
+</section>

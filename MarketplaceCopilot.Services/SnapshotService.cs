@@ -14,7 +14,7 @@ namespace MarketplaceCopilot.Services;
 /// Builds Engagement Snapshots (executive summaries) from the deal/event stores and
 /// renders/sends them as compact HTML email. Pure read over the data store — no mutations.
 /// </summary>
-public class SnapshotService(DataStore store, IConfiguration config, ILogger<SnapshotService> logger) : ISnapshotService
+public class SnapshotService(DataStore store, IConfiguration config, ILogger<SnapshotService> logger, ITenantAccessor tenant) : ISnapshotService
 {
     private const StringComparison Ic = StringComparison.OrdinalIgnoreCase;
 
@@ -60,7 +60,7 @@ public class SnapshotService(DataStore store, IConfiguration config, ILogger<Sna
 
     public DashboardInsights BuildDashboardInsights()
     {
-        var deals = store.Deals.Where(d => !d.Archived).ToList();
+        var deals = store.Deals.Where(d => !d.Archived && d.TenantId == tenant.TenantId).ToList();
         return new DashboardInsights
         {
             ActiveEvents = store.CampaignEvents.Count(e => string.Equals(e.Status, "Active", Ic)),
@@ -122,8 +122,8 @@ public class SnapshotService(DataStore store, IConfiguration config, ILogger<Sna
 
     private List<Deal> ResolveDeals(SnapshotRequest r)
     {
-        // Archived engagements never appear in snapshots/summaries.
-        var source = store.Deals.Where(d => !d.Archived).ToList();
+        // Archived engagements never appear in snapshots/summaries; cross-tenant deals never do either.
+        var source = store.Deals.Where(d => !d.Archived && d.TenantId == tenant.TenantId).ToList();
         switch ((r.Scope ?? "").ToLowerInvariant())
         {
             case "engagement":

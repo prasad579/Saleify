@@ -129,7 +129,7 @@ public class AiService : IAiService
         return $"Extracted {actionItems.Count} action item(s) from your latest notes.";
     }
 
-    public string Chat(string message, Deal? deal, DataStore store)
+    public string Chat(string message, Deal? deal, DataStore store, string tenantId)
     {
         var lower = message.ToLowerInvariant();
         if (lower.Contains("discount"))
@@ -141,9 +141,10 @@ public class AiService : IAiService
         }
         if (lower.Contains("approval") || lower.Contains("pending"))
         {
-            var pending = store.Deals.Count(d => d.Stage is "Approval" or "Meeting Notes");
+            var tenantDeals = store.Deals.Where(d => d.TenantId == tenantId).ToList();
+            var pending = tenantDeals.Count(d => d.Stage is "Approval" or "Meeting Notes");
             return pending > 0
-                ? $"{pending} deal(s) need approval or follow-up. Check {string.Join(", ", store.Deals.Where(d => d.Stage is "Approval").Select(d => d.Id))}."
+                ? $"{pending} deal(s) need approval or follow-up. Check {string.Join(", ", tenantDeals.Where(d => d.Stage is "Approval").Select(d => d.Id))}."
                 : "No deals are currently waiting for approval.";
         }
         if (lower.Contains("pricing") || lower.Contains("calculate"))

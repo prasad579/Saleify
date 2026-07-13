@@ -13,6 +13,8 @@ public class AppUser
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     /// <summary>Organization name — shown in the Customer Portal header, set for Customer-role users.</summary>
     public string Company { get; set; } = "";
+    /// <summary>The tenant this user belongs to — scopes which deals/products they can see.</summary>
+    public string TenantId { get; set; } = "";
 }
 
 public class OAuthCallbackResult

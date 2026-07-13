@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using MarketplaceCopilot.Data;
 using MarketplaceCopilot.Entities;
+using MarketplaceCopilot.Services.Contracts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -11,8 +12,11 @@ namespace MarketplaceCopilot.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(IConfiguration config, UserStore users, IWebHostEnvironment env) : ControllerBase
+public class AuthController(IConfiguration config, UserStore users, IWebHostEnvironment env, ITenantService tenants) : ControllerBase
 {
+    /// <summary>Resolve-or-create the tenant for a company name, defaulting to the seed tenant when none is given.</summary>
+    private string ResolveTenantId(string? company) =>
+        string.IsNullOrWhiteSpace(company) ? Tenant.DefaultTenantId : tenants.GetOrCreateByCompanyName(company).Id;
     private string FrontendUrl => config["Auth:FrontendUrl"] ?? "http://localhost:4200";
     private bool DevAutoApprove => env.IsDevelopment() && config.GetValue("Auth:AutoApproveLocalSignup", true);
     private bool DevAllowAnyLogin => env.IsDevelopment() && config.GetValue("Auth:AllowAnyLogin", true);
@@ -42,7 +46,8 @@ public class AuthController(IConfiguration config, UserStore users, IWebHostEnvi
 
         try
         {
-            var user = users.RegisterLocal(request.FullName!, request.Email, request.Password, autoApprove: DevAutoApprove);
+            var tenantId = ResolveTenantId(request.Company);
+            var user = users.RegisterLocal(request.FullName!, request.Email, request.Password, autoApprove: DevAutoApprove, tenantId: tenantId);
             return Ok(new AuthResponse
             {
                 Success = true,
@@ -52,7 +57,9 @@ public class AuthController(IConfiguration config, UserStore users, IWebHostEnvi
                 Name = user.Name,
                 Email = user.Email,
                 Status = user.Status,
-                Provider = "local"
+                Provider = "local",
+                TenantId = user.TenantId,
+                TenantName = tenants.GetById(user.TenantId)?.Name
             });
         }
         catch (InvalidOperationException ex)
@@ -69,18 +76,19 @@ public class AuthController(IConfiguration config, UserStore users, IWebHostEnvi
         }
         catch (InvalidOperationException ex) when (DevAllowAnyLogin)
         {
+            var tenantId = ResolveTenantId(request.Company);
             if (ex.Message.Contains("Invalid email or password", StringComparison.Ordinal))
-                return users.LoginOrRegisterDev(request.Email, request.Password, request.FullName);
+                return users.LoginOrRegisterDev(request.Email, request.Password, request.FullName, tenantId);
 
             var user = users.FindByEmail(request.Email);
             if (user is not null && user.Provider == "local" && user.PasswordHash == UserStore.HashPassword(request.Password))
-                return users.LoginOrRegisterDev(request.Email, request.Password, request.FullName);
+                return users.LoginOrRegisterDev(request.Email, request.Password, request.FullName, tenantId);
 
             throw;
         }
     }
 
-    private static AuthResponse ToAuthResponse(AppUser user, string message) => new()
+    private AuthResponse ToAuthResponse(AppUser user, string message) => new()
     {
         Success = true,
         Message = message,
@@ -90,7 +98,9 @@ public class AuthController(IConfiguration config, UserStore users, IWebHostEnvi
         Email = user.Email,
         Status = user.Status,
         Provider = user.Provider,
-        Company = user.Company
+        Company = user.Company,
+        TenantId = user.TenantId,
+        TenantName = tenants.GetById(user.TenantId)?.Name
     };
 
     [HttpPost("verify-email")]
@@ -178,8 +188,8 @@ public class AuthController(IConfiguration config, UserStore users, IWebHostEnvi
         if (string.IsNullOrWhiteSpace(email))
             return Redirect($"{FrontendUrl}/auth/callback?error=no_email");
 
-        var user = users.LoginOrRegisterOAuth(email, name, provider);
-        var q = $"token={Uri.EscapeDataString(user.Token)}&email={Uri.EscapeDataString(user.Email)}&name={Uri.EscapeDataString(user.Name)}&role={Uri.EscapeDataString(user.Role)}&status={Uri.EscapeDataString(user.Status)}&provider={provider}";
+        var user = users.LoginOrRegisterOAuth(email, name, provider, Tenant.DefaultTenantId);
+        var q = $"token={Uri.EscapeDataString(user.Token)}&email={Uri.EscapeDataString(user.Email)}&name={Uri.EscapeDataString(user.Name)}&role={Uri.EscapeDataString(user.Role)}&status={Uri.EscapeDataString(user.Status)}&provider={provider}&tenantId={Uri.EscapeDataString(user.TenantId)}";
         return Redirect($"{FrontendUrl}/auth/callback?{q}");
     }
 

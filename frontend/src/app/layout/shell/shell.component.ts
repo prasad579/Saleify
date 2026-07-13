@@ -35,6 +35,7 @@ export class ShellComponent implements OnInit {
     { path: '/deals', icon: '💼', label: 'Engagements', badge: 0 },
     { path: '/deals/new', icon: '➕', label: 'New Engagement' },
     { path: '/offer-requests', icon: '📨', label: 'Offer Requests' },
+    { path: '/engagement-requests', icon: '📥', label: 'Customer Requests' },
     { path: '/audit-log', icon: '📜', label: 'Audit Log' },
     { path: '/settings', icon: '⚙️', label: 'Settings' },
   ];

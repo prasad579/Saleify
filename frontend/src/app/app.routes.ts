@@ -27,6 +27,8 @@ import { HomeSettingsComponent } from '@features/home-settings/home-settings.com
 import { AttentionSettingsComponent } from '@features/attention-settings/attention-settings.component';
 import { AuditLogComponent } from '@features/audit-log/audit-log.component';
 import { OfferRequestsComponent } from '@features/offer-requests/offer-requests.component';
+import { EngagementRequestsComponent } from '@features/engagement-requests/engagement-requests.component';
+import { TenantSettingsComponent } from '@features/tenant-settings/tenant-settings.component';
 import { OfferRequestDetailComponent } from '@features/offer-request-detail/offer-request-detail.component';
 import { SettingsHomeComponent } from '@features/settings/settings-home.component';
 import { CustomerShellComponent } from '@layout/customer-shell/customer-shell.component';
@@ -61,8 +63,10 @@ export const routes: Routes = [
       { path: 'settings/home', component: HomeSettingsComponent },
       { path: 'settings/alerts', component: AttentionSettingsComponent },
       { path: 'settings/people', component: PeopleSettingsComponent },
+      { path: 'settings/marketplaces', component: TenantSettingsComponent },
       { path: 'offer-requests', component: OfferRequestsComponent },
       { path: 'offer-requests/:id', component: OfferRequestDetailComponent },
+      { path: 'engagement-requests', component: EngagementRequestsComponent },
       { path: 'audit-log', component: AuditLogComponent },
       { path: 'campaign-events', redirectTo: 'settings/campaign-events', pathMatch: 'full' },
       { path: 'deals/new', component: DealCreateComponent },

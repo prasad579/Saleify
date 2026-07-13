@@ -1,0 +1,46 @@
+<div class="header-row">
+  <div>
+    <h1 class="page-title">Connected Marketplaces</h1>
+    <p class="page-subtitle">Connect {{ tenant?.name || 'your' }}'s AWS, Azure, and GCP seller accounts to pull in your product catalog for engagements.</p>
+  </div>
+  <button type="button" class="btn btn-outline" (click)="load()">↻ Refresh</button>
+</div>
+
+@if (loading) {
+  <p class="muted">Loading…</p>
+} @else {
+  <div class="cloud-grid">
+    @for (c of clouds; track c.cloud) {
+      <div class="card cloud-card">
+        <div class="cloud-head">
+          <span class="cloud-icon">{{ c.icon }}</span>
+          <div>
+            <h3>{{ c.label }}</h3>
+            <span class="badge" [class.badge-green]="isConnected(c.cloud)" [class.badge-gray]="!isConnected(c.cloud)">
+              {{ connectionFor(c.cloud).status }}
+            </span>
+          </div>
+        </div>
+
+        @if (isConnected(c.cloud)) {
+          <dl class="cloud-meta">
+            <dt>Seller / account</dt><dd>{{ connectionFor(c.cloud).sellerLabel || '—' }}</dd>
+            <dt>Products</dt><dd>{{ connectionFor(c.cloud).productCount }}</dd>
+            <dt>Last synced</dt><dd>{{ connectionFor(c.cloud).lastSyncedAt || '—' }}</dd>
+          </dl>
+          <div class="cloud-actions">
+            <button type="button" class="btn btn-outline btn-sm" [disabled]="!!busyCloud" (click)="sync(c.cloud)">
+              {{ busyCloud === c.cloud ? 'Syncing…' : '↻ Sync Now' }}
+            </button>
+            <button type="button" class="btn btn-outline btn-sm danger" [disabled]="!!busyCloud" (click)="disconnect(c.cloud)">Disconnect</button>
+          </div>
+        } @else {
+          <p class="cloud-empty">Not connected — no products from {{ c.label }} appear in engagements yet.</p>
+          <button type="button" class="btn btn-primary btn-sm" [disabled]="!!busyCloud" (click)="connect(c.cloud)">
+            {{ busyCloud === c.cloud ? 'Connecting…' : 'Connect' }}
+          </button>
+        }
+      </div>
+    }
+  </div>
+}

@@ -22,7 +22,8 @@ public class UserStore
                 Provider = "local",
                 PasswordHash = HashPassword("demo123"),
                 Status = "approved",
-                Role = "Sales Representative"
+                Role = "Sales Representative",
+                TenantId = Tenant.DefaultTenantId
             };
             demo.Token = CreateToken();
             Users.Add(demo);
@@ -32,6 +33,8 @@ public class UserStore
         demo.Status = "approved";
         demo.Role = string.IsNullOrWhiteSpace(demo.Role) ? "Sales Representative" : demo.Role;
         demo.PasswordHash = HashPassword("demo123");
+        if (string.IsNullOrWhiteSpace(demo.TenantId))
+            demo.TenantId = Tenant.DefaultTenantId;
         if (string.IsNullOrWhiteSpace(demo.Token))
             demo.Token = CreateToken();
     }
@@ -81,7 +84,7 @@ public class UserStore
         return Convert.ToHexString(bytes);
     }
 
-    public AppUser RegisterLocal(string fullName, string email, string password, bool autoApprove = false)
+    public AppUser RegisterLocal(string fullName, string email, string password, bool autoApprove = false, string? tenantId = null)
     {
         var existing = FindByEmail(email);
         if (existing is not null)
@@ -95,7 +98,8 @@ public class UserStore
             Provider = "local",
             PasswordHash = HashPassword(password),
             Status = autoApprove ? "approved" : "pending_verification",
-            Role = autoApprove ? "Sales Representative" : ""
+            Role = autoApprove ? "Sales Representative" : "",
+            TenantId = string.IsNullOrWhiteSpace(tenantId) ? Tenant.DefaultTenantId : tenantId
         };
         if (autoApprove)
             user.Token = CreateToken();
@@ -103,7 +107,7 @@ public class UserStore
         return user;
     }
 
-    public AppUser LoginOrRegisterDev(string email, string password, string? fullName = null)
+    public AppUser LoginOrRegisterDev(string email, string password, string? fullName = null, string? tenantId = null)
     {
         var user = FindByEmail(email);
         if (user is null)
@@ -111,9 +115,12 @@ public class UserStore
             var name = string.IsNullOrWhiteSpace(fullName)
                 ? email.Split('@')[0]
                 : fullName.Trim();
-            user = RegisterLocal(name, email, password, autoApprove: true);
+            user = RegisterLocal(name, email, password, autoApprove: true, tenantId: tenantId);
             return user;
         }
+
+        if (string.IsNullOrWhiteSpace(user.TenantId))
+            user.TenantId = string.IsNullOrWhiteSpace(tenantId) ? Tenant.DefaultTenantId : tenantId;
 
         if (user.Provider != "local")
             throw new InvalidOperationException($"This email uses {user.Provider} sign-in. Use that button instead.");
@@ -149,7 +156,7 @@ public class UserStore
         return user;
     }
 
-    public AppUser LoginOrRegisterOAuth(string email, string name, string provider)
+    public AppUser LoginOrRegisterOAuth(string email, string name, string provider, string? tenantId = null)
     {
         var user = FindByEmail(email);
         if (user is null)
@@ -161,9 +168,14 @@ public class UserStore
                 Name = name,
                 Provider = provider,
                 Status = "approved",
-                Role = "Sales Representative"
+                Role = "Sales Representative",
+                TenantId = string.IsNullOrWhiteSpace(tenantId) ? Tenant.DefaultTenantId : tenantId
             };
             Users.Add(user);
+        }
+        else if (string.IsNullOrWhiteSpace(user.TenantId))
+        {
+            user.TenantId = string.IsNullOrWhiteSpace(tenantId) ? Tenant.DefaultTenantId : tenantId;
         }
         else if (user.Provider != provider && user.Provider != "local")
         {

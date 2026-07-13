@@ -11,18 +11,24 @@ export interface UserSession {
   status: AuthStatus;
   provider?: string;
   company?: string;
+  tenantId?: string;
+  tenantName?: string;
 }
+
+/** Fallback tenant when the server doesn't return one yet — mirrors Tenant.DefaultTenantId. */
+const DEFAULT_TENANT_ID = 'TEN-1';
+const DEFAULT_TENANT_NAME = 'SaaSify';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   user = signal<UserSession | null>(this.load());
 
-  login(email: string, _password: string, name = 'Srinivas K', role = 'Sales Representative', token = 'demo-token', status: AuthStatus = 'approved', provider = 'local', company = '') {
-    this.setSession({ name, email, role, token, status, provider, company });
+  login(email: string, _password: string, name = 'Srinivas K', role = 'Sales Representative', token = 'demo-token', status: AuthStatus = 'approved', provider = 'local', company = '', tenantId = DEFAULT_TENANT_ID, tenantName = DEFAULT_TENANT_NAME) {
+    this.setSession({ name, email, role, token, status, provider, company, tenantId, tenantName });
   }
 
-  oauthLogin(token: string, email: string, name: string, role: string, provider: string, status: AuthStatus = 'approved') {
-    this.setSession({ name, email, role, token, status, provider });
+  oauthLogin(token: string, email: string, name: string, role: string, provider: string, status: AuthStatus = 'approved', tenantId = DEFAULT_TENANT_ID) {
+    this.setSession({ name, email, role, token, status, provider, tenantId });
   }
 
   startSignup(fullName: string, email: string, _password: string) {
@@ -64,7 +70,9 @@ export class AuthService {
       role: 'Sales Representative',
       token: 'demo-local-session',
       status: 'approved',
-      provider: 'local'
+      provider: 'local',
+      tenantId: DEFAULT_TENANT_ID,
+      tenantName: DEFAULT_TENANT_NAME
     });
   }
 
@@ -113,7 +121,9 @@ export class AuthService {
         token: parsed.token ?? '',
         status: parsed.status || 'approved',
         provider: parsed.provider,
-        company: parsed.company
+        company: parsed.company,
+        tenantId: parsed.tenantId,
+        tenantName: parsed.tenantName
       };
     } catch {
       localStorage.removeItem('mc_user');

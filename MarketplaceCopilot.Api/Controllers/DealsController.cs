@@ -16,8 +16,12 @@ public class DealsController(
     IMeetingNotesService meetingNotes,
     IApprovalService approvals,
     IAuditService audit,
-    IOfferRequestService offerRequests) : ControllerBase
+    IOfferRequestService offerRequests,
+    ITenantAccessor tenant) : ControllerBase
 {
+    /// <summary>Tenant-scoped lookup — a deal from another tenant resolves as not-found, same as a bad id.</summary>
+    private Deal? FindDeal(string id) => store.Deals.FirstOrDefault(d => d.Id == id && d.TenantId == tenant.TenantId);
+
     /// <summary>
     /// List engagements. By default only active (non-archived) engagements are returned;
     /// pass ?view=archived for archived only, or ?view=all for both.
@@ -25,14 +29,15 @@ public class DealsController(
     [HttpGet]
     public ActionResult<IEnumerable<Deal>> GetAll([FromQuery] string? view = null)
     {
-        foreach (var d in store.Deals)
+        var tenantDeals = store.Deals.Where(d => d.TenantId == tenant.TenantId).ToList();
+        foreach (var d in tenantDeals)
             meetingNotes.Normalize(d);
 
         IEnumerable<Deal> deals = (view ?? "").ToLowerInvariant() switch
         {
-            "archived" => store.Deals.Where(d => d.Archived),
-            "all" => store.Deals,
-            _ => store.Deals.Where(d => !d.Archived)
+            "archived" => tenantDeals.Where(d => d.Archived),
+            "all" => tenantDeals,
+            _ => tenantDeals.Where(d => !d.Archived)
         };
         return deals.ToList();
     }
@@ -40,7 +45,7 @@ public class DealsController(
     [HttpGet("stats")]
     public ActionResult<DealStats> GetStats()
     {
-        var deals = store.Deals.Where(d => !d.Archived).ToList();
+        var deals = store.Deals.Where(d => !d.Archived && d.TenantId == tenant.TenantId).ToList();
         return new DealStats
         {
             Total = deals.Count,
@@ -55,7 +60,7 @@ public class DealsController(
     [HttpGet("{id}")]
     public ActionResult<DealDetailDto> GetById(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         meetingNotes.Normalize(deal);
         return dealService.ToDetail(deal);
@@ -64,7 +69,7 @@ public class DealsController(
     [HttpGet("{id}/history")]
     public ActionResult<object> GetHistory(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         return new { dealId = id, changeHistory = deal.ChangeHistory ?? [] };
     }
@@ -73,7 +78,7 @@ public class DealsController(
     [HttpPost("{id}/archive")]
     public ActionResult<object> Archive(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         deal.Archived = true;
@@ -90,7 +95,7 @@ public class DealsController(
     [HttpPost("{id}/unarchive")]
     public ActionResult<object> Unarchive(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         deal.Archived = false;
@@ -106,7 +111,7 @@ public class DealsController(
     [HttpDelete("{id}")]
     public ActionResult<object> Delete(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         store.Deals.Remove(deal);
@@ -122,7 +127,7 @@ public class DealsController(
     [HttpPost("{id}/unlock-edits")]
     public ActionResult<object> UnlockEdits(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         if (!deal.Locked) return new { success = true, message = "Engagement is already editable." };
 
@@ -156,6 +161,7 @@ public class DealsController(
         var deal = new Deal
         {
             Id = store.NextDealId(),
+            TenantId = tenant.TenantId,
             Name = string.IsNullOrWhiteSpace(name) ? request.EngagementType.Trim() : name,
             Customer = customer,
             ContactName = request.ContactName?.Trim() ?? "",
@@ -206,13 +212,14 @@ public class DealsController(
     [HttpPut("{id}")]
     public ActionResult<Deal> Update(string id, [FromBody] Deal updated)
     {
-        var index = store.Deals.FindIndex(d => d.Id == id);
+        var index = store.Deals.FindIndex(d => d.Id == id && d.TenantId == tenant.TenantId);
         if (index < 0) return NotFound();
 
         var existing = store.Deals[index];
         if (existing.Locked) return BadRequest(new { success = false, message = LockedMessage });
         var before = CloneDeal(existing);
         updated.Id = id;
+        updated.TenantId = existing.TenantId;
         // Keep marketplace consistent with the tagged campaign / event (auto-fill + lock).
         updated.Marketplace = DeriveMarketplace(updated.CampaignEventId?.Trim() ?? "", updated.Marketplace?.Trim() ?? "");
         updated.LastUpdated = "Just now";
@@ -245,7 +252,7 @@ public class DealsController(
     [HttpPost("{id}/products")]
     public ActionResult<DealDetailDto> SetProducts(string id, [FromBody] List<string> productIds)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         if (deal.Locked) return BadRequest(new { success = false, message = LockedMessage });
 
@@ -274,7 +281,7 @@ public class DealsController(
     [HttpPost("{id}/pricing/preview")]
     public ActionResult<object> PreviewPricing(string id, [FromBody] PricingConfig pricing)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         if (pricing.PublicPricePerYear <= 0)
@@ -294,7 +301,7 @@ public class DealsController(
     [HttpPost("{id}/pricing")]
     public ActionResult<DealDetailDto> SetPricing(string id, [FromBody] PricingConfig pricing)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         if (deal.Locked) return BadRequest(new { success = false, message = LockedMessage });
 
@@ -321,7 +328,7 @@ public class DealsController(
     [HttpPost("{id}/meeting-notes")]
     public ActionResult<object> SetMeetingNotes(string id, [FromBody] SaveMeetingNotesRequest request, [FromServices] IAiService ai)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         var sessionsAdded = meetingNotes.ApplySave(deal, request);
@@ -350,7 +357,7 @@ public class DealsController(
     [HttpGet("{id}/approvals")]
     public ActionResult<object> GetApprovals(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         meetingNotes.Normalize(deal);
         var summary = approvals.BuildSummary(deal);
@@ -361,7 +368,7 @@ public class DealsController(
     [HttpPost("{id}/approvals/action")]
     public ActionResult<object> ApprovalAction(string id, [FromBody] ApprovalActionRequest request)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         var result = approvals.ApplyAction(deal, request);
@@ -375,7 +382,7 @@ public class DealsController(
     [HttpPost("{id}/approvals/regenerate-documents")]
     public ActionResult<object> RegenerateDocuments(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         approvals.RegenerateDocuments(deal);
@@ -387,7 +394,7 @@ public class DealsController(
     [HttpPost("{id}/approvals/enter")]
     public ActionResult<object> EnterApprovals(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         approvals.EnsurePlan(deal);
@@ -403,7 +410,7 @@ public class DealsController(
     [HttpPost("{id}/approvals/submit")]
     public ActionResult<object> SubmitApprovals(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         if (!approvals.CanProceed(deal))
@@ -426,7 +433,7 @@ public class DealsController(
     [HttpPost("{id}/submit-engagement")]
     public ActionResult<object> SubmitEngagement(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
 
         var (status, message) = ResolveSubmitOutcome(deal.EngagementType);
@@ -450,7 +457,7 @@ public class DealsController(
     [HttpGet("{id}/approvals/documents/{docId}")]
     public ActionResult GetApprovalDocument(string id, string docId)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         meetingNotes.Normalize(deal);
         approvals.EnsurePlan(deal);
@@ -465,7 +472,7 @@ public class DealsController(
     [HttpGet("{id}/approvals/documents/{docId}/download")]
     public ActionResult DownloadApprovalDocument(string id, string docId)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         meetingNotes.Normalize(deal);
         approvals.EnsurePlan(deal);
@@ -481,7 +488,7 @@ public class DealsController(
     [HttpPost("{id}/approvals/unlock")]
     public ActionResult<object> UnlockApprovals(string id)
     {
-        var deal = store.Deals.FirstOrDefault(d => d.Id == id);
+        var deal = FindDeal(id);
         if (deal is null) return NotFound();
         if (!approvals.UnlockForEdits(deal))
             return BadRequest(new { success = false, message = "Documents cannot be unlocked for editing." });

@@ -52,9 +52,10 @@ export class AuthCallbackComponent implements OnInit {
     const role = params.get('role') || 'Sales Representative';
     const provider = params.get('provider') || 'oauth';
     const status = (params.get('status') || 'approved') as AuthStatus;
+    const tenantId = params.get('tenantId') || undefined;
 
     if (token && email && name) {
-      this.auth.oauthLogin(token, email, name, role, provider, status);
+      this.auth.oauthLogin(token, email, name, role, provider, status, tenantId);
       this.router.navigate(['/home']);
       return;
     }

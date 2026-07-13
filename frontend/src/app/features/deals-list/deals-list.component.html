@@ -95,6 +95,9 @@
             <td>
               <strong>{{ d.name || '—' }}</strong>
               <div class="cell-sub">{{ d.id }}</div>
+              @if (d.requestedByCustomer) {
+                <div><span class="badge badge-blue" title="Created from a customer portal request">🙋 Customer Requested</span></div>
+              }
               @if (flagsOf(d).length) {
                 <div class="flag-row">
                   @for (f of flagsOf(d); track f.label) {
